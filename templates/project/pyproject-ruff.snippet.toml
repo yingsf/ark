@@ -1,0 +1,38 @@
+# 以下内容应追加到 pyproject.toml 中（仅在不存在 [tool.ruff] 时）
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.11",
+  "pyright>=1.1.400",
+]
+
+[tool.ruff]
+target-version = "py<python_version_short>"
+line-length = 100
+src = <source_and_test_dirs>
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "W",   # pycodestyle warnings
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "SIM", # flake8-simplify
+  "C4",  # flake8-comprehensions
+  "RUF"  # Ruff-specific rules
+]
+ignore = [
+  "E501" # line length controlled by formatter
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["<project_name>"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true

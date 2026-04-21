@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(uv run ruff format *)",
+      "Bash(uv run ruff check * --fix)",
+      "Bash(uv run pyright)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 30,
+            "command": "uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}

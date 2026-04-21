@@ -1,0 +1,10 @@
+{
+  "name": "ark",
+  "version": "1.0.0",
+  "description": "Artifact-driven Reactive Kernel - Python backend development workflow for Claude Code",
+  "author": { "name": "Yingshufeng" },
+  "license": "MIT",
+  "homepage": "https://github.com/yingsf/ark",
+  "repository": "https://github.com/yingsf/ark",
+  "keywords": ["python", "backend", "workflow", "artifact", "reactive", "ark"]
+}

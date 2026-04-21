@@ -1,0 +1,150 @@
+# Python 项目通用忽略规则
+# 适用于 macOS、Linux、Windows，以及常见 IDE / 编辑器开发环境
+
+# =========================
+# 操作系统生成文件
+# =========================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+*.icloud
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.stackdump
+*.lnk
+
+# =========================
+# Python 字节码与缓存
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Python 构建与打包产物
+# =========================
+build/
+dist/
+site/
+.eggs/
+*.egg
+*.egg-info/
+pip-wheel-metadata/
+
+# Python 扩展编译产物
+*.so
+*.pyd
+
+# =========================
+# Python 虚拟环境
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# 测试、覆盖率与工具缓存
+# =========================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.cache/
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# =========================
+# Jupyter Notebook
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# 日志与运行时临时文件
+# =========================
+*.log
+*.pid
+*.pid.lock
+*.out
+*.err
+
+# =========================
+# 本地环境变量与机器相关配置
+# =========================
+.env
+.env.*
+!.env.example
+*.local
+
+# =========================
+# IDE / 编辑器
+# =========================
+
+# JetBrains 系列（PyCharm / IntelliJ 等）
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# =========================
+# 可按项目需要启用的规则
+# 默认注释，避免误伤通用项目
+# =========================
+
+# 本地数据库
+# *.sqlite3
+# *.db
+
+# 本地目录
+# logs/
+# tmp/
+# temp/
+# uploads/
+
+# 数据、模型与实验产物
+# data/
+# artifacts/
+# checkpoints/
+# runs/
+# wandb/
+# mlruns/
+# *.pt
+# *.pth
+# *.ckpt
+# *.onnx

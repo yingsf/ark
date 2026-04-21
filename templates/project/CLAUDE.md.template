@@ -1,0 +1,93 @@
+# {project_name}
+
+## Project Overview
+
+{project_name} 是一个 Python 项目，使用 src layout，包名为 `{project_name}`。
+
+本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/` 目录。
+
+## Commands
+
+```bash
+# 安装依赖
+uv sync
+
+# 运行全部测试
+uv run pytest
+
+# 运行单个测试文件
+uv run pytest tests/test_xxx.py -v
+
+# 代码格式化与检查
+uv run ruff format .
+uv run ruff check . --fix
+
+# 类型检查
+uv run pyright
+```
+
+## Must
+
+- 新增公开函数必须有类型注解和测试
+- 开始任务前阅读 `docs/tasks.md`
+- 完成 `/ark` 命令后更新对应 Artifact
+- 提交前运行 `uv run pytest`
+
+## Artifact Workflow
+
+| 文件 | 何时更新 |
+|------|----------|
+| `docs/spec.md` | 添加新功能前 |
+| `docs/design.md` | 架构变更时 |
+| `docs/plan.md` | 任务规划或阶段推进时 |
+| `docs/tasks.md` | 开始/完成任务时 |
+| `docs/decisions.md` | 做出技术选型时 |
+| `docs/validation.md` | 完成验证后 |
+| `docs/handoff.md` | 阶段暂停或会话结束前 |
+
+## Working Pattern
+
+1. 开始任务前阅读 `docs/tasks.md`，确认当前进展
+2. 改动完成后更新对应 Artifact（tasks / validation / decisions）
+3. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
+
+## Code Style
+
+- 使用 type hints，所有公开函数必须有参数和返回值类型注解
+- docstring 使用 Google 风格
+- 导入顺序：stdlib → third-party → local，之间用空行分隔
+- 优先使用 `pathlib.Path` 而非 `os.path`
+- 异常处理不要裸 `except:`，至少捕获 `Exception`
+
+## Testing Conventions
+
+- 测试文件命名：`test_<module>.py`
+- 测试函数命名：`test_<function>_<scenario>_<expected>`
+- 公共 fixture 放在 `tests/conftest.py`
+- 每个新增的公开函数都必须有对应测试
+
+## Commit Messages
+
+使用 Conventional Commits 格式：
+
+```
+<type>(<scope>): <description>
+
+feat: 新功能
+fix: 修复
+refactor: 重构
+test: 测试
+docs: 文档
+chore: 工具链
+```
+
+## Architecture Notes
+
+> TODO: 记录关键架构约定，如核心抽象、模块依赖规则、错误处理策略
+
+## Do NOT
+
+- 不要在 `__init__.py` 中放业务逻辑
+- 不要创建 `utils.py` 万能工具模块
+- 不要在测试中 `mock.patch` 内部实现，优先依赖注入
+- 不要未读 `docs/tasks.md` 就开始编码

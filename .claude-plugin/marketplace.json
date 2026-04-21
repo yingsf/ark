@@ -1,0 +1,26 @@
+{
+  "name": "ark",
+  "owner": {
+    "name": "Yingshufeng"
+  },
+  "metadata": {
+    "description": "Artifact-driven Reactive Kernel - Python backend development workflow plugin marketplace",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "ark",
+      "source": "./",
+      "description": "Artifact-driven Reactive Kernel - Python backend development workflow for Claude Code",
+      "version": "1.0.0",
+      "author": {
+        "name": "Yingshufeng"
+      },
+      "homepage": "https://github.com/yingsf/ark",
+      "repository": "https://github.com/yingsf/ark",
+      "license": "MIT",
+      "keywords": ["python", "backend", "workflow", "artifact", "reactive"],
+      "category": "workflow"
+    }
+  ]
+}

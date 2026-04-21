@@ -1,0 +1,203 @@
+# Python 项目通用忽略规则
+# 适用于 macOS、Linux、Windows，以及常见 IDE / 编辑器开发环境
+
+# =========================
+# 操作系统生成文件
+# =========================
+
+# 通用临时/备份文件
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+*.icloud
+Icon?
+
+# Linux
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.stackdump
+*.lnk
+
+# =========================
+# Python 字节码与缓存
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Python 构建与打包产物
+# =========================
+build/
+dist/
+site/
+.eggs/
+*.egg
+*.egg-info/
+pip-wheel-metadata/
+wheels/
+share/python-wheels/
+MANIFEST
+
+# Python 扩展编译产物
+*.so
+*.pyd
+*.dylib
+
+# =========================
+# Python 虚拟环境
+# =========================
+.venv/
+venv/
+env/
+ENV/
+.uv/
+
+# =========================
+# 测试、覆盖率与工具缓存
+# =========================
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.pyright/
+.ruff_cache/
+*.cover
+*.py,cover
+
+# =========================
+# Jupyter / IPython
+# =========================
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+
+# =========================
+# 日志与运行时临时文件
+# =========================
+*.log
+*.pid
+*.pid.lock
+*.out
+*.err
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =========================
+# 本地环境变量与机器相关配置
+# =========================
+.env
+.env.*
+!.env.example
+*.local
+.envrc
+.direnv/
+
+# =========================
+# IDE / 编辑器
+# =========================
+
+# JetBrains 系列（PyCharm / IntelliJ 等）
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# 其他编辑器 / 工具
+.spyderproject
+.spyproject
+.ropeproject
+
+# =========================
+# 可按项目需要启用的规则
+# 默认注释，避免误伤通用项目
+# =========================
+
+# 本地数据库
+# *.sqlite3
+# *.db
+# db.sqlite3
+# db.sqlite3-journal
+
+# 本地目录
+# logs/
+# log/
+# tmp/
+# temp/
+# uploads/
+# instance/
+
+# 文档构建产物
+# docs/_build/
+
+# 数据、模型与实验产物
+# data/
+# artifacts/
+# checkpoints/
+# runs/
+# wandb/
+# mlruns/
+# *.pt
+# *.pth
+# *.ckpt
+# *.onnx
+
+# Docker / Kubernetes
+# docker-compose.override.yml
+# docker-compose.*.override.yml
+# *.rendered.yaml
+# *.rendered.yml
+# charts/*.tgz
+
+# 证书与密钥文件
+# *.key
+# *.pem
+# *.p12
+# *.pfx
+
+# 项目个性化忽略
+# tmp_git_message.txt
