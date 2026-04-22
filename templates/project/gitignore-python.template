@@ -199,8 +199,8 @@ pip-delete-this-directory.txt
 # *.p12
 # *.pfx
 
-# ARK ruff hook 本地副本（由 ark-init 自动复制，不需要提交）
-.claude/ruff-hook.py
+# Claude Code 本地配置（ark 生成的 hooks 和 settings 在此目录下）
+.claude/
 
 # 项目个性化忽略
 # tmp_git_message.txt

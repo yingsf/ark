@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
