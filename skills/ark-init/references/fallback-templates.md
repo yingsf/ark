@@ -117,7 +117,7 @@ docstring-code-format = true
           {
             "type": "command",
             "timeout": 30,
-            "command": "uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py"
+            "command": "uv run python .claude/ruff-hook.py"
           }
         ]
       }

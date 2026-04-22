@@ -345,8 +345,9 @@ CLAUDE.md 应反映：
 ##### Mode A（全新项目）：Bootstrap
 
 直接生成：
+- `.claude/ruff-hook.py`（从 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目本地，hook 命令使用相对路径避免 `${CLAUDE_PLUGIN_ROOT}` 不展开的问题）
 - `pyrightconfig.json`（基于探测变量）
-- `.claude/settings.local.json`（本地配置，含 ruff hooks + permissions）
+- `.claude/settings.local.json`（本地配置，含 ruff hooks + permissions；hook 命令引用 `.claude/ruff-hook.py`）
 - `pyproject.toml` 中追加 `[tool.ruff]` 配置（如不存在）
 
 ##### Mode B（已有项目）：Inspect & Respect
@@ -356,7 +357,7 @@ CLAUDE.md 应反映：
 | 类别 | 文件 | Mode B 策略 |
 |------|------|------------|
 | ARK 工作流文件 | CLAUDE.md、MEMORY.md、docs/* | 可创建（如不存在） |
-| 本地辅助配置 | .claude/settings.local.json | 可创建（如不存在） |
+| 本地辅助配置 | .claude/ruff-hook.py、.claude/settings.local.json | 可创建（如不存在） |
 | 项目质量配置 | pyrightconfig.json、pyproject.toml [tool.ruff] | 默认不创建，只报告建议 |
 
 对 ARK 工作流文件和本地辅助配置执行三段式：
@@ -379,7 +380,8 @@ CLAUDE.md 应反映：
 | 文件 | Mode B 行为 |
 |------|------------|
 | `pyrightconfig.json` | 不创建。检测是否存在及核心字段完整性，在摘要中报告探测结果和配置建议 |
-| `.claude/settings.json` / `.claude/settings.local.json` | 检测是否含 `hooks.PostToolUse`。若均不存在，生成 `.claude/settings.local.json`；若 `settings.local.json` 已存在但缺 hooks，提供可选确认动作：将 ruff 文件级 hooks 合并追加（不覆盖已有字段，用户确认后执行）|
+| `.claude/ruff-hook.py` | 若需要生成或合并 `.claude/settings.local.json` 的 hooks，先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；已存在且内容一致时跳过 |
+| `.claude/settings.json` / `.claude/settings.local.json` | 检测是否含 `hooks.PostToolUse`。若均不存在，生成 `.claude/settings.local.json`（hook 命令引用 `.claude/ruff-hook.py`）；若 `settings.local.json` 已存在但缺 hooks，提供可选确认动作：将 ruff 文件级 hooks 合并追加（不覆盖已有字段，用户确认后执行）|
 | `pyproject.toml [tool.ruff]` | 不追加。检测是否存在，在摘要中报告"建议手动补充"并列出可参考字段 |
 
 **关于 Ruff src 范围：** Mode B 输出中的 Ruff 范围建议基于 init 阶段的轻量扫描，仅为初步探测结果。建议用户执行 `/ark-analyze` 后根据真实项目结构确认或补充完整范围（如加入 `tests/` 等）。
