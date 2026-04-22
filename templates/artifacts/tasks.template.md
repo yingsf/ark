@@ -1,6 +1,6 @@
 # Tasks
 
-<!-- 本文件跟踪当前阶段的细粒度任务状态。由 /ark-tasks 初始化，由 implement / debug / sync 小幅更新。-->
+<!-- 本文件跟踪当前阶段的细粒度任务状态。由 /ark:ark-tasks 初始化，由 implement / debug / sync 小幅更新。-->
 <!-- 不要在这里定义需求（那是 spec 的职责），也不要在这里描述阶段策略（那是 plan 的职责）。-->
 <!-- Done = 已完成且已验证。未经验证的完成不应标记为 Done。-->
 

@@ -1,6 +1,6 @@
 # Project Bootstrap Guidelines
 
-本文件用于指导 `/ark-init` 的初始化行为。
+本文件用于指导 `/ark:ark-init` 的初始化行为。
 
 ## 核心目标
 
@@ -25,7 +25,7 @@ init 在执行前必须先确认项目模式：
 - 不创建任何代码文件或项目配置（pyproject.toml、src/、`<包名>/`、tests/ 等）
 - 只创建工作流文件（CLAUDE.md、MEMORY.md、docs/ Artifact）
 - CLAUDE.md 基于扫描到的真实项目结构动态生成
-- 推荐在完成后执行 `/ark-analyze` 以理解代码库
+- 推荐在完成后执行 `/ark:ark-analyze` 以理解代码库
 
 ## 必须交互确认的输入
 
@@ -277,7 +277,7 @@ CLAUDE.md 应反映：
 
 ### 第五步：输出摘要
 
-包含项目扫描结果和文件创建状态，推荐执行 `/ark-analyze`。
+包含项目扫描结果和文件创建状态，推荐执行 `/ark:ark-analyze`。
 
 ---
 
@@ -392,7 +392,7 @@ CLAUDE.md 应反映：
 | `.claude/settings.json` / `.claude/settings.local.json` | 检测是否含 `hooks.PostToolUse`。若均不存在，生成 `.claude/settings.local.json`（hook 命令引用 `.claude/ruff-hook.py`）；若 `settings.local.json` 已存在但缺 hooks，提供可选确认动作：将 ruff 文件级 hooks 合并追加（不覆盖已有字段，用户确认后执行）|
 | `pyproject.toml [tool.ruff]` | 不追加。检测是否存在，在摘要中报告"建议手动补充"并列出可参考字段 |
 
-**关于 Ruff src 范围：** Mode B 输出中的 Ruff 范围建议基于 init 阶段的轻量扫描，仅为初步探测结果。建议用户执行 `/ark-analyze` 后根据真实项目结构确认或补充完整范围（如加入 `tests/` 等）。
+**关于 Ruff src 范围：** Mode B 输出中的 Ruff 范围建议基于 init 阶段的轻量扫描，仅为初步探测结果。建议用户执行 `/ark:ark-analyze` 后根据真实项目结构确认或补充完整范围（如加入 `tests/` 等）。
 
 ### 变量探测失败策略
 

@@ -13,8 +13,8 @@ version: "1.0"
 将用户请求整理为明确的需求规格，并写入 `docs/ark/spec.md`。规格必须足以支撑 design 或 plan 的编写——含糊的验收标准等于没有规格。
 
 ## 前置建议
-- 如果需求描述存在歧义或范围不清晰，建议先执行 `/ark-intake` 澄清任务
-- 如果 `/ark-analyze` 已预填充 spec 内容，应审查确认现有内容，在此基础上补充完善，而非从零开始
+- 如果需求描述存在歧义或范围不清晰，建议先执行 `/ark:ark-intake` 澄清任务
+- 如果 `/ark:ark-analyze` 已预填充 spec 内容，应审查确认现有内容，在此基础上补充完善，而非从零开始
 
 ## 适用场景
 - 需求需要成文化
@@ -45,7 +45,7 @@ version: "1.0"
 |------|------|
 | 用户提供了输入（命令后有文字） | 正常执行后续步骤 |
 | 无输入，`docs/ark/spec.md` 有实质性内容 | 概述现有内容，默认按审查补充模式工作。如需重写，由用户明确指出 |
-| 无输入，`docs/ark/spec.md` 无实质性内容 | 停止，告知用户需要提供需求描述，或建议 `/ark-intake` |
+| 无输入，`docs/ark/spec.md` 无实质性内容 | 停止，告知用户需要提供需求描述，或建议 `/ark:ark-intake` |
 
 **"实质性内容"判定**（满足任一即可）：
 - 已包含明确的能力边界或范围描述
@@ -67,7 +67,7 @@ version: "1.0"
 - 非目标必须真正起到缩小歧义的作用
 - 规格不应包含实现细节（那是 design 的职责）
 - 无用户输入时，不得在 spec.md 无实质性内容的情况下自行生成规格
-- 不得修改 `docs/ark/spec.md` 以外的核心 Artifact（如 design.md、plan.md 等）；若设计也需要更新，应建议用户显式执行 `/ark-design`
+- 不得修改 `docs/ark/spec.md` 以外的核心 Artifact（如 design.md、plan.md 等）；若设计也需要更新，应建议用户显式执行 `/ark:ark-design`
 
 ## 停止条件
 - 规格足以支撑 design 或 plan 的编写
@@ -80,10 +80,10 @@ version: "1.0"
 
 ## 建议下一步
 
-- 若设计也需要更新 → `/ark-design`
-- 若需要拆解实施步骤 → `/ark-plan`
-- 若计划非常简单（1-2 步）且无需状态追踪 → `/ark-implement`
-- 否则 → `/ark-plan` → `/ark-tasks` → `/ark-implement`
+- 若设计也需要更新 → `/ark:ark-design`
+- 若需要拆解实施步骤 → `/ark:ark-plan`
+- 若计划非常简单（1-2 步）且无需状态追踪 → `/ark:ark-implement`
+- 否则 → `/ark:ark-plan` → `/ark:ark-tasks` → `/ark:ark-implement`
 
 ## 备注
 不要把重要开放问题埋在模糊表述里。验收标准是 spec 最核心的产出，写好它比写全其他节更重要。

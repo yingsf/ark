@@ -15,12 +15,12 @@
 
 ### `docs/ark/plan.md`
 
-主更新者：`/ark-plan`
+主更新者：`/ark:ark-plan`
 
 以下 Skill 在满足条件时可小幅回写：
-- `/ark-implement`：发现原计划与现实明显偏差 / 执行顺序发生实质变化 / 风险或阻塞出现重大变化
-- `/ark-debug`：根因导致原计划失效
-- `/ark-sync`：plan 已明显失真
+- `/ark:ark-implement`：发现原计划与现实明显偏差 / 执行顺序发生实质变化 / 风险或阻塞出现重大变化
+- `/ark:ark-debug`：根因导致原计划失效
+- `/ark:ark-sync`：plan 已明显失真
 
 **不应用于**：代替 tasks 管理细粒度状态 · 代替 handoff 做恢复摘要
 
@@ -28,12 +28,12 @@
 
 ### `docs/ark/tasks.md`
 
-主更新者：`/ark-tasks`
+主更新者：`/ark:ark-tasks`
 
 以下 Skill 在满足条件时可小幅更新：
-- `/ark-implement`：一个任务实际已完成 / 当前进行中的任务已变化 / 新阻塞已出现
-- `/ark-debug`：新的阻塞或诊断任务出现
-- `/ark-sync`：tasks 状态明显过期
+- `/ark:ark-implement`：一个任务实际已完成 / 当前进行中的任务已变化 / 新阻塞已出现
+- `/ark:ark-debug`：新的阻塞或诊断任务出现
+- `/ark:ark-sync`：tasks 状态明显过期
 
 **不应用于**：代替 spec 定义需求 · 代替 plan 定义阶段策略
 
@@ -41,18 +41,18 @@
 
 ### `docs/ark/decisions.md`
 
-主更新者：`/ark-decide`
+主更新者：`/ark:ark-decide`
 
 以下 Skill 在满足条件时可建议更新（不直接回写，建议用户确认）：
-- `/ark-implement`：出现关键技术取舍
-- `/ark-debug`：修复路径引入重要取舍
-- `/ark-refactor`：重构引入不可逆的结构性选择
+- `/ark:ark-implement`：出现关键技术取舍
+- `/ark:ark-debug`：修复路径引入重要取舍
+- `/ark:ark-refactor`：重构引入不可逆的结构性选择
 
 ---
 
 ### `docs/ark/validation.md`
 
-主更新者：`/ark-validate`
+主更新者：`/ark:ark-validate`
 
 只记录**真实执行过**的验证内容，禁止将「计划验证」写成「已执行验证」。
 
@@ -60,11 +60,11 @@
 
 ### `docs/ark/handoff.md`
 
-主更新者：`/ark-handoff`
+主更新者：`/ark:ark-handoff`
 
 以下情况可触发更新建议：
-- `/ark-sync`：handoff 与当前阶段明显不符
-- `/ark-next`：handoff 是推荐下一步的主要信息来源，若过期应标注
+- `/ark:ark-sync`：handoff 与当前阶段明显不符
+- `/ark:ark-next`：handoff 是推荐下一步的主要信息来源，若过期应标注
 
 **不应用于**：代替 plan 作为主执行文档 · 代替 tasks 管理状态
 
@@ -72,13 +72,13 @@
 
 ### `docs/ark/spec.md` / `docs/ark/design.md`
 
-主更新者分别为 `/ark-spec` 和 `/ark-design`。
+主更新者分别为 `/ark:ark-spec` 和 `/ark:ark-design`。
 
-`/ark-analyze` 可在首次分析时预填充这两个文件（基于代码扫描结果反推）。预填充条件：
+`/ark:ark-analyze` 可在首次分析时预填充这两个文件（基于代码扫描结果反推）。预填充条件：
 - 文件为空或仍为初始模板内容
 - 基于代码实际行为和结构反推，不凭空编写
-- 必须标注来源（`<!-- 由 /ark-analyze 自动生成，需人工确认 -->`）
-- 后续应由 `/ark-spec` 或 `/ark-design` 审查确认
+- 必须标注来源（`<!-- 由 /ark:ark-analyze 自动生成，需人工确认 -->`）
+- 后续应由 `/ark:ark-spec` 或 `/ark:ark-design` 审查确认
 
 其他 Skill 通常不直接回写这两个文件。如发现内容过期，应建议重新执行对应 Skill，而不是随意修改。
 
@@ -86,7 +86,7 @@
 
 ## 实施过程中的回写规则
 
-### `/ark-implement`
+### `/ark:ark-implement`
 - 原计划与现实偏差明显 → 更新 `docs/ark/plan.md`
 - 某项任务完成 / 开始 / 阻塞 → 更新 `docs/ark/tasks.md`
 - 出现关键技术取舍 → 建议更新 `docs/ark/decisions.md`（不强制直接写入）
@@ -114,21 +114,21 @@
 - 仅仅阅读了一个文件
 - 没有客观完成标准的模糊进展
 
-### `/ark-debug`
+### `/ark:ark-debug`
 - 根因导致原计划失效 → 更新 `docs/ark/plan.md`
 - 新的阻塞或诊断任务出现 → 更新 `docs/ark/tasks.md`
 - 修复路径引入重要取舍 → 建议更新 `docs/ark/decisions.md`
 
-### `/ark-refactor`
+### `/ark:ark-refactor`
 - 重构范围超出预期 → 更新 `docs/ark/plan.md`
 - 任务状态变化 → 更新 `docs/ark/tasks.md`
 - 引入不可逆结构性选择 → 建议更新 `docs/ark/decisions.md`
 
-### `/ark-review`
+### `/ark:ark-review`
 - 发现严重问题导致计划需要调整 → 建议更新 `docs/ark/plan.md`
 - review 结论影响验证策略 → 建议更新 `docs/ark/validation.md`
 
-### `/ark-sync`
+### `/ark:ark-sync`
 优先指出并修正以下情况：
 - docs 与代码现实冲突
 - tasks 状态明显过期
@@ -136,10 +136,10 @@
 - handoff 与当前阶段不符
 - validation 漏记关键结果
 
-### `/ark-analyze`
+### `/ark:ark-analyze`
 - 首次分析已有代码库 → 预填充 `docs/ark/spec.md`（当前系统在做什么）
 - 首次分析已有代码库 → 预填充 `docs/ark/design.md`（当前架构长什么样）
-- 预填充内容必须标注来源，后续应由 `/ark-spec` 或 `/ark-design` 审查确认
+- 预填充内容必须标注来源，后续应由 `/ark:ark-spec` 或 `/ark:ark-design` 审查确认
 
 ---
 

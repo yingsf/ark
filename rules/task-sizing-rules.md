@@ -49,10 +49,10 @@
 - 轻微重构一个局部函数
 
 ### 默认流程
-- `/ark-intake`
-- `/ark-implement` 或 `/ark-debug`
-- `/ark-test`
-- `/ark-validate`
+- `/ark:ark-intake`
+- `/ark:ark-implement` 或 `/ark:ark-debug`
+- `/ark:ark-test`
+- `/ark:ark-validate`
 
 ### 最低要求
 - 至少明确目标
@@ -80,12 +80,12 @@
 - 引入一项新的基础能力但不改变整体架构
 
 ### 默认流程
-- `/ark-intake`
-- `/ark-plan`
-- `/ark-design`（如需要）
-- `/ark-implement`
-- `/ark-test`
-- `/ark-validate`
+- `/ark:ark-intake`
+- `/ark:ark-plan`
+- `/ark:ark-design`（如需要）
+- `/ark:ark-implement`
+- `/ark:ark-test`
+- `/ark:ark-validate`
 
 ### 推荐 Artifact
 - `docs/ark/plan.md`
@@ -116,15 +116,15 @@
 - 长周期研发任务
 
 ### 默认流程
-- `/ark-intake`
-- `/ark-spec`
-- `/ark-design`
-- `/ark-plan`
-- `/ark-tasks`
-- `/ark-implement`
-- `/ark-test`
-- `/ark-validate`
-- `/ark-handoff`
+- `/ark:ark-intake`
+- `/ark:ark-spec`
+- `/ark:ark-design`
+- `/ark:ark-plan`
+- `/ark:ark-tasks`
+- `/ark:ark-implement`
+- `/ark:ark-test`
+- `/ark:ark-validate`
+- `/ark:ark-handoff`
 
 ### 推荐 Artifact
 优先完整使用 7 个核心 Artifact：

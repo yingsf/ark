@@ -63,7 +63,7 @@ version: "1.0"
 **不允许直接修正**（只能建议更新）：
 - `spec.md`、`design.md`（需求与设计的变更必须经过对应 Skill）
 - `validation.md` 的验证事实（验证记录必须真实执行）
-- `decisions.md` 的技术判断（决策变更必须经过 `/ark-decide`）
+- `decisions.md` 的技术判断（决策变更必须经过 `/ark:ark-decide`）
 
 ## 验证要求
 - 区分「明确冲突」与「可能过期」
@@ -93,4 +93,4 @@ version: "1.0"
 当项目源代码中有 3+ 模块时生成，建议补充到 CLAUDE.md 的 Architecture Notes 部分。
 
 ## 备注
-`/ark-sync` 不替代 spec、plan、validate 或 handoff，它的职责是让整个状态面重新可信。
+`/ark:ark-sync` 不替代 spec、plan、validate 或 handoff，它的职责是让整个状态面重新可信。

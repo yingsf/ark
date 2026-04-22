@@ -24,7 +24,7 @@ version: "2.0"
 - 只需要理解某个局部函数，不需要全局视图
 
 ## 前置建议
-- 建议先执行 `/ark-init`（已有项目模式）植入工作流文件，再执行 analyze
+- 建议先执行 `/ark:ark-init`（已有项目模式）植入工作流文件，再执行 analyze
 
 ## 输入
 - 项目目录结构、已有代码文件、pyproject.toml / setup.py / requirements.txt、配置文件
@@ -161,7 +161,7 @@ version: "2.0"
      - 关于"系统做什么、有什么能力"→ `[spec]`
      - 关于"系统怎么构建、模块关系"→ `[design]`
      - 两者都涉及 → `[spec, design]`
-   - **输出时按后续动作分组**（见固定输出格式第 7 节），不得仅以标签形式输出。分组仅用于帮助用户判断后续处理方向，不表示 `/ark-analyze` 会自动执行对应 Skill
+   - **输出时按后续动作分组**（见固定输出格式第 7 节），不得仅以标签形式输出。分组仅用于帮助用户判断后续处理方向，不表示 `/ark:ark-analyze` 会自动执行对应 Skill
    - **不得将不确定的内容写成确定事实**
 
 4. **写入工作文档**
@@ -189,7 +189,7 @@ version: "2.0"
      - 模块结构：各模块及其职责
      - 数据流/调用流：核心路径
      - 接口边界：外部接口清单
-   - 预填充内容必须标注 `<!-- 由 /ark-analyze 自动生成，需人工确认 -->`
+   - 预填充内容必须标注 `<!-- 由 /ark:ark-analyze 自动生成，需人工确认 -->`
 
 4. **清理工作文档**
    - 询问用户是否保留 `docs/ark/.ark-analysis.md`
@@ -217,17 +217,17 @@ version: "2.0"
    - 用户可调整方案（修改去向、内容、跳过某些项）
 
 4. **执行确认后的写入**
-   - 仅写入 `docs/ark/.ark-analysis.md`：更新对应不确定项状态为"[已澄清]"（用户已回答，但正式 spec/design 更新仍待 `/ark-spec`、`/ark-design` 完成），记录用户回答摘要
+   - 仅写入 `docs/ark/.ark-analysis.md`：更新对应不确定项状态为"[已澄清]"（用户已回答，但正式 spec/design 更新仍待 `/ark:ark-spec`、`/ark:ark-design` 完成），记录用户回答摘要
    - 对于涉及 spec/design 的更新建议，明确列出：
-     - 哪些 U 项需通过 `/ark-spec` 处理
-     - 哪些 U 项需通过 `/ark-design` 处理
-     - 哪些 U 项需先 `/ark-spec` 再 `/ark-design`
+     - 哪些 U 项需通过 `/ark:ark-spec` 处理
+     - 哪些 U 项需通过 `/ark:ark-design` 处理
+     - 哪些 U 项需先 `/ark:ark-spec` 再 `/ark:ark-design`
 
 **禁止事项：**
-- 不得写入 `docs/ark/spec.md` 或 `docs/ark/design.md`（无论用户是否确认）；对 spec/design 的更新建议只能通过显式执行 `/ark-spec`、`/ark-design` 完成
+- 不得写入 `docs/ark/spec.md` 或 `docs/ark/design.md`（无论用户是否确认）；对 spec/design 的更新建议只能通过显式执行 `/ark:ark-spec`、`/ark:ark-design` 完成
 - 仅可写入 `docs/ark/.ark-analysis.md`（更新不确定项状态、记录用户回答）
 - 不得将用户对不确定项的回答自动写入 memory
-- 不得自动进入 `/ark-spec`、`/ark-design` 或其他 Skill 的职责范围
+- 不得自动进入 `/ark:ark-spec`、`/ark:ark-design` 或其他 Skill 的职责范围
 
 ## 回写规则
 
@@ -257,7 +257,7 @@ version: "2.0"
 - 不确定项必须说明不确定的具体内容和原因
 - 收到用户对不确定项的回答时，必须先生成建议更新方案并等待确认，不得直接写入 Artifact
 - 建议更新方案必须明确区分每条回答的去向（spec / design / analysis-doc / 暂不更新）
-- 用户对不确定项的回答经确认后，analyze 只能更新工作文档状态；涉及 spec/design 的更新必须通过显式 `/ark-spec`、`/ark-design` 完成，不得直接写入
+- 用户对不确定项的回答经确认后，analyze 只能更新工作文档状态；涉及 spec/design 的更新必须通过显式 `/ark:ark-spec`、`/ark:ark-design` 完成，不得直接写入
 
 ## 停止条件
 - 项目架构已清晰到可以支持后续 spec/design 审查和 plan 编写
@@ -300,18 +300,18 @@ version: "2.0"
 
 **A. 待确认的规格边界**
 关于系统做什么、有什么能力的不确定项。
-若你准备确认这些边界，可后续显式执行 `/ark-spec`。
+若你准备确认这些边界，可后续显式执行 `/ark:ark-spec`。
 
 **B. 待确认的设计机制**
 关于系统怎么构建、模块关系的不确定项。
-若你准备确认这些机制，可后续显式执行 `/ark-design`。
+若你准备确认这些机制，可后续显式执行 `/ark:ark-design`。
 
 **C. 同时涉及规格与设计**
 同时涉及规格与设计的不确定项。
-若你准备正式更新文档，通常先显式执行 `/ark-spec`，再显式执行 `/ark-design`。
+若你准备正式更新文档，通常先显式执行 `/ark:ark-spec`，再显式执行 `/ark:ark-design`。
 
 **D. 更像真实问题或配置缺陷**
-分析中发现的可确认问题。`/ark-analyze` 只负责暴露问题，不自动进入 `/ark-plan`、`/ark-implement` 或 `/ark-debug`。若你准备处理，请显式选择对应 Skill。
+分析中发现的可确认问题。`/ark:ark-analyze` 只负责暴露问题，不自动进入 `/ark:ark-plan`、`/ark:ark-implement` 或 `/ark:ark-debug`。若你准备处理，请显式选择对应 Skill。
 
 **E. 暂不阻塞当前任务**
 当前不影响理解和使用，可暂时保留，不必立即处理。
@@ -327,23 +327,23 @@ version: "2.0"
 | U2 | ... | docs/ark/design.md | ... |
 | U5 | ... | 暂不更新 | ... |
 
-- `/ark-analyze` 不自动执行任何后续 Skill
+- `/ark:ark-analyze` 不自动执行任何后续 Skill
 
 > **C 类处理指引（实现参考，不输出给用户）：**
-> 当不确定项同时涉及 spec 和 design 时，通常先用 `/ark-spec` 确认系统边界、能力承诺与范围，再用 `/ark-design` 解释当前结构与实现机制。
+> 当不确定项同时涉及 spec 和 design 时，通常先用 `/ark:ark-spec` 确认系统边界、能力承诺与范围，再用 `/ark:ark-design` 解释当前结构与实现机制。
 > 这样可避免将"预留扩展位"误写成"已成立能力"。
 >
 > 示例：不确定项"core/db/vector/ 目录名暗示向量数据库，但当前仅有 ES 相关代码"
-> - `/ark-spec` 先确认：该目录是为未来多向量数据库扩展预留，当前不构成正式能力承诺
-> - `/ark-design` 再解释：目录命名原因、当前 ES 结构现状、未来扩展方向
+> - `/ark:ark-spec` 先确认：该目录是为未来多向量数据库扩展预留，当前不构成正式能力承诺
+> - `/ark:ark-design` 再解释：目录命名原因、当前 ES 结构现状、未来扩展方向
 
 ### 9. 建议下一步
 
-- 若要确认系统边界、能力范围、框架约定：可显式执行 `/ark-spec`
-- 若要确认结构机制、模块关系、实现解释：可显式执行 `/ark-design`
-- 若准备推进开发，但需求、范围或成功标准仍未清晰：先显式执行 `/ark-intake`
-- 若目标已经明确，且需要拆分阶段与实施步骤：可显式执行 `/ark-plan`
+- 若要确认系统边界、能力范围、框架约定：可显式执行 `/ark:ark-spec`
+- 若要确认结构机制、模块关系、实现解释：可显式执行 `/ark:ark-design`
+- 若准备推进开发，但需求、范围或成功标准仍未清晰：先显式执行 `/ark:ark-intake`
+- 若目标已经明确，且需要拆分阶段与实施步骤：可显式执行 `/ark:ark-plan`
 
 ## 备注
-`/ark-analyze` 的目标不是产出完美的文档，而是「让陌生代码库在短时间内变得可理解」。
+`/ark:ark-analyze` 的目标不是产出完美的文档，而是「让陌生代码库在短时间内变得可理解」。
 分析结果应作为后续 spec、design、plan 的输入，而非最终产出。

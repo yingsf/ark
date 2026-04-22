@@ -46,8 +46,8 @@ YYYY-MM-DD
 - 下一步动作 2
 
 ## 推荐 Skill
-`/ark-implement`
-<!-- 或 /ark-validate / /ark-sync / /ark-debug 等 -->
+`/ark:ark-implement`
+<!-- 或 /ark:ark-validate / /ark:ark-sync / /ark:ark-debug 等 -->
 
 ## 恢复提示
 <!-- 下一次继续时最先要知道的上下文，写最关键的 1-3 条 -->

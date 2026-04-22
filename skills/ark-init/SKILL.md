@@ -87,12 +87,18 @@ my_project/
 
 ### 第零步：模式选择
 
-询问用户项目当前状态：
+自动检测当前目录的项目状态，输出检测结果并使用编号选择确认：
 
-- **模式 A（全新项目）**：从零开始创建新项目 → 继续第一步
-- **模式 B（已有项目）**：项目代码已存在，需要植入 ark 工作流 → 跳至模式 B
+```
+当前目录检测结果：
+[列出检测到的项目文件，或"未检测到已有项目文件"]
 
-> 若当前目录已检测到 `pyproject.toml` / `setup.py` / `setup.cfg`、`src/` 目录、`requirements*.txt`、根目录下包含 `__init__.py` 的包目录、`tests/`、或常见入口文件（`main.py` / `app.py` / `manage.py`），应主动建议模式 B。
+请选择初始化模式：
+1. 模式 A — 全新项目（从零开始创建）
+2. 模式 B — 已有项目（植入 ark 工作流）[如检测到项目文件则标记为推荐]
+```
+
+检测规则：若当前目录存在以下任一文件/目录，标记为"检测到已有项目"：`pyproject.toml` / `setup.py` / `setup.cfg`、`src/` 目录、`requirements*.txt`、根目录下包含 `__init__.py` 的包目录、`tests/`、或常见入口文件（`main.py` / `app.py` / `manage.py`）。检测到时模式 B 标记为推荐。
 
 ---
 
@@ -174,7 +180,7 @@ my_project/
 **必须创建（如不存在）：**
 - `docs/` 目录及 7 个核心 Artifact
 - `CLAUDE.md`（基于扫描到的真实项目结构动态生成，不使用通用模板）
-- `MEMORY.md`
+- `MEMORY.md`（使用模板或 fallback，见 `references/fallback-templates.md`，不得自定义内容）
 
 **不触碰（任何情况下不得修改）：**
 - `pyproject.toml`、`setup.py`、`setup.cfg` 等已有配置
@@ -270,8 +276,8 @@ my_project/
 
 #### 4. 下一步
 - 如有待处理事项（uv 未安装等），优先列出手动操作指引
-- 需求未定义：建议 `/ark-spec`
-- 目标明确但需要拆解：建议 `/ark-plan`
+- 需求未定义：建议 `/ark:ark-spec`
+- 目标明确但需要拆解：建议 `/ark:ark-plan`
 
 ### 模式 B（已有项目）
 
@@ -290,11 +296,11 @@ my_project/
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|
 
 #### 3. 下一步
-- **强烈建议**：`/ark-analyze`（理解代码库并预填充 artifact）
-- 若需求或改动目标尚不清晰：`/ark-intake`（澄清目标、范围、约束和推荐流程）
-- 若目标已经明确且可以拆解推进：`/ark-plan`
+- **强烈建议**：`/ark:ark-analyze`（理解代码库并预填充 artifact）
+- 若需求或改动目标尚不清晰：`/ark:ark-intake`（澄清目标、范围、约束和推荐流程）
+- 若目标已经明确且可以拆解推进：`/ark:ark-plan`
 
 ## 备注
-`/ark-init` 的目标是「生成可工作的起点」，不是「一次性生成最终项目」。
+`/ark:ark-init` 的目标是「生成可工作的起点」，不是「一次性生成最终项目」。
 详细的 fallback 模板内容见 `references/fallback-templates.md`。
 各文件的创建策略与初始化哲学见 `references/project-bootstrap-guidelines.md`。

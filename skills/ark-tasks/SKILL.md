@@ -13,7 +13,7 @@ version: "1.0"
 将计划拆解为可跟踪的具体任务，在 `docs/ark/tasks.md` 中维护执行状态。
 
 ## 前置建议
-- 建议先执行 `/ark-plan` 形成阶段规划，再用 tasks 管理细粒度状态
+- 建议先执行 `/ark:ark-plan` 形成阶段规划，再用 tasks 管理细粒度状态
 
 ## 适用场景
 - 计划需要更细粒度的执行跟踪
@@ -23,7 +23,7 @@ version: "1.0"
 
 ## 不适用场景
 - 任务很小，可以安全地一步执行完成
-- 还没有清晰的计划（应先执行 `/ark-plan`）
+- 还没有清晰的计划（应先执行 `/ark:ark-plan`）
 - tasks 会替代 plan 变成主执行文档（两者职责不同）
 
 ## 输入
@@ -72,7 +72,7 @@ version: "1.0"
 - 每个任务都有明确的完成信号
 - Blocked 任务必须有解除条件
 - tasks.md 应与 plan.md 保持阶段对齐（不应出现 plan 中没有的阶段）
-- 执行本 Skill 期间不得写入实现代码（只产出 docs/ark/tasks.md，编码由 `/ark-implement` 负责）
+- 执行本 Skill 期间不得写入实现代码（只产出 docs/ark/tasks.md，编码由 `/ark:ark-implement` 负责）
 - 不得修改 `docs/ark/tasks.md` 以外的核心 Artifact
 
 ## 停止条件
@@ -93,7 +93,7 @@ version: "1.0"
 ```
 
 ## 建议
-任务分解完成后，建议下一步为 `/ark-implement`（从第一个 Todo 任务开始实施）。
+任务分解完成后，建议下一步为 `/ark:ark-implement`（从第一个 Todo 任务开始实施）。
 
 ## 备注
 `docs/ark/tasks.md` 回答「当前有哪些任务及其状态」，不应替代 plan 成为主执行文档，也不应包含需求定义或验证结论。

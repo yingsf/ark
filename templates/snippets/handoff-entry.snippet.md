@@ -30,7 +30,7 @@
 **推荐下一步：**
 - 下一步动作 1
 
-**推荐 Skill：** `/ark-implement`
+**推荐 Skill：** `/ark:ark-implement`
 
 **恢复提示：**
 <!-- 最关键的 1-3 条上下文 -->

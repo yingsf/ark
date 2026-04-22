@@ -44,25 +44,25 @@ version: "1.0"
 
 推荐策略表前，必须按以下顺序逐项裁决：
 
-1. **判状态可信性** — Artifact 之间存在明显冲突（如 handoff 与 tasks 阶段判断相反）→ 优先 `/ark-sync`
-2. **判验证闭环** — Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark-validate`；Doing 项不单独触发（可能仍在进行中）
-3. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark-implement`
-4. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark-plan`、`/ark-spec`、`/ark-design` 或 `/ark-intake`
+1. **判状态可信性** — Artifact 之间存在明显冲突（如 handoff 与 tasks 阶段判断相反）→ 优先 `/ark:ark-sync`
+2. **判验证闭环** — Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
+3. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
+4. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design` 或 `/ark:ark-intake`
 
 ## 推荐策略
 
 | 情况 | 推荐 Skill |
 |------|------------|
-| handoff 与 tasks 状态矛盾 | `/ark-sync` |
-| 功能已实现但无验证记录 | `/ark-validate` |
-| 目标清晰、Doing 明确、无阻塞 | `/ark-implement` |
-| 当前阶段准备暂停 | `/ark-handoff` |
-| 需要先理解代码库再推进 | `/ark-analyze` |
-| 有新需求但不够清晰 | `/ark-intake` |
-| 需求明确但无执行计划 | `/ark-plan` |
-| 需要补充或更新需求规格 | `/ark-spec` |
-| 需要更新技术设计 | `/ark-design` |
-| 实现已完成，合并前需评审 | `/ark-review` |
+| handoff 与 tasks 状态矛盾 | `/ark:ark-sync` |
+| 功能已实现但无验证记录 | `/ark:ark-validate` |
+| 目标清晰、Doing 明确、无阻塞 | `/ark:ark-implement` |
+| 当前阶段准备暂停 | `/ark:ark-handoff` |
+| 需要先理解代码库再推进 | `/ark:ark-analyze` |
+| 有新需求但不够清晰 | `/ark:ark-intake` |
+| 需求明确但无执行计划 | `/ark:ark-plan` |
+| 需要补充或更新需求规格 | `/ark:ark-spec` |
+| 需要更新技术设计 | `/ark:ark-design` |
+| 实现已完成，合并前需评审 | `/ark:ark-review` |
 
 ## 固定输出格式
 
@@ -73,4 +73,4 @@ version: "1.0"
 ### 5. 推荐 Skill
 
 ## 备注
-`/ark-next` 不是重新做全套规划，而是帮助在当前状态下找到最合理的下一步。
+`/ark:ark-next` 不是重新做全套规划，而是帮助在当前状态下找到最合理的下一步。

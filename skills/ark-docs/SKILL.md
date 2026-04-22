@@ -13,7 +13,7 @@ version: "1.0"
 编写或更新项目文档，使其与真实实现和当前 Artifact 保持一致。
 
 ## 前置建议
-- 如果 Artifact 文档可能已过期，建议先执行 `/ark-sync` 同步状态
+- 如果 Artifact 文档可能已过期，建议先执行 `/ark:ark-sync` 同步状态
 
 ## 适用场景
 - README 缺失或过期
