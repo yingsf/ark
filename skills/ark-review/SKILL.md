@@ -16,7 +16,7 @@ version: "1.0"
 
 ## 前置建议
 - review 评估的是代码本身，不依赖 Artifact 同步状态，通常不需要先执行 `/ark-sync`
-- 如果实现目标不明确，建议先确认 `docs/spec.md` 或 `docs/plan.md`
+- 如果实现目标不明确，建议先确认 `docs/ark/spec.md` 或 `docs/ark/plan.md`
 
 ## 适用场景
 - 实现完成后、合并或定稿前
@@ -34,9 +34,9 @@ version: "1.0"
 - 按严重程度分组的问题清单、风险点、测试或设计缺口、可执行的反馈建议
 
 ## 相关 Artifact
-- 可引用 `docs/design.md`、`docs/plan.md`、`docs/spec.md`
-- 可为 `docs/validation.md` 提供输入（review 发现的缺口）
-- 严重问题可建议更新 `docs/plan.md`
+- 可引用 `docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/spec.md`
+- 可为 `docs/ark/validation.md` 提供输入（review 发现的缺口）
+- 严重问题可建议更新 `docs/ark/plan.md`
 
 ## 工作流
 1. 在上下文中阅读代码，理解改动意图。
@@ -44,7 +44,7 @@ version: "1.0"
 3. 评估可维护性（接口清晰度、职责单一性、可读性）。显式检查：函数认知复杂度是否明显过高（例如超过项目配置阈值）、是否存在不必要的 protected/internal 成员访问（若存在应优先评估是否补正式接口）、是否存在已形成维护负担的大段重复代码（包括当前变更与前序批次已落地代码之间的跨文件重复）。
 4. 检查回归风险（改动是否影响未修改的行为路径）。
 5. 审视测试是否缺覆盖或断言过弱。
-6. 检查是否符合 `docs/design.md` 的接口边界与设计约束。
+6. 检查是否符合 `docs/ark/design.md` 的接口边界与设计约束。
 7. 检查文档与注释质量：公共接口 docstring 是否充分，复杂逻辑是否有必要注释，注释是否解释原因与约束，是否存在注释缺失或过度注释。
 8. 按严重级别整理结论（见分级标准）。
 

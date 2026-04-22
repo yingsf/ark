@@ -10,7 +10,7 @@ version: "2.0"
 # /ark-analyze
 
 ## 目标
-扫描并理解一个已有代码库，输出项目架构认知，并可基于分析结果预填充 `docs/spec.md` 和 `docs/design.md`。
+扫描并理解一个已有代码库，输出项目架构认知，并可基于分析结果预填充 `docs/ark/spec.md` 和 `docs/ark/design.md`。
 
 ## 适用场景
 - 接手已有项目，需要快速建立全局认知
@@ -34,15 +34,15 @@ version: "2.0"
 - 模块地图（各模块职责与依赖关系）
 - 核心数据流与调用链
 - 外部接口清单
-- 可选：预填充 `docs/spec.md` 和 `docs/design.md`
+- 可选：预填充 `docs/ark/spec.md` 和 `docs/ark/design.md`
 
 ## 相关 Artifact
-- 可预填充：`docs/spec.md`、`docs/design.md`
-- 可引用：`docs/plan.md`、`docs/tasks.md`（如已存在）
+- 可预填充：`docs/ark/spec.md`、`docs/ark/design.md`
+- 可引用：`docs/ark/plan.md`、`docs/ark/tasks.md`（如已存在）
 
 ## 核心原则：增量锚定分析
 
-本 skill 采用**增量锚定分析**（Incremental Grounded Analysis）策略，将分析拆分为多个阶段，每阶段将发现的事实写入**分析工作文档**（`docs/.ark-analysis.md`），下阶段从文件读取而非依赖上下文记忆。
+本 skill 采用**增量锚定分析**（Incremental Grounded Analysis）策略，将分析拆分为多个阶段，每阶段将发现的事实写入**分析工作文档**（`docs/ark/.ark-analysis.md`），下阶段从文件读取而非依赖上下文记忆。
 
 这样做的目的是：
 - 避免因上下文压力导致分析结果遗漏或虚构
@@ -52,7 +52,7 @@ version: "2.0"
 
 ## 分析工作文档
 
-文件路径：`docs/.ark-analysis.md`
+文件路径：`docs/ark/.ark-analysis.md`
 
 每个分析阶段必须：
 1. **先读**工作文档中已有内容（不从上下文记忆取）
@@ -108,7 +108,7 @@ version: "2.0"
    - 读取入口文件，记录启动流程概要
 
 5. **写入工作文档**
-   - 创建 `docs/.ark-analysis.md`
+   - 创建 `docs/ark/.ark-analysis.md`
    - 写入「结构事实」、「技术栈事实」、「入口事实」三个章节
    - 所有内容必须是**直接观察到的事实**（目录存在/不存在、文件内容），不做推测
 
@@ -117,7 +117,7 @@ version: "2.0"
 **目标**：在阶段一的事实基础上，深入读取各模块内容，记录模块职责和关系。**必须先读取工作文档中的阶段一结果，再开始本阶段。**
 
 1. **读取工作文档**
-   - 完整读取 `docs/.ark-analysis.md` 中阶段一已写入的内容
+   - 完整读取 `docs/ark/.ark-analysis.md` 中阶段一已写入的内容
    - 基于阶段一的目录结构事实，确定需要深入分析的模块列表
 
 2. **逐模块读取**
@@ -144,7 +144,7 @@ version: "2.0"
 **目标**：验证阶段一和阶段二的发现，识别不确定项，补全遗漏。**必须先读取工作文档中的全部已有内容。**
 
 1. **读取工作文档**
-   - 完整读取 `docs/.ark-analysis.md` 中阶段一和阶段二写入的全部内容
+   - 完整读取 `docs/ark/.ark-analysis.md` 中阶段一和阶段二写入的全部内容
 
 2. **事实核验**
    - 优先核验以下类型的事实（不是一视同仁地核验所有内容）：
@@ -173,26 +173,26 @@ version: "2.0"
 **目标**：基于工作文档中的已验证事实，生成最终分析报告并预填充 Artifact。**必须先读取工作文档的全部内容。**
 
 1. **读取工作文档**
-   - 完整读取 `docs/.ark-analysis.md` 的全部内容
+   - 完整读取 `docs/ark/.ark-analysis.md` 的全部内容
 
 2. **生成分析报告**
    - 基于工作文档中的事实（不基于上下文记忆），按「固定输出格式」生成报告
    - 报告中的每一项都应能在工作文档中找到对应的事实依据
 
 3. **预填充 Artifact（可选）**
-   - 预填充 `docs/spec.md`：
+   - 预填充 `docs/ark/spec.md`：
      - 背景：项目是什么、解决什么问题
      - 目标：当前系统提供的核心能力
      - 范围：已知的功能范围
      - 验收标准：基于现有行为描述
-   - 预填充 `docs/design.md`：
+   - 预填充 `docs/ark/design.md`：
      - 模块结构：各模块及其职责
      - 数据流/调用流：核心路径
      - 接口边界：外部接口清单
    - 预填充内容必须标注 `<!-- 由 /ark-analyze 自动生成，需人工确认 -->`
 
 4. **清理工作文档**
-   - 询问用户是否保留 `docs/.ark-analysis.md`
+   - 询问用户是否保留 `docs/ark/.ark-analysis.md`
    - 若用户选择不保留，删除该文件
    - 若用户选择保留，该文件可作为后续调查的参考
 
@@ -206,9 +206,9 @@ version: "2.0"
 
 2. **生成建议更新方案**
    - 对每条回答明确其去向：
-     - → `docs/spec.md`（规格边界确认）
-     - → `docs/design.md`（设计机制确认）
-     - → `docs/.ark-analysis.md`（补充事实记录）
+     - → `docs/ark/spec.md`（规格边界确认）
+     - → `docs/ark/design.md`（设计机制确认）
+     - → `docs/ark/.ark-analysis.md`（补充事实记录）
      - → 暂不更新（信息不足或 E 类）
    - 注明每条更新的具体内容摘要
 
@@ -217,26 +217,26 @@ version: "2.0"
    - 用户可调整方案（修改去向、内容、跳过某些项）
 
 4. **执行确认后的写入**
-   - 仅写入 `docs/.ark-analysis.md`：更新对应不确定项状态为"[已澄清]"（用户已回答，但正式 spec/design 更新仍待 `/ark-spec`、`/ark-design` 完成），记录用户回答摘要
+   - 仅写入 `docs/ark/.ark-analysis.md`：更新对应不确定项状态为"[已澄清]"（用户已回答，但正式 spec/design 更新仍待 `/ark-spec`、`/ark-design` 完成），记录用户回答摘要
    - 对于涉及 spec/design 的更新建议，明确列出：
      - 哪些 U 项需通过 `/ark-spec` 处理
      - 哪些 U 项需通过 `/ark-design` 处理
      - 哪些 U 项需先 `/ark-spec` 再 `/ark-design`
 
 **禁止事项：**
-- 不得写入 `docs/spec.md` 或 `docs/design.md`（无论用户是否确认）；对 spec/design 的更新建议只能通过显式执行 `/ark-spec`、`/ark-design` 完成
-- 仅可写入 `docs/.ark-analysis.md`（更新不确定项状态、记录用户回答）
+- 不得写入 `docs/ark/spec.md` 或 `docs/ark/design.md`（无论用户是否确认）；对 spec/design 的更新建议只能通过显式执行 `/ark-spec`、`/ark-design` 完成
+- 仅可写入 `docs/ark/.ark-analysis.md`（更新不确定项状态、记录用户回答）
 - 不得将用户对不确定项的回答自动写入 memory
 - 不得自动进入 `/ark-spec`、`/ark-design` 或其他 Skill 的职责范围
 
 ## 回写规则
 
-### 预填充 `docs/spec.md`
+### 预填充 `docs/ark/spec.md`
 - 仅在 spec.md 为空或为初始模板时预填充
 - 预填充内容基于工作文档中的已验证事实，不是凭空编写
 - 必须标注来源
 
-### 预填充 `docs/design.md`
+### 预填充 `docs/ark/design.md`
 - 仅在 design.md 为空或为初始模板时预填充
 - 基于工作文档中的已验证事实
 - 必须标注来源
@@ -291,8 +291,8 @@ version: "2.0"
 |------|------|------|
 
 ### 6. Artifact 预填充状态
-- `docs/spec.md`：已预填充 / 未预填充（原因）
-- `docs/design.md`：已预填充 / 未预填充（原因）
+- `docs/ark/spec.md`：已预填充 / 未预填充（原因）
+- `docs/ark/design.md`：已预填充 / 未预填充（原因）
 
 ### 7. 不确定项（按后续动作分组）
 
@@ -323,8 +323,8 @@ version: "2.0"
 
 | U 编号 | 你的回答 | 建议去向 | 更新内容摘要 |
 |--------|---------|---------|-------------|
-| U1 | ... | docs/spec.md | ... |
-| U2 | ... | docs/design.md | ... |
+| U1 | ... | docs/ark/spec.md | ... |
+| U2 | ... | docs/ark/design.md | ... |
 | U5 | ... | 暂不更新 | ... |
 
 - `/ark-analyze` 不自动执行任何后续 Skill

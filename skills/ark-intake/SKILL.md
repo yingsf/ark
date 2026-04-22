@@ -26,7 +26,7 @@ version: "1.0"
 - 用户请求、当前仓库状态、已有文档与代码、当前任务上下文
 
 ## 相关 Artifact
-- 可引用 `docs/spec.md`、`docs/plan.md`、`docs/handoff.md` 作为上下文
+- 可引用 `docs/ark/spec.md`、`docs/ark/plan.md`、`docs/ark/handoff.md` 作为上下文
 - 不直接写入任何 Artifact（输出作为下游 Skill 的输入）
 - **状态落点约束**：当任务规模 ≥ Medium，且输出包含关键范围判断、约束识别或阻塞性歧义时，必须推动核心结论落入 `spec` / `plan` / `handoff` 中之一，不得仅停留在对话中
 

@@ -1,7 +1,7 @@
 ---
 name: ark-tasks
 description: |
-  将计划拆解为可跟踪任务，在 docs/tasks.md 中维护状态。
+  将计划拆解为可跟踪任务，在 docs/ark/tasks.md 中维护状态。
   触发时机：计划需要更细粒度执行跟踪、任务跨多个会话、存在多个子问题需要显式管理时。
   关键词：任务列表、任务跟踪、todo、doing、done、blocked、任务状态。
 version: "1.0"
@@ -10,7 +10,7 @@ version: "1.0"
 # /ark-tasks
 
 ## 目标
-将计划拆解为可跟踪的具体任务，在 `docs/tasks.md` 中维护执行状态。
+将计划拆解为可跟踪的具体任务，在 `docs/ark/tasks.md` 中维护执行状态。
 
 ## 前置建议
 - 建议先执行 `/ark-plan` 形成阶段规划，再用 tasks 管理细粒度状态
@@ -27,21 +27,21 @@ version: "1.0"
 - tasks 会替代 plan 变成主执行文档（两者职责不同）
 
 ## 输入
-- `docs/plan.md`、当前仓库状态、已知阻塞项
+- `docs/ark/plan.md`、当前仓库状态、已知阻塞项
 
 ## 输出
 - 结构化任务列表，含状态（Todo / Doing / Done / Blocked）、优先级、依赖、阻塞解除条件
 
 ## 相关 Artifact
-- `docs/tasks.md`
-- 可引用 `docs/plan.md`
+- `docs/ark/tasks.md`
+- 可引用 `docs/ark/plan.md`
 
 ## 工作流
-1. 阅读 `docs/plan.md`，理解阶段划分与执行顺序。
+1. 阅读 `docs/ark/plan.md`，理解阶段划分与执行顺序。
 2. 将计划步骤拆解为具体任务——每个任务应满足粒度标准（见下方）。
 3. 为每个任务标注：状态、优先级、依赖关系。
 4. 对 Blocked 任务，必须记录「解除条件」（什么情况下可以继续）。
-5. 写入或更新 `docs/tasks.md`。
+5. 写入或更新 `docs/ark/tasks.md`。
 
 ## 任务粒度标准
 
@@ -72,18 +72,18 @@ version: "1.0"
 - 每个任务都有明确的完成信号
 - Blocked 任务必须有解除条件
 - tasks.md 应与 plan.md 保持阶段对齐（不应出现 plan 中没有的阶段）
-- 执行本 Skill 期间不得写入实现代码（只产出 docs/tasks.md，编码由 `/ark-implement` 负责）
-- 不得修改 `docs/tasks.md` 以外的核心 Artifact
+- 执行本 Skill 期间不得写入实现代码（只产出 docs/ark/tasks.md，编码由 `/ark-implement` 负责）
+- 不得修改 `docs/ark/tasks.md` 以外的核心 Artifact
 
 ## 停止条件
 - 当前范围内的所有任务都已被识别并分配了状态
 - Blocked 项的解除条件已明确
-- `docs/tasks.md` 已完成写入
+- `docs/ark/tasks.md` 已完成写入
 - 本 Skill 到此停止，输出建议下一步，不继续执行实现代码
 
 ## 固定输出格式
 
-写入 `docs/tasks.md`，任务按状态分组：Done → Doing → Todo → Blocked
+写入 `docs/ark/tasks.md`，任务按状态分组：Done → Doing → Todo → Blocked
 
 每条任务格式：
 ```
@@ -96,4 +96,4 @@ version: "1.0"
 任务分解完成后，建议下一步为 `/ark-implement`（从第一个 Todo 任务开始实施）。
 
 ## 备注
-`docs/tasks.md` 回答「当前有哪些任务及其状态」，不应替代 plan 成为主执行文档，也不应包含需求定义或验证结论。
+`docs/ark/tasks.md` 回答「当前有哪些任务及其状态」，不应替代 plan 成为主执行文档，也不应包含需求定义或验证结论。

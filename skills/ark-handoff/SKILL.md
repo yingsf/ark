@@ -27,13 +27,13 @@ version: "1.0"
 - 还没有任何可总结进展
 
 ## 输入
-- 当前任务目标、`docs/plan.md`、`docs/tasks.md`、`docs/validation.md`、当前代码与文档状态
+- 当前任务目标、`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/validation.md`、当前代码与文档状态
 
 ## 输出
 - 当前目标、当前阶段判断、已完成内容、未完成内容、风险/阻塞、推荐下一步、关键文件列表
 
 ## 相关 Artifact
-- `docs/handoff.md`
+- `docs/ark/handoff.md`
 
 ## 工作流
 1. 判断当前阶段（澄清/规划/实现/验证/收尾）。
@@ -47,7 +47,7 @@ version: "1.0"
 - handoff 必须与当前真实状态一致
 - 不应假装「所有事情都很清楚」
 - 若当前状态本身不可信，应先建议 `/ark-sync`
-- 不得修改 `docs/handoff.md` 以外的核心 Artifact
+- 不得修改 `docs/ark/handoff.md` 以外的核心 Artifact
 
 ## 推荐策略
 - 实现基本完成但未验证 → 推荐 `/ark-validate`

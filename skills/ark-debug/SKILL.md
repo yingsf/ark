@@ -34,10 +34,10 @@ version: "1.0"
 - 必要时：Artifact 回写建议
 
 ## 相关 Artifact
-- 可读取：`docs/plan.md`、`docs/tasks.md`、`docs/design.md`
-- 可在必要时回写：`docs/plan.md`、`docs/tasks.md`
-- 若修复路径引入重要取舍：建议更新 `docs/decisions.md`
-- 应为 `docs/validation.md` 提供输入
+- 可读取：`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/design.md`
+- 可在必要时回写：`docs/ark/plan.md`、`docs/ark/tasks.md`
+- 若修复路径引入重要取舍：建议更新 `docs/ark/decisions.md`
+- 应为 `docs/ark/validation.md` 提供输入
 
 ## 工作流
 1. 清楚定义观察到的症状（不要跳过这一步直接猜根因）。
@@ -51,14 +51,14 @@ version: "1.0"
 
 ## 回写规则
 
-### 回写 `docs/plan.md`
+### 回写 `docs/ark/plan.md`
 - 根因导致原计划失效或需要调整执行顺序
 
-### 回写 `docs/tasks.md`
+### 回写 `docs/ark/tasks.md`
 - 出现新的阻塞或诊断任务
 - 某任务因 bug 需要重做 → 移回 Todo 或 Blocked
 
-### 建议更新 `docs/decisions.md`
+### 建议更新 `docs/ark/decisions.md`
 - 修复路径引入了非平凡的技术取舍
 
 ## 验证要求

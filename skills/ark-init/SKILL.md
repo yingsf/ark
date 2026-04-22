@@ -34,26 +34,27 @@ version: "1.0"
 ## 输出文件
 `.gitignore`、`pyproject.toml`、`README.md`、`CHANGELOG.md`、`CLAUDE.md`、`MEMORY.md`、
 `src/<project_name>/__init__.py`、`tests/__init__.py`、`tests/conftest.py`（如启用测试）、
-`docs/` 及 7 个核心 Artifact
+`docs/ark/` 及 7 个核心 Artifact
 
 > `.venv/` 由 uv 按需创建，不是保证产物。
 
 ## 相关 Artifact
 自动创建完整的 7 个核心 Artifact：
-`docs/spec.md`、`docs/design.md`、`docs/plan.md`、`docs/tasks.md`、
-`docs/decisions.md`、`docs/validation.md`、`docs/handoff.md`
+`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`、
+`docs/ark/decisions.md`、`docs/ark/validation.md`、`docs/ark/handoff.md`
 
 ## 目标目录结构
 ```
 my_project/
 ├── docs/
-│   ├── spec.md
-│   ├── design.md
-│   ├── plan.md
-│   ├── tasks.md
-│   ├── decisions.md
-│   ├── validation.md
-│   └── handoff.md
+│   └── ark/
+│       ├── spec.md
+│       ├── design.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── decisions.md
+│       ├── validation.md
+│       └── handoff.md
 ├── src/
 │   └── my_project/
 │       └── __init__.py
@@ -112,8 +113,9 @@ my_project/
 2. 在 pyproject.toml 添加 pytest 依赖（如启用）
 3. 创建 `src/<project_name>/__init__.py`
 4. 创建 tests/ 结构（如启用）
-5. `uv sync`
-6. `uv add --dev ruff pyright`（安装默认开发质量工具到 dev 依赖）
+5. 确保 `pyproject.toml` 包含正确的 build-system 配置（src layout 需要）：若缺少 `[build-system]` 则追加 hatchling 配置，若缺少 `[tool.hatch.build.targets.wheel]` 则追加 `packages = ["src/<project_name>"]`
+6. `uv sync`
+7. `uv add --dev ruff pyright`（安装默认开发质量工具到 dev 依赖）
 
 **路径 B（uv 不可用）**：
 1. 手动创建目录结构

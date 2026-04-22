@@ -88,10 +88,10 @@
 - `/ark-validate`
 
 ### 推荐 Artifact
-- `docs/plan.md`
-- `docs/validation.md`
-- 如结构复杂，补 `docs/design.md`
-- 如需持续跟踪，补 `docs/tasks.md`
+- `docs/ark/plan.md`
+- `docs/ark/validation.md`
+- 如结构复杂，补 `docs/ark/design.md`
+- 如需持续跟踪，补 `docs/ark/tasks.md`
 
 ## Large Task
 
@@ -129,13 +129,13 @@
 ### 推荐 Artifact
 优先完整使用 7 个核心 Artifact：
 
-- `docs/spec.md`
-- `docs/design.md`
-- `docs/plan.md`
-- `docs/tasks.md`
-- `docs/decisions.md`
-- `docs/validation.md`
-- `docs/handoff.md`
+- `docs/ark/spec.md`
+- `docs/ark/design.md`
+- `docs/ark/plan.md`
+- `docs/ark/tasks.md`
+- `docs/ark/decisions.md`
+- `docs/ark/validation.md`
+- `docs/ark/handoff.md`
 
 ## 升级规则
 

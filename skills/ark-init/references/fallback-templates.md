@@ -222,7 +222,7 @@ All notable changes to this project will be documented in this file.
 ## Project Overview
 
 <project_name> 是一个 Python 项目，使用 src layout，包名为 `<project_name>`。
-本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/` 目录。
+本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
 
 ## Commands
 
@@ -246,17 +246,17 @@ uv run pyright
 
 | 文件 | 何时更新 |
 |------|----------|
-| `docs/spec.md` | 添加新功能前 |
-| `docs/design.md` | 架构变更时 |
-| `docs/plan.md` | 任务规划或阶段推进时 |
-| `docs/tasks.md` | 开始/完成任务时 |
-| `docs/decisions.md` | 做出技术选型时 |
-| `docs/validation.md` | 完成验证后 |
-| `docs/handoff.md` | 阶段暂停或会话结束前 |
+| `docs/ark/spec.md` | 添加新功能前 |
+| `docs/ark/design.md` | 架构变更时 |
+| `docs/ark/plan.md` | 任务规划或阶段推进时 |
+| `docs/ark/tasks.md` | 开始/完成任务时 |
+| `docs/ark/decisions.md` | 做出技术选型时 |
+| `docs/ark/validation.md` | 完成验证后 |
+| `docs/ark/handoff.md` | 阶段暂停或会话结束前 |
 
 ## Working Pattern
 
-1. 开始任务前阅读 `docs/tasks.md`，确认当前进展
+1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
 2. 改动完成后更新对应 Artifact（tasks / validation / decisions）
 3. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
 ```

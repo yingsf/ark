@@ -24,15 +24,15 @@ version: "1.0"
 - 没有可供比对的 Artifact 或仓库上下文
 
 ## 输入
-- 当前仓库状态、`docs/plan.md`、`docs/tasks.md`、`docs/validation.md`、`docs/handoff.md`
+- 当前仓库状态、`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/validation.md`、`docs/ark/handoff.md`
 
 ## 输出
 - 当前状态一致性评估、已发现的冲突或过期内容、建议更新的 Artifact 列表、推荐下一步 Skill
 
 ## 相关 Artifact
 - 可读取全部 docs Artifact
-- 在必要且明确时，可小幅回写：`docs/plan.md`、`docs/tasks.md`、`docs/handoff.md`
-- 对 `docs/validation.md` 与 `docs/decisions.md`，更偏向建议更新
+- 在必要且明确时，可小幅回写：`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/handoff.md`
+- 对 `docs/ark/validation.md` 与 `docs/ark/decisions.md`，更偏向建议更新
 
 ## 工作流
 1. 读取关键 Artifact，优先查看 `plan`、`tasks`、`validation`、`handoff`。

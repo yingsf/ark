@@ -69,13 +69,14 @@ my_project/                  # 项目根目录
 │   └── workflows/
 │       └── ci.yml
 ├── docs/                    # 文档 + ark Artifact
-│   ├── spec.md
-│   ├── design.md
-│   ├── plan.md
-│   ├── tasks.md
-│   ├── decisions.md
-│   ├── validation.md
-│   └── handoff.md
+│   └── ark/                 # ARK 核心 Artifact
+│       ├── spec.md
+│       ├── design.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── decisions.md
+│       ├── validation.md
+│       └── handoff.md
 ├── src/                     # 源代码（src layout）
 │   └── my_project/          # 包名目录
 │       └── __init__.py      # 包初始化（仅含 __init__.py）
@@ -158,6 +159,13 @@ git rev-parse --is-inside-work-tree
 ```bash
 uv init --no-workspace
 说明：在 target directory 中原地初始化，不得额外嵌套一层目录
+```
+
+初始化后、`uv sync` 前，必须检查并补全 `pyproject.toml` 的 build-system 配置（src layout 需要）：
+- 若缺少 `[build-system]`，追加 hatchling 配置
+- 若缺少 `[tool.hatch.build.targets.wheel]`，追加 `packages = ["src/<project_name>"]`
+
+```bash
 uv venv
 uv add pytest --dev  # 如启用测试
 ```
@@ -220,13 +228,13 @@ MEMORY.md 是 Claude Code 的标准规则入口文件，Claude Code 会在每次
 
 docs/ Artifact 是 ark 实现跨会话记忆和状态追踪的核心，必须自动创建完整的 7 个 Artifact：
 
-- `docs/spec.md`
-- `docs/design.md`
-- `docs/plan.md`
-- `docs/tasks.md`
-- `docs/decisions.md`
-- `docs/validation.md`
-- `docs/handoff.md`
+- `docs/ark/spec.md`
+- `docs/ark/design.md`
+- `docs/ark/plan.md`
+- `docs/ark/tasks.md`
+- `docs/ark/decisions.md`
+- `docs/ark/validation.md`
+- `docs/ark/handoff.md`
 
 模板文件存在时使用模板，不存在时创建空文件。
 

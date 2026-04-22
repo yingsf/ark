@@ -18,13 +18,13 @@
 - 风险或阻塞 1（解除条件：...）
 
 **Artifact 信任状态：**
-- `docs/plan.md`：可信 / 可能过期
-- `docs/tasks.md`：可信 / 可能过期
-- `docs/validation.md`：可信 / 缺记录
+- `docs/ark/plan.md`：可信 / 可能过期
+- `docs/ark/tasks.md`：可信 / 可能过期
+- `docs/ark/validation.md`：可信 / 缺记录
 <!-- 按需列出状态可能有变化的 Artifact -->
 
 **恢复顺序：**
-1. 先读 `docs/{artifact}` — 原因
+1. 先读 `docs/ark/{artifact}` — 原因
 2. 然后执行 {动作}
 
 **推荐下一步：**

@@ -104,13 +104,13 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 
 | Artifact | 职责 |
 |----------|------|
-| `docs/spec.md` | 要做什么 |
-| `docs/design.md` | 准备怎么做 |
-| `docs/plan.md` | 将如何分阶段推进 |
-| `docs/tasks.md` | 当前任务及其状态 |
-| `docs/decisions.md` | 关键选择与理由 |
-| `docs/validation.md` | 验证了什么，证据是什么 |
-| `docs/handoff.md` | 下次从哪里继续 |
+| `docs/ark/spec.md` | 要做什么 |
+| `docs/ark/design.md` | 准备怎么做 |
+| `docs/ark/plan.md` | 将如何分阶段推进 |
+| `docs/ark/tasks.md` | 当前任务及其状态 |
+| `docs/ark/decisions.md` | 关键选择与理由 |
+| `docs/ark/validation.md` | 验证了什么，证据是什么 |
+| `docs/ark/handoff.md` | 下次从哪里继续 |
 
 > 每个 Artifact 的职责边界与回写协议见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`
 

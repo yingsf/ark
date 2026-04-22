@@ -28,17 +28,17 @@ YYYY-MM-DD
 
 ## Artifact 信任状态
 <!-- 对每个核心 Artifact 标注可信度，帮助 next 判断应优先读取哪个 -->
-- `docs/spec.md`：可信 / 可能过期 / 缺失
-- `docs/design.md`：可信 / 可能过期 / 缺失
-- `docs/plan.md`：可信 / 可能过期 / 缺失
-- `docs/tasks.md`：可信 / 可能过期 / 缺失
-- `docs/decisions.md`：可信 / 可能过期 / 缺失
-- `docs/validation.md`：可信 / 可能过期 / 缺记录
+- `docs/ark/spec.md`：可信 / 可能过期 / 缺失
+- `docs/ark/design.md`：可信 / 可能过期 / 缺失
+- `docs/ark/plan.md`：可信 / 可能过期 / 缺失
+- `docs/ark/tasks.md`：可信 / 可能过期 / 缺失
+- `docs/ark/decisions.md`：可信 / 可能过期 / 缺失
+- `docs/ark/validation.md`：可信 / 可能过期 / 缺记录
 
 ## 恢复顺序
 <!-- 明确下次会话的恢复动作序列，比"关键文件"更强 -->
-1. 先读 `docs/{artifact}` — 原因
-2. 再读 `docs/{artifact}` — 原因
+1. 先读 `docs/ark/{artifact}` — 原因
+2. 再读 `docs/ark/{artifact}` — 原因
 3. 然后执行 {动作}
 
 ## 推荐下一步

@@ -33,8 +33,8 @@ version: "1.0"
 - 改善后的结构、明确列出的不变行为、建议或补充的回归覆盖、剩余风险说明
 
 ## 相关 Artifact
-- 可引用 `docs/design.md`
-- 应为 `docs/validation.md` 提供输入
+- 可引用 `docs/ark/design.md`
+- 应为 `docs/ark/validation.md` 提供输入
 
 ## 工作流
 1. 先定义哪些行为不能变。

@@ -32,10 +32,10 @@ version: "1.0"
 - 新增或更新的测试文件
 - 测试执行命令与结果摘要（通过 / 失败 / 跳过数量）
 - 对未覆盖区域的说明
-- 可直接写入 `docs/validation.md` 的验证记录草稿
+- 可直接写入 `docs/ark/validation.md` 的验证记录草稿
 
 ## 相关 Artifact
-- 可为 `docs/validation.md` 提供输入（测试结果摘要）
+- 可为 `docs/ark/validation.md` 提供输入（测试结果摘要）
 
 ## 工作流
 1. 识别最重要的目标行为（从 spec 或 implement 的目标出发）。

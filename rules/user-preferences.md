@@ -18,13 +18,15 @@
 
 - 默认使用 `src/` layout
 - 默认在项目根目录使用 `tests/`
-- 默认使用 `docs/` 保存任务状态 Artifact
-- docs/ Artifact 自动创建，不需要用户确认
+- 默认使用 `docs/ark/` 保存任务状态 Artifact
+- docs/ark/ Artifact 自动创建，不需要用户确认
 
 ## 工具链默认值
 
 - 测试框架：pytest
-- 代码风格/静态检查：使用 PyCharm 插件，不在项目中配置 ruff/mypy
+- 代码风格/lint：ruff（lint + format）
+- 静态类型检查：pyright（typeCheckingMode: standard）
+- 人工检查：推荐使用 PyCharm 的 SonarQube For IDE 插件进行最终的人工代码检查
 
 ## 代码风格偏好
 

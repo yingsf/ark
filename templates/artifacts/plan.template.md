@@ -43,9 +43,9 @@
 
 ## Artifact 链接
 <!-- 帮助后续 Skill 定位相关信息 -->
-- 细粒度任务状态 → `docs/tasks.md`
-- 已执行验证记录 → `docs/validation.md`
-- 重大技术取舍 → `docs/decisions.md`
+- 细粒度任务状态 → `docs/ark/tasks.md`
+- 已执行验证记录 → `docs/ark/validation.md`
+- 重大技术取舍 → `docs/ark/decisions.md`
 
 ## 当前状态
 - Status: not started / in progress / blocked / done

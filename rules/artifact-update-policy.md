@@ -13,7 +13,7 @@
 
 ## 各 Artifact 的回写条件
 
-### `docs/plan.md`
+### `docs/ark/plan.md`
 
 主更新者：`/ark-plan`
 
@@ -26,7 +26,7 @@
 
 ---
 
-### `docs/tasks.md`
+### `docs/ark/tasks.md`
 
 主更新者：`/ark-tasks`
 
@@ -39,7 +39,7 @@
 
 ---
 
-### `docs/decisions.md`
+### `docs/ark/decisions.md`
 
 主更新者：`/ark-decide`
 
@@ -50,7 +50,7 @@
 
 ---
 
-### `docs/validation.md`
+### `docs/ark/validation.md`
 
 主更新者：`/ark-validate`
 
@@ -58,7 +58,7 @@
 
 ---
 
-### `docs/handoff.md`
+### `docs/ark/handoff.md`
 
 主更新者：`/ark-handoff`
 
@@ -70,7 +70,7 @@
 
 ---
 
-### `docs/spec.md` / `docs/design.md`
+### `docs/ark/spec.md` / `docs/ark/design.md`
 
 主更新者分别为 `/ark-spec` 和 `/ark-design`。
 
@@ -87,9 +87,9 @@
 ## 实施过程中的回写规则
 
 ### `/ark-implement`
-- 原计划与现实偏差明显 → 更新 `docs/plan.md`
-- 某项任务完成 / 开始 / 阻塞 → 更新 `docs/tasks.md`
-- 出现关键技术取舍 → 建议更新 `docs/decisions.md`（不强制直接写入）
+- 原计划与现实偏差明显 → 更新 `docs/ark/plan.md`
+- 某项任务完成 / 开始 / 阻塞 → 更新 `docs/ark/tasks.md`
+- 出现关键技术取舍 → 建议更新 `docs/ark/decisions.md`（不强制直接写入）
 
 **plan.md 回写触发样例：**
 
@@ -115,18 +115,18 @@
 - 没有客观完成标准的模糊进展
 
 ### `/ark-debug`
-- 根因导致原计划失效 → 更新 `docs/plan.md`
-- 新的阻塞或诊断任务出现 → 更新 `docs/tasks.md`
-- 修复路径引入重要取舍 → 建议更新 `docs/decisions.md`
+- 根因导致原计划失效 → 更新 `docs/ark/plan.md`
+- 新的阻塞或诊断任务出现 → 更新 `docs/ark/tasks.md`
+- 修复路径引入重要取舍 → 建议更新 `docs/ark/decisions.md`
 
 ### `/ark-refactor`
-- 重构范围超出预期 → 更新 `docs/plan.md`
-- 任务状态变化 → 更新 `docs/tasks.md`
-- 引入不可逆结构性选择 → 建议更新 `docs/decisions.md`
+- 重构范围超出预期 → 更新 `docs/ark/plan.md`
+- 任务状态变化 → 更新 `docs/ark/tasks.md`
+- 引入不可逆结构性选择 → 建议更新 `docs/ark/decisions.md`
 
 ### `/ark-review`
-- 发现严重问题导致计划需要调整 → 建议更新 `docs/plan.md`
-- review 结论影响验证策略 → 建议更新 `docs/validation.md`
+- 发现严重问题导致计划需要调整 → 建议更新 `docs/ark/plan.md`
+- review 结论影响验证策略 → 建议更新 `docs/ark/validation.md`
 
 ### `/ark-sync`
 优先指出并修正以下情况：
@@ -137,8 +137,8 @@
 - validation 漏记关键结果
 
 ### `/ark-analyze`
-- 首次分析已有代码库 → 预填充 `docs/spec.md`（当前系统在做什么）
-- 首次分析已有代码库 → 预填充 `docs/design.md`（当前架构长什么样）
+- 首次分析已有代码库 → 预填充 `docs/ark/spec.md`（当前系统在做什么）
+- 首次分析已有代码库 → 预填充 `docs/ark/design.md`（当前架构长什么样）
 - 预填充内容必须标注来源，后续应由 `/ark-spec` 或 `/ark-design` 审查确认
 
 ---
@@ -158,6 +158,6 @@
 
 | 任务规模 | 最低要求 |
 |---------|----------|
-| Small | 必要时更新 `docs/validation.md` |
-| Medium | `docs/plan.md` + `docs/validation.md` |
+| Small | 必要时更新 `docs/ark/validation.md` |
+| Medium | `docs/ark/plan.md` + `docs/ark/validation.md` |
 | Large | 全部 7 个核心 Artifact |

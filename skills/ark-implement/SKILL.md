@@ -33,7 +33,7 @@ version: "1.0"
 | 文档可能过期 | `/ark-sync` |
 
 ## 输入
-- 当前相关代码、`docs/spec.md`、`docs/design.md`、`docs/plan.md`、`docs/tasks.md`
+- 当前相关代码、`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`
 
 ## 输出
 - 已完成的代码修改
@@ -42,9 +42,9 @@ version: "1.0"
 - 对后续 test / validate 的建议
 
 ## 相关 Artifact
-- 可读取：`docs/spec.md`、`docs/design.md`、`docs/plan.md`、`docs/tasks.md`
-- 可在必要时回写：`docs/plan.md`、`docs/tasks.md`
-- 若出现关键取舍，应建议更新：`docs/decisions.md`
+- 可读取：`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`
+- 可在必要时回写：`docs/ark/plan.md`、`docs/ark/tasks.md`
+- 若出现关键取舍，应建议更新：`docs/ark/decisions.md`
 
 ## 工作流
 
@@ -96,7 +96,7 @@ version: "1.0"
 
 - 每次只执行一个批次
 - 每个批次结束后执行局部检查（ruff/pyright 仅限已改文件）
-- 更新 `docs/tasks.md` 记录批次进展（在任务备注区记录当前批次）
+- 更新 `docs/ark/tasks.md` 记录批次进展（在任务备注区记录当前批次）
 - 输出当前批次完成状态，建议下一批次或停止
 
 ### 中断安全
@@ -105,17 +105,17 @@ version: "1.0"
 - 若未到达批次完成点且会话即将中断，优先完成当前批次再 handoff
 - 若确实无法完成当前批次，handoff 必须记录：已完成的文件/锚点、未完成的文件/锚点、下一批次入口
 
-### 回写 `docs/plan.md`
+### 回写 `docs/ark/plan.md`
 - 实际步骤与原计划明显不同
 - 风险或阻塞发生重大变化
 - 执行顺序需要调整
 
-### 回写 `docs/tasks.md`
+### 回写 `docs/ark/tasks.md`
 - 某任务已完成 → 移入 Done
 - 某任务已开始 → 移入 Doing
 - 出现新阻塞 → 加入 Blocked（附解除条件）
 
-### 建议更新 `docs/decisions.md`
+### 建议更新 `docs/ark/decisions.md`
 - 做出了非平凡技术取舍或选用了新的实现路线
 
 ## 验证要求

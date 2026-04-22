@@ -1,7 +1,7 @@
 ---
 name: ark-decide
 description: |
-  将重要工程决策结构化记录到 docs/decisions.md。
+  将重要工程决策结构化记录到 docs/ark/decisions.md。
   触发时机：做出了非平凡技术选择、经过多个备选方案权衡、架构或工具链方向发生变化时。
   关键词：决策、技术选型、方案对比、权衡、ADR、选择理由、decisions。
 version: "1.0"
@@ -10,7 +10,7 @@ version: "1.0"
 # /ark-decide
 
 ## 目标
-将重要工程决策结构化记录到 `docs/decisions.md`，确保「为什么这么选」在未来可查可审计。
+将重要工程决策结构化记录到 `docs/ark/decisions.md`，确保「为什么这么选」在未来可查可审计。
 
 ## 适用场景
 - 做出了非平凡的技术选择（不只是「用了哪个函数」）
@@ -28,10 +28,10 @@ version: "1.0"
 - 当前决策背景、备选方案、选择依据、已知影响
 
 ## 输出
-- 结构化决策记录（追加到 `docs/decisions.md`）
+- 结构化决策记录（追加到 `docs/ark/decisions.md`）
 
 ## 相关 Artifact
-- `docs/decisions.md`
+- `docs/ark/decisions.md`
 
 ## 工作流
 1. 明确需要记录的决策是什么（用一句话表达）。
@@ -40,21 +40,21 @@ version: "1.0"
 4. 说明最终选择。
 5. 解释理由：相比其他方案的核心优势是什么？
 6. 记录已知影响与副作用。
-7. 追加到 `docs/decisions.md`（新记录加在最前面）。
+7. 追加到 `docs/ark/decisions.md`（新记录加在最前面）。
 
 ## 验证要求
 - 每条决策记录必须有「理由」节，不能只有「选了 A」
 - 备选方案至少列举 2 个（只有 1 个通常意味着没有实质决策）
 - 影响节应诚实记录已知副作用，不得只写优点
-- 不得修改 `docs/decisions.md` 以外的核心 Artifact
+- 不得修改 `docs/ark/decisions.md` 以外的核心 Artifact
 
 ## 停止条件
-- 决策记录已追加到 `docs/decisions.md`
+- 决策记录已追加到 `docs/ark/decisions.md`
 - 记录足以让未来的自己（或他人）理解「为什么」
 
 ## 固定输出格式
 
-追加到 `docs/decisions.md`，使用标准片段格式（参考 `decision-record.snippet.md`）：
+追加到 `docs/ark/decisions.md`，使用标准片段格式（参考 `decision-record.snippet.md`）：
 - 标题 → 日期 → 状态 → 背景 → 备选方案 → 决策 → 理由 → 影响
 
 ## 备注

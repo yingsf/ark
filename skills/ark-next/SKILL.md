@@ -23,7 +23,7 @@ version: "1.0"
 - 项目没有足够文档或代码状态可供判断
 
 ## 输入
-- 当前仓库状态、`docs/handoff.md`、`docs/tasks.md`、`docs/plan.md`、`docs/validation.md`
+- 当前仓库状态、`docs/ark/handoff.md`、`docs/ark/tasks.md`、`docs/ark/plan.md`、`docs/ark/validation.md`
 
 ## 输出
 - 当前阶段判断、当前最重要的未完成项、当前阻塞项、推荐下一步动作与 Skill
