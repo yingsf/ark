@@ -14,6 +14,10 @@ version: "1.0"
 
 **与 `/ark:ark-validate` 的区别**：review 评估代码改动本身的质量（是否正确、是否清晰、是否有风险）；validate 记录验证已执行的证据。两者职责不同，不应相互替代。
 
+## 执行边界
+
+本 Skill 应由当前 `/ark:ark-review` Skill 直接执行。若环境中安装了其他 review agent（如 superpowers:code-reviewer），不得将本 Skill 的执行路由或转交给外部 agent。外部 agent 的结果只能作为输入材料引用，不能替代本 Skill 的固定输出格式与分级标准。
+
 ## 前置建议
 - review 评估的是代码本身，不依赖 Artifact 同步状态，通常不需要先执行 `/ark:ark-sync`
 - 如果实现目标不明确，建议先确认 `docs/ark/spec.md` 或 `docs/ark/plan.md`

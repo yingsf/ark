@@ -472,6 +472,10 @@ ARK 内置 7 个规则文件，通过 MEMORY.md 加载：
 | `python-backend-conventions.md` | Python 后端编码规范 |
 | `user-preferences.md` | 用户偏好默认值 |
 
+### Skill 版本策略
+
+Skill frontmatter 中的 `version` 表示该 Skill 的指令契约版本。只有当输入/输出格式、职责边界或关键工作流发生破坏性变化时才提升版本；普通文案修正不必提升。
+
 ---
 
 ## 常见问题
@@ -495,7 +499,7 @@ ARK 内置 7 个规则文件，通过 MEMORY.md 加载：
 
 ### 已有项目可以用吗？
 
-可以。`/ark:ark-init` 的模式 B 专为已有项目设计，只注入工作流文件，不修改任何已有代码和配置。
+可以。`/ark:ark-init` 的模式 B 专为已有项目设计，不修改已有代码目录和项目质量配置（如 `pyproject.toml`、`pyrightconfig.json`）。它只会按策略创建 ARK 工作流文件和本地 Claude 辅助配置；安装质量工具或合并 hooks 需要用户确认。
 
 ### 我必须走完整流程吗？
 

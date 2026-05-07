@@ -39,7 +39,7 @@ dev = [
 [tool.ruff]
 target-version = "py<python_version_short>"
 line-length = 100
-src = ["src", "tests"]
+src = <source_and_test_dirs>
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RUF"]
@@ -61,7 +61,7 @@ docstring-code-format = true
 
 ```json
 {
-  "include": ["src", "tests"],
+  "include": <source_and_test_dirs>,
   "exclude": [
     "**/__pycache__",
     "**/.pytest_cache",
@@ -100,7 +100,7 @@ docstring-code-format = true
       "Bash(git status)",
       "Bash(git diff *)",
       "Bash(uv run ruff format *)",
-      "Bash(uv run ruff check * --fix)",
+      "Bash(uv run ruff check --fix *)",
       "Bash(uv run pyright)"
     ],
     "deny": [
@@ -229,7 +229,7 @@ All notable changes to this project will be documented in this file.
 文件级（日常编辑）：
 ```bash
 uv run ruff format <file>
-uv run ruff check <file> --fix
+uv run ruff check --fix <file>
 ```
 
 全项目级（手动整理时）：
@@ -238,7 +238,7 @@ uv sync
 uv run pytest
 uv run pytest tests/test_xxx.py -v
 uv run ruff format .
-uv run ruff check . --fix
+uv run ruff check --fix .
 uv run pyright
 ```
 
@@ -293,7 +293,6 @@ uv run pyright
 ## tests/conftest.py
 
 ```python
-import pytest
 ```
 
 ---

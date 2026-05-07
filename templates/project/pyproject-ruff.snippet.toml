@@ -1,11 +1,5 @@
 # 以下内容应追加到 pyproject.toml 中（仅在不存在 [tool.ruff] 时）
-
-[dependency-groups]
-dev = [
-  "pytest>=8.0",
-  "ruff>=0.11",
-  "pyright>=1.1.400",
-]
+# 开发依赖安装由 /ark:ark-init 通过 uv add --dev 管理，本片段只包含 Ruff 配置。
 
 [tool.ruff]
 target-version = "py<python_version_short>"

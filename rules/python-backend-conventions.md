@@ -97,7 +97,7 @@
 - `pytest`：测试
 - `ruff`：lint + format（替代 flake8、isort、black）
 - `pyright`：静态类型检查（typeCheckingMode: standard）
-- 提交前应运行 `uv run ruff format . && uv run ruff check . --fix && uv run pyright`
+- 提交前应运行 `uv run ruff check --fix . && uv run ruff format . && uv run pyright`
 
 ## Review 关注顺序
 

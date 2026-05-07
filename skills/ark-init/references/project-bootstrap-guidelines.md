@@ -238,6 +238,15 @@ docs/ Artifact 是 ark 实现跨会话记忆和状态追踪的核心，必须自
 
 模板文件存在时使用模板，不存在时创建空文件。
 
+模板映射：
+- `spec.md` → `templates/artifacts/spec.template.md`
+- `design.md` → `templates/artifacts/design.template.md`
+- `plan.md` → `templates/artifacts/plan.template.md`
+- `tasks.md` → `templates/artifacts/tasks.template.md`
+- `decisions.md` → `templates/artifacts/decisions.template.md`
+- `validation.md` → `templates/artifacts/validation.template.md`
+- `handoff.md` → `templates/artifacts/handoff.template.md`
+
 ## 模式 B 执行流程：已有项目
 
 ### 第一步：扫描项目
@@ -298,10 +307,10 @@ CLAUDE.md 应反映：
 ### Python 版本
 
 优先级（从高到低）：
-1. `pyproject.toml` 的 `requires-python`（如 `>=3.11`）→ 取最低版本
+1. `pyproject.toml` 的 `requires-python`（如 `>=3.12`）→ 取最低版本
 2. `.python-version` 文件内容
 3. `uv.lock` 或 `.venv` 中的信息
-4. 默认 `3.11`
+4. 默认 `3.12`
 
 用途：`pyrightconfig.json` 的 `pythonVersion`、`pyproject.toml` 的 `target-version`
 
@@ -400,7 +409,7 @@ CLAUDE.md 应反映：
 
 | 变量 | 无法确定时的策略 |
 |------|----------------|
-| pythonVersion | 回退到 3.11，在摘要中标注"默认值，建议确认" |
+| pythonVersion | 回退到 3.12，在摘要中标注"默认值，建议确认" |
 | include dirs | 仅包含已确认存在的目录；若一个都无法确认，则不生成 pyrightconfig.json，在摘要中报告 |
 | known-first-party | 直接省略该字段 |
 | test dirs | 省略，不写入 include 列表 |

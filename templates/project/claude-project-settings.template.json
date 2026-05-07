@@ -5,7 +5,7 @@
       "Bash(git status)",
       "Bash(git diff *)",
       "Bash(uv run ruff format *)",
-      "Bash(uv run ruff check * --fix)",
+      "Bash(uv run ruff check --fix *)",
       "Bash(uv run pyright)"
     ],
     "deny": [

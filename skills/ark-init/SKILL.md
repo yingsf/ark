@@ -83,6 +83,8 @@ my_project/
 3. 如果以数字开头，添加前缀 `_`
 4. 全部转为小写
 
+模板占位符统一使用 `<project_name>`。生成项目文件时必须替换所有 `<project_name>`、`<python_version>`、`<python_version_short>` 和 `<source_and_test_dirs>`，不得混用花括号占位符格式。
+
 ## 工作流
 
 ### 第零步：模式选择
@@ -153,6 +155,15 @@ my_project/
 
 ### 第六步：创建 docs/ Artifact
 自动创建 7 个核心 Artifact，使用模板或空文件，不需要用户确认。
+
+模板映射：
+- `spec.md` → `templates/artifacts/spec.template.md`
+- `design.md` → `templates/artifacts/design.template.md`
+- `plan.md` → `templates/artifacts/plan.template.md`
+- `tasks.md` → `templates/artifacts/tasks.template.md`
+- `decisions.md` → `templates/artifacts/decisions.template.md`
+- `validation.md` → `templates/artifacts/validation.template.md`
+- `handoff.md` → `templates/artifacts/handoff.template.md`
 
 ### 第七步：初始化 Git
 若目录不在 Git 仓库中，询问是否执行 `git init`。

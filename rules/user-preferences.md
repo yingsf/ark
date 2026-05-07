@@ -24,8 +24,8 @@
 ## 工具链默认值
 
 - 测试框架：pytest
-- 代码风格/lint：ruff（lint + format）
-- 静态类型检查：pyright（typeCheckingMode: standard）
+- 代码风格/lint：ruff（lint + format）。项目级 ruff 配置由 `/ark:ark-init` 管理；IDE 层面推荐使用 PyCharm 内置格式化能力，不强制安装 ruff IDE 插件
+- 静态类型检查：pyright（typeCheckingMode: standard）。项目级 pyright 配置由 `/ark:ark-init` 管理
 - 人工检查：推荐使用 PyCharm 的 SonarQube For IDE 插件进行最终的人工代码检查
 
 ## 代码风格偏好

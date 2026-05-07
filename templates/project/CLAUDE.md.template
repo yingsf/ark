@@ -1,8 +1,8 @@
-# {project_name}
+# <project_name>
 
 ## Project Overview
 
-{project_name} 是一个 Python 项目，使用 src layout，包名为 `{project_name}`。
+<project_name> 是一个 Python 项目，使用 src layout，包名为 `<project_name>`。
 
 本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
 
@@ -20,7 +20,7 @@ uv run pytest tests/test_xxx.py -v
 
 # 代码格式化与检查
 uv run ruff format .
-uv run ruff check . --fix
+uv run ruff check --fix .
 
 # 类型检查
 uv run pyright
