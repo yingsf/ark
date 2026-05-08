@@ -60,7 +60,46 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 - **不得**跳过已有冲突直接覆写文档
 - **不得**对模糊的用户直接输入猜测意图并直接执行；应建议 `/ark:ark-intake` 或使用引导式提问帮助澄清
 - **不得**在以 Artifact 为主要产出的 Skill 执行中自动进入后续 Skill 的职责范围。完成 Artifact 写入后必须停止，并仅建议下一步 Skill。除非用户明确要求，否则不得继续执行实现、修复或验证动作
-- **不得**在未收到 `/ark-*` 指令的情况下更新核心 Artifact（spec / design / plan / tasks / decisions / validation / handoff）或执行正式工作流。非指令输入应作为普通交互回应，复杂需求建议 `/ark:ark-intake`
+- **不得**隐性跳过验证步骤。核心 Artifact 更新遵循 artifact-update-policy.md，可通过 `/ark:ark-xxx` 显式触发，也可通过自动路由倾向触发对应 Skill 后由 Skill 按规则更新
+
+## 路由倾向
+
+当前项目使用 ARK 工作流。根据用户意图优先选择对应 ARK Skill：
+
+| 用户意图 | 优先激活 |
+|---------|---------|
+| 新需求、新功能、添加能力、目标未澄清 | ark-intake |
+| 实现已有 plan/task/batch、按计划继续开发 | ark-implement |
+| bug、报错、异常、失败 | ark-debug |
+| 继续、推进、不确定当前该做什么 | ark-next |
+| 审查、review、检查代码 | ark-review |
+| 重构、优化结构 | ark-refactor |
+| 文档、README、说明 | ark-docs |
+| 体检、状态、同步 | ark-sync |
+| 分析项目、接手 | ark-analyze |
+| 初始化、新项目 | ark-init |
+
+若自动触发成功：进入对应 Skill，由 Skill 内部规则约束行为。
+若未能自动触发：输出推荐入口（如"建议使用 /ark:ark-debug 排查此问题"）。
+意图不明确时：展示当前 Artifact 状态和可选路径，请用户确认。
+安全约束：每个 Skill 内部边界不受触发方式影响。
+
+## 旧项目升级
+
+ARK 插件更新后：
+- 规则文件随插件更新自动生效（rules/ 通过 MEMORY.md 加载）
+- 项目内 CLAUDE.md / MEMORY.md 不自动覆盖，需用户手动更新
+- Artifact 版本头缺失时由 ark-sync 标记 unknown，不阻塞工作流
+- 用户可重新执行 ark-init Mode B 检查是否需要补模板/规则入口
+- 不提供自动迁移，避免覆盖用户自定义内容
+
+## Definition of Done
+
+Small 完成：目标达成 + 验证说明。
+Medium 完成：plan/tasks 更新 + validation 记录 + 关键状态同步。
+Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handoff 可恢复。
+
+（后续如需细化可拆到独立规则文件）
 
 ## 默认工作方式
 
@@ -68,7 +107,7 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 - 显式说明假设
 - 在实现后建议验证步骤
 - 遇到歧义时主动提出聚焦型澄清问题，而不是猜测继续
-- 收到非 `/ark-*` 指令的直接输入时，作为普通交互回应；不得更新核心 Artifact 或执行正式工作流。复杂需求建议 `/ark:ark-intake`
+- 能力降级规则见 capability-policy.md，不假设能力永久可用，不因能力缺失而中断工作流
 
 ## 典型任务类型
 

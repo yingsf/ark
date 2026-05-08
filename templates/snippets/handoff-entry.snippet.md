@@ -18,9 +18,9 @@
 - 风险或阻塞 1（解除条件：...）
 
 **Artifact 信任状态：**
-- `docs/ark/plan.md`：可信 / 可能过期
-- `docs/ark/tasks.md`：可信 / 可能过期
-- `docs/ark/validation.md`：可信 / 缺记录
+- `docs/ark/plan.md`：fresh / stale / conflicting / unknown
+- `docs/ark/tasks.md`：fresh / stale / conflicting / unknown
+- `docs/ark/validation.md`：fresh / stale / conflicting / unknown
 <!-- 按需列出状态可能有变化的 Artifact -->
 
 **恢复顺序：**

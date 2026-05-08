@@ -61,6 +61,30 @@ version: "1.0"
 | **Minor** | 代码清晰度问题、轻微重复、命名不清 | 函数名意图不明、局部变量命名模糊、轻度复杂度上升趋势但未失控、可后续整理的轻度重复 |
 | **Suggestion** | 可接受的改进建议，不影响合并 | 可提取的公共逻辑、文档补充建议 |
 
+## Finding 后续路径
+
+按 finding 类型推荐后续 Skill：
+
+| Finding 类型 | 推荐后续 Skill |
+|-------------|---------------|
+| 行为错误 / 失败路径 / 回归风险 | ark-debug |
+| 结构问题 / 重复 / 可维护性 | ark-refactor 或 ark-implement |
+| 测试缺口 | ark-test |
+| 设计偏差 | ark-design 或 ark-plan |
+| 验证证据不足 | ark-validate |
+
+## Finding 追加规则
+
+Critical / Major finding：
+  - 必须输出 tasks.md 待新增条目清单（格式：优先级、描述、建议 Skill）
+  - 不直接写入 tasks.md（保持 review 的观察者角色）
+  - 后续处理：
+    - 已有 tasks.md 且只需小幅追加 → 由 ark-implement 或 ark-tasks 追加
+    - 无 tasks.md 或需要重排任务优先级 → 走 ark-tasks
+
+Minor / Suggestion：
+  - 列出建议条目，用户决定是否记录到 tasks.md P2
+
 ## 验证要求
 - 优先报告真实问题，而不是风格噪音
 - 区分「确认缺陷」与「低置信度担忧」
@@ -81,7 +105,12 @@ version: "1.0"
 - **Suggestion**（可选改进）：
 ### 3. 风险点
 ### 4. 测试与设计缺口
-### 5. 总结
+### 5. tasks.md 待新增条目（Critical / Major 时必须输出）
+- 优先级：P0 / P1
+- 描述：
+- 建议后续 Skill：
+（Minor / Suggestion 可选输出）
+### 6. 总结
 - 当前状态：可合并 / 修复后可合并 / 需要重大修改
 - 建议下一步
 

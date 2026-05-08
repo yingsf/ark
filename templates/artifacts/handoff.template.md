@@ -1,3 +1,6 @@
+<!-- ark-artifact: handoff -->
+<!-- schema-version: 1.0 -->
+
 # Handoff
 
 <!-- 本文件是恢复视图，不是执行主文档。-->
@@ -27,13 +30,13 @@ YYYY-MM-DD
 - 风险或阻塞 2
 
 ## Artifact 信任状态
-<!-- 对每个核心 Artifact 标注可信度，帮助 next 判断应优先读取哪个 -->
-- `docs/ark/spec.md`：可信 / 可能过期 / 缺失
-- `docs/ark/design.md`：可信 / 可能过期 / 缺失
-- `docs/ark/plan.md`：可信 / 可能过期 / 缺失
-- `docs/ark/tasks.md`：可信 / 可能过期 / 缺失
-- `docs/ark/decisions.md`：可信 / 可能过期 / 缺失
-- `docs/ark/validation.md`：可信 / 可能过期 / 缺记录
+<!-- 对每个核心 Artifact 标注可信度（fresh / stale / conflicting / unknown），帮助 next 判断应优先读取哪个 -->
+- `docs/ark/spec.md`：fresh / stale / conflicting / unknown
+- `docs/ark/design.md`：fresh / stale / conflicting / unknown
+- `docs/ark/plan.md`：fresh / stale / conflicting / unknown
+- `docs/ark/tasks.md`：fresh / stale / conflicting / unknown
+- `docs/ark/decisions.md`：fresh / stale / conflicting / unknown
+- `docs/ark/validation.md`：fresh / stale / conflicting / unknown
 
 ## 恢复顺序
 <!-- 明确下次会话的恢复动作序列，比"关键文件"更强 -->

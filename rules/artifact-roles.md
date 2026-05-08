@@ -23,4 +23,37 @@
 
 `spec` 管目标 · `design` 管方案 · `plan` 管推进 · `tasks` 管状态 · `decisions` 管取舍 · `validation` 管证据 · `handoff` 管恢复
 
+## Design vs Decide 边界
+
+- **design.md**：记录方案如何工作，以及局部技术权衡
+- **decisions.md**：只记录满足以下全部条件的选择——不可逆或高回退成本、影响长期维护方向、未来可能被团队质疑或推翻
+
+一般性技术权衡留在 design.md，不重复进 decisions.md。触发 ark-decide 时需判断：如果该选择在 3 个月内不太可能被重新审视，留 design.md 即可。
+
+## Artifact 可信度
+
+四态定义：
+
+| 状态 | 定义 |
+|------|------|
+| fresh | 内容与文件现实 / Artifact 一致性 / 验证记录一致 |
+| stale | 最近代码变更影响该 Artifact，但 Artifact 未反映 |
+| conflicting | Artifact 之间描述矛盾 |
+| unknown | 缺少足够证据判断 |
+
+判断依据（按优先级）：
+
+1. 当前文件现实
+2. Artifact 之间一致性
+3. 已执行验证记录
+4. git diff / git log（如可用）
+
+无 git 的项目依据 1-3 即可判断，不必然 unknown。
+
+关键 Skill 入口要求：
+- ark-implement：检查 plan.md + tasks.md 可信度
+- ark-validate：检查 tasks.md 可信度
+- ark-next：检查 handoff.md + tasks.md + plan.md 可信度
+- 非 fresh 时推荐 ark-sync
+
 > 完整的回写条件与禁止性约束见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`

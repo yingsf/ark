@@ -70,6 +70,27 @@ my_project/
 └── .venv/                # 条件产物（由 uv 创建，不保证存在）
 ```
 
+## 能力探测
+
+初始化时检测并追加到项目 CLAUDE.md（控制在 5-8 行以内）：
+
+```markdown
+## ARK 能力快照
+<!-- ark-init: 仅初始化时参考，运行时各 Skill 按需重新检查 -->
+- git: <可用/不可用>
+- uv: <可用/不可用, 版本>
+- pytest: <可用/不可用>
+- ruff: <可用/不可用>
+- pyright: <可用/不可用>
+```
+
+Agent tool 可用性不在此时探测，由各 Skill 执行时检查工具集。运行时能力判断仍以当前 Skill 检查为准。
+
+能力降级策略见 `${CLAUDE_PLUGIN_ROOT}/rules/capability-policy.md`。
+
+Mode A（全新项目）：生成能力快照。
+Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确认后更新；未确认时只在输出摘要中报告当前探测结果，不写文件。若 CLAUDE.md 不存在则正常生成。
+
 ## 核心原则
 - 除了 `__init__.py`，不要创建其他 `.py` 文件
 - 包名目录必须是合法的 Python 标识符
@@ -150,11 +171,26 @@ my_project/
 - `${CLAUDE_PLUGIN_ROOT}/templates/project/claude-project-settings.template.json`
 - `${CLAUDE_PLUGIN_ROOT}/templates/project/pyproject-ruff.snippet.toml`
 
+### 第四点七步：CI 质量门禁（Mode A）
+
+询问用户是否生成 CI 质量门禁配置：
+- 模板路径：`${CLAUDE_PLUGIN_ROOT}/templates/project/github-actions-python.yml.template`
+- 生成目标：`.github/workflows/python-quality.yml`
+- 如项目未启用 pyright 或 pytest，提醒用户删除模板中对应步骤
+
 ### 第五步：处理冲突
 对每个已存在的文件，询问用户：覆盖 / 跳过 / 中止。
 
 ### 第六步：创建 docs/ Artifact
 自动创建 7 个核心 Artifact，使用模板或空文件，不需要用户确认。
+
+每个 Artifact 顶部必须包含版本头注释：
+```
+<!-- ark-artifact: <name> -->
+<!-- schema-version: 1.0 -->
+```
+
+模板文件中已包含版本头，使用模板时无需额外添加。使用空文件或 fallback 时需手动写入版本头。
 
 模板映射：
 - `spec.md` → `templates/artifacts/spec.template.md`
@@ -189,7 +225,7 @@ my_project/
 只创建不存在的文件；若文件存在但为空或仅含空行，视为可初始化对象。不触碰已有代码结构。
 
 **必须创建（如不存在）：**
-- `docs/` 目录及 7 个核心 Artifact
+- `docs/` 目录及 7 个核心 Artifact（每个顶部含版本头注释）
 - `CLAUDE.md`（基于扫描到的真实项目结构动态生成，不使用通用模板）
 - `MEMORY.md`（使用模板或 fallback，见 `references/fallback-templates.md`，不得自定义内容）
 
@@ -233,6 +269,10 @@ my_project/
 **输出表述：** 若安装成功，应明确写"Pyright 工具已安装（通过 PyPI 包 pyright 提供 pyright CLI）"，不得仅写版本号，避免与 npm 官方路径混淆。
 
 **安装后仍不自动注入配置：** 即使安装了工具，配置生成仍遵循 B-第三点五步的 Inspect & Respect 策略。
+
+#### B-第三点九步：CI 质量门禁提示（Mode B）
+
+仅提示，不自动生成：若项目无 `.github/workflows/` 下的 CI 配置，建议配置 CI 质量门禁，模板可参考 `${CLAUDE_PLUGIN_ROOT}/templates/project/github-actions-python.yml.template`。
 
 #### B-第四步：输出结果摘要
 见「固定输出格式」中的模式 B 部分。
@@ -281,6 +321,7 @@ my_project/
 | MEMORY.md | 使用模板 / 使用 fallback |
 | docs/ Artifact | 使用模板 / 使用空文件 |
 | 质量工具安装 | 已安装 / 跳过（原因）|
+| CI 质量门禁 | 已生成 / 跳过（用户选择）|
 
 #### 3. 目录树
 输出简洁的最终目录树。
@@ -305,6 +346,8 @@ my_project/
 | MEMORY.md | 使用模板 / 跳过（已存在）|
 | docs/ Artifact | 使用模板 / 使用空文件 / 跳过（已存在）|
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|
+| 能力探测 | 已写入 / 用户未确认，仅报告 / 跳过（原因）|
+| CI 质量门禁 | 已存在 / 建议配置 / 跳过（原因）|
 
 #### 3. 下一步
 - **强烈建议**：`/ark:ark-analyze`（理解代码库并预填充 artifact）

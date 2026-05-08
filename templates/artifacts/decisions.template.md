@@ -1,3 +1,6 @@
+<!-- ark-artifact: decisions -->
+<!-- schema-version: 1.0 -->
+
 # Decisions
 
 <!-- 本文件记录项目中的重要工程决策。每条记录使用下方格式追加，新记录加在最前面。-->

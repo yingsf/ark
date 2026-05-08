@@ -75,6 +75,40 @@ validate 的职责是验证实现是否满足目标，并将验证状态如实�
 因条件不足无法完成的验证，必须说明受限原因（环境依赖、数据缺失等）。
 如果真实运行环境不可用（如缺少外部服务、数据库未启动等），应记入此项，不得降级为 mock 验证来凑"通过"。
 
+## 入口可信度检查
+
+执行前检查 tasks.md 可信度：
+- fresh → 正常执行
+- stale → 提示用户"任务状态可能过期，建议先 ark-sync"
+- conflicting → 停止，要求 ark-sync
+- unknown → 提示并继续（刚接手项目不阻塞验证）
+
+可信度定义见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-roles.md` 的 Artifact 可信度段。
+
+## Sub-agent Evidence-only 模式
+
+当 Agent tool 可用时，验证执行 spawn sub-agent：
+- sub-agent 运行测试/脚本
+- sub-agent **不写任何文件**
+- sub-agent 返回 evidence summary（执行结果、输出、退出码）
+- 主 agent 收集 summary → 写入 validation.md
+
+当 Agent tool 不可用时，主 agent 直接执行验证，输出中记录降级说明：
+
+```
+Sub-agent 状态：未启用
+原因：当前环境未提供 Agent tool
+降级影响：context rot 风险较高，建议按 batch 收口，及时 handoff
+```
+
+正常启用时输出中记录：
+
+```
+Sub-agent 状态：已启用（N 个 collector）
+```
+
+sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
+
 ## 工作流
 1. 从 `/ark:ark-test` 的输出获取已执行验证数据（如已执行）。
 2. 补充手工验证、集成测试等非自动化验证结果。
@@ -120,6 +154,9 @@ validate 的职责是验证实现是否满足目标，并将验证状态如实�
 - 若验证强度不足且可补充测试 → `/ark:ark-test` 后再 `/ark:ark-validate`
 - 若发现需要修复的问题 → `/ark:ark-debug`
 - 若验证已闭环 → `/ark:ark-tasks` 将对应任务标记为 Done
+
+### 8. Sub-agent 状态
+- Sub-agent 状态：已启用（N 个 collector）/ 未启用（原因：...）
 
 ## 备注
 `/ark:ark-validate` 的价值不在于「证明一切都好」，而在于「让真实验证状态透明可见」。

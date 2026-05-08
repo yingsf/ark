@@ -9,98 +9,48 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-一套以个人开发体验为优先的 Claude Code 工作流内核，为 Python 后端项目提供 Artifact 驱动的任务管理、状态追踪与验证闭环。
+面向 Python 后端项目的 Claude Code 工作流插件。ARK 用文件化 Artifact 管理需求、设计、计划、任务、决策、验证和交接状态，让复杂开发任务可追踪、可验证、可中断恢复。
 
-[快速开始](#快速开始) · [安装](#安装) · [使用](#使用) · [指令辨析](#指令辨析) · [FAQ](#常见问题)
+[安装](#安装) · [快速开始](#快速开始) · [Mode A](#mode-a全新项目) · [Mode B](#mode-b已有项目) · [工作流](#推荐工作流) · [Skill](#skill-一览) · [FAQ](#faq)
 
 </div>
 
 ---
 
-## 特性
-
-- **Artifact 驱动** — 7 个核心产物构成项目状态面，跨会话可恢复
-- **19 个专责 Skill** — 实现不验证、验证不修复、分析不执行，职责边界清晰
-- **渐进式流程** — 小任务轻流程，大任务走完整流程，支持升降级
-- **中断恢复** — 文件即状态，不受上下文窗口限制
-- **批次实施** — 大改动自动拆批，每个批次是天然的中断安全点
-- **Python 后端优先** — 内置 ruff / pyright hook，src layout 脚手架
-
----
-
-## 快速开始
-
-```bash
-# 在 Claude Code 中执行
-
-# 1. 添加 ark marketplace
-/plugin marketplace add yingsf/ark
-
-# 2. 安装插件
-/plugin install ark@ark
-
-# 3. 重新加载
-/reload-plugins
-```
-
-进入你的项目目录：
-
-```
-/ark:ark-init       # 初始化 ARK 工作流
-/ark:ark-helper     # 根据场景获得流程指引
-```
-
-详细安装选项和说明见下方 [安装](#安装) 章节。
-
----
-
 ## ARK 是什么
 
-ARK 是一个 Claude Code 插件，为 Python 后端项目提供一套 Artifact 驱动的工程工作流，并内置 19 个可直接调用的 Skill。
+ARK 是一套 **Artifact-first** 的 Claude Code 工程工作流。它不是一组松散 prompt，而是一套围绕项目文件持续维护状态的开发内核。
 
-传统 AI 编程的痛点：长任务中断后上下文丢失、实现完不知道验没验证、文档和代码逐渐失真、模糊需求被猜测执行。ARK 的解法不是加更多 prompt，而是建立一套 **Artifact（产物）驱动的状态系统**——把任务目标、设计方案、执行计划、验证证据全部写入项目文件，让每次会话都能从上次中断处精确恢复。
+传统 AI 编程容易遇到这些问题：
 
-### 核心设计
+- 对话上下文变长后，后期实现、debug、validate 质量下降
+- 中断几天后，不知道上次做到哪里
+- 实现说完成了，但没有验证证据
+- 文档、计划、代码现实逐渐不一致
+- 模糊需求被直接猜测执行
 
-**文件即状态** — 7 个核心 Artifact 构成项目的状态面，每个回答一个关键问题：
+ARK 的处理方式是把关键状态落到项目文件中：
 
-| Artifact | 回答的问题 |
-|----------|-----------|
-| `docs/ark/spec.md` | 要做什么 |
-| `docs/ark/design.md` | 准备怎么做 |
-| `docs/ark/plan.md` | 将如何分阶段推进 |
-| `docs/ark/tasks.md` | 当前有哪些任务，各自什么状态 |
-| `docs/ark/decisions.md` | 关键选择是什么，为什么这么选 |
-| `docs/ark/validation.md` | 验证了什么，证据是什么 |
-| `docs/ark/handoff.md` | 下次从哪里继续 |
+| Artifact | 作用 |
+|----------|------|
+| `docs/ark/spec.md` | 需求目标、范围、非目标、验收标准 |
+| `docs/ark/design.md` | 技术设计、模块关系、重要权衡 |
+| `docs/ark/plan.md` | 阶段划分、推进顺序、风险和验证策略 |
+| `docs/ark/tasks.md` | 当前任务、优先级、状态和阻塞 |
+| `docs/ark/decisions.md` | 高成本、长期性、可能被质疑的关键决策 |
+| `docs/ark/validation.md` | 已执行验证、证据、未覆盖项和风险 |
+| `docs/ark/handoff.md` | 下次恢复时最该读取什么、继续做什么 |
 
-**一个 Skill 一个职责** — 19 个 Skill 各司其职，实现不验证、验证不修复、分析不执行。每完成一步建议下一步，但绝不自动串联。
+## 核心能力
 
-**渐进式适配** — 小任务走轻流程，大任务走完整流程。规模判断错误时支持升降级，而不是硬撑或降级处理。
-
-### 19 个 Skill 一览
-
-| 分类 | Skill | 职责 |
-|------|-------|------|
-| **启动** | `/ark:ark-init` | 初始化项目结构和工作流文件 |
-| **澄清** | `/ark:ark-intake` | 澄清任务目标、范围、规模和推荐流程 |
-| | `/ark:ark-helper` | 根据场景推荐最合适的 ARK 流程路径 |
-| **分析** | `/ark:ark-analyze` | 扫描代码库，理解架构，可选预填充 spec/design |
-| **规划** | `/ark:ark-spec` | 将需求结构化为规格文档 |
-| | `/ark:ark-design` | 编写技术设计文档 |
-| | `/ark:ark-plan` | 制定可恢复的执行计划 |
-| | `/ark:ark-tasks` | 拆分可追踪的任务列表 |
-| | `/ark:ark-decide` | 记录重要工程决策及理由 |
-| **实施** | `/ark:ark-implement` | 最小可行实现，大改动自动拆批 |
-| | `/ark:ark-debug` | 定位 bug 根因并制定低风险修复方案 |
-| | `/ark:ark-refactor` | 在保持外部行为不变的前提下改善代码结构 |
-| | `/ark:ark-review` | 审查代码变更的正确性和风险 |
-| **验证** | `/ark:ark-test` | 创建和组织测试 |
-| | `/ark:ark-validate` | 验证并记录验证证据（只验证不修复） |
-| **恢复** | `/ark:ark-handoff` | 生成交接文档，为下次会话提供恢复点 |
-| | `/ark:ark-next` | 根据当前状态裁决下一步 |
-| | `/ark:ark-sync` | 同步代码现实与 Artifact 状态 |
-| **文档** | `/ark:ark-docs` | 更新项目文档使其匹配真实实现 |
+- **20 个专责 Skill**：入口、初始化、澄清、分析、规划、实施、验证、恢复和文档各有明确边界。
+- **自动路由倾向**：用户直接描述任务时，规则会优先引导 Claude 选择对应 ARK Skill；这是倾向，不是运行时强保证。
+- **显式智能入口**：`/ark:ark` 会读取当前 Artifact 状态，判断阶段并推荐下一步。
+- **Sub-agent 支持**：analyze/validate 可用只读或证据收集 agent，implement 可用 batch worker，并通过 write set 审计防止越界写入。
+- **Artifact 可信度四态**：`fresh / stale / conflicting / unknown` 帮助判断文档是否还能作为执行依据。
+- **能力降级策略**：Agent tool、git、uv、pytest、ruff、pyright 不可用时，不中断工作流，但会在输出中说明降级影响。
+- **Mode A / Mode B 初始化**：既能创建全新 Python 项目，也能以 Inspect & Respect 方式接入已有项目。
+- **验证硬边界**：`ark-validate` 只记录验证证据，不修改源码，不用 mock 结果冒充真实通过。
 
 ---
 
@@ -108,409 +58,685 @@ ARK 是一个 Claude Code 插件，为 Python 后端项目提供一套 Artifact 
 
 ### 前置要求
 
-| 工具 | 用途 | 说明 |
-|------|------|------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | AI 编程助手 | CLI 或桌面端均可 |
-| [Git](https://git-scm.com/) | 版本控制 | |
-| Python 3.10+ | 运行时 | |
-
-> 在全新 Python 项目场景下，`/ark:ark-init` 会按推荐配置为项目接入 [uv](https://docs.astral.sh/uv/)、[ruff](https://docs.astral.sh/ruff/)、[pyright](https://github.com/RobertCraigie/pyright-python) 和 [pytest](https://docs.pytest.org/)。已有项目模式下，这些工具仅在缺失时建议安装，不会自动注入配置。
+| 工具 | 要求 |
+|------|------|
+| Claude Code | 已安装并可使用 plugin 命令 |
+| Git | 推荐安装，用于状态判断和 checkpoint |
+| Python | 推荐 3.12；ARK 支持 3.10-3.14 的项目初始化参数 |
 
 ### 安装插件
 
-```bash
-# 在 Claude Code 中执行以下 3 步
+在 Claude Code 中执行：
 
-# 1. 添加 ark marketplace
+```text
 /plugin marketplace add yingsf/ark
-
-# 2. 安装 ark 插件（会提示选择安装范围，见下方说明）
 /plugin install ark@ark
-
-# 3. 重新加载插件
 /reload-plugins
 ```
 
-**安装范围说明：**
+安装时可选择作用范围：
 
-安装时会提示选择范围，大多数情况下选第一项即可：
-
-| 选项 | 含义 | 适合谁 |
-|------|------|--------|
-| **Install for you** (user scope) | 安装到用户目录，所有项目可用 | 大多数用户，推荐 |
-| **Install for this project** (project scope) | 写入项目配置，协作者共享 | 团队协作，需要所有人使用 ark |
-| **Install locally** (local scope) | 仅当前仓库、仅当前用户生效 | 想先试用，不影响其他项目 |
-
-### 在项目中初始化
-
-安装插件后，在你的项目目录中执行：
-
-```
-/ark:ark-init
-```
-
-`/ark:ark-init` 提供两种模式：
-- **模式 A（全新项目）**：从零创建完整的项目骨架 + ARK 工作流
-- **模式 B（已有项目）**：只注入 ARK 工作流文件，不触碰已有代码
-
-若启用了 ARK 提供的 hook 配置，编辑 Python 文件后可自动执行 `ruff format` 与 `ruff check --fix`。
+| 选项 | 含义 | 建议 |
+|------|------|------|
+| Install for you | 当前用户所有项目可用 | 推荐 |
+| Install for this project | 项目内共享插件配置 | 团队统一使用时选择 |
+| Install locally | 只在当前仓库、当前用户生效 | 试用时选择 |
 
 ### 升级
 
-```bash
-# 更新 marketplace 中的插件到最新版本
+```text
 /plugin marketplace update ark
 /reload-plugins
 ```
 
-升级插件本身不会直接改动现有项目文件。若新版本引入了新的模板或工作流文件，建议在项目中重新运行 `/ark:ark-init`，并按提示选择是否更新相关文件。
+升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 `/ark:ark-init`，选择 Mode B 检查是否需要补齐。
 
 ### 卸载
 
-```bash
-# 移除 ark 插件
+```text
 /plugin remove ark
 
 # 如果不再需要 marketplace
 /plugin marketplace remove ark
 ```
 
-卸载不会删除你项目中的 `docs/`、`CLAUDE.md`、`MEMORY.md` 等 ARK 生成的文件。如需清理，手动删除即可。
+卸载插件不会删除项目中已经生成的 `docs/ark/`、`CLAUDE.md`、`MEMORY.md`、`.claude/` 等文件。如需从项目中完全移除 ARK，请手动删除这些项目文件。
 
 ---
 
-## 使用
+## 快速开始
 
-### 快速入口：不确定该用什么？
+ARK 的日常使用不需要先背命令。项目通过 `/ark:ark-init` 接入后，`MEMORY.md` 会引用 ARK 规则文件；在这些规则被当前 Claude Code 会话加载的前提下，你可以直接描述任务，ARK 会根据 `rules/ark.md` 的路由倾向优先按对应 Skill 的规则处理。
 
-```
-/ark:ark-helper
-```
+显式 `/ark:ark-*` 命令适合这些场景：初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先使用 `/ark:ark` 读取项目状态并让 ARK 推荐下一步，再按推荐继续。
 
-`/ark:ark-helper` 根据你的场景推荐最合适的流程路径。它不执行任何操作，只做导航。
+### 全新项目
 
-### 场景 1：启动新项目
-
-```
-/ark:ark-init          → 初始化项目结构
-/ark:ark-intake        → 澄清你想做什么（需求已明确可跳过）
-/ark:ark-spec          → 将需求写成正式规格文档
-/ark:ark-design        → 编写技术设计
-/ark:ark-plan          → 制定阶段级执行计划
-/ark:ark-tasks         → 拆分为可追踪任务
-/ark:ark-implement     → 开始实现
-/ark:ark-test          → 编写测试
-/ark:ark-validate      → 记录验证结果
+```text
+/ark:ark-init
 ```
 
-### 场景 2：接手已有项目
+选择：
 
-```
-/ark:ark-init          → 模式 B：植入工作流（不碰代码）
-/ark:ark-analyze       → 扫描理解代码库
-# analyze 会预填充 spec/design，标注为"待确认"
-/ark:ark-spec          → 审查确认需求
-/ark:ark-design        → 审查确认设计
-/ark:ark-plan          → 制定推进计划
-/ark:ark-implement     → 开始实现
+```text
+1. 模式 A — 全新项目（从零开始创建）
 ```
 
-### 场景 3：收到一个模糊的需求
+初始化完成后，直接描述你要做的事：
 
-```
-/ark:ark-intake        → 自动评估输入模糊度
-                     Low  → 直接给出分析和推荐流程
-                     Medium → 封闭式提问帮你澄清
-                     High → 给示例帮你表达
-# 澄清后，intake 会推荐下一步（可能是 spec、plan 或直接 implement）
+```text
+帮我设计一个用户登录功能
 ```
 
-### 场景 4：修一个 bug
+ARK 会倾向进入新需求流程：澄清目标、形成规格、设计方案、拆计划、实施和验证。你仍然可以在需要时显式指定入口：
 
-```
-/ark:ark-debug         → 定位根因，制定修复方案
-/ark:ark-implement     → 实现修复
-/ark:ark-test          → 补回归测试
-/ark:ark-validate      → 记录验证证据
+```text
+/ark:ark
+/ark:ark-intake
 ```
 
-### 场景 5：上次中断了，今天继续
+### 已有项目
 
-```
-/ark:ark-next          → 自动裁决下一步
-                     读取 handoff → tasks → plan → validation
-                     告诉你最该做什么
-
-# 如果文档可能过期（隔了很久）：
-/ark:ark-sync          → 先同步代码与文档状态
-/ark:ark-next          → 再裁决下一步
-
-# 如果要保存当前进度并结束：
-/ark:ark-handoff       → 记录恢复点
+```text
+/ark:ark-init
 ```
 
-### 场景 6：实现完了要合并
+选择：
 
-```
-/ark:ark-review        → 审查变更的正确性、风险和测试覆盖
-/ark:ark-test          → 补充缺失的测试（如有）
-/ark:ark-validate      → 记录验证闭环
+```text
+2. 模式 B — 已有项目（植入 ARK 工作流）
 ```
 
-### 工作流全景图
+初始化完成后，直接描述你的接手目标：
 
-> 下图展示的是推荐路径，不是强制的线性流程。你可以根据任务规模跳过不需要的环节。
+```text
+帮我理解这个项目的结构，找出下一步该从哪里开始
+```
 
+ARK 会倾向先分析项目，再根据不确定项推荐确认 spec/design 或进入 plan。你也可以显式执行 `/ark:ark` 查看当前 Artifact 状态。
+
+### 不确定下一步
+
+```text
+/ark:ark
 ```
-                    ┌──────────┐
-          ┌────────►│ark-helper│◄── 不确定用什么？
-          │         └──────────┘
-          │
-          ▼
-     ┌──────────┐     ┌────────────┐     ┌────────────┐
-     │ark-intake├────►│  ark-spec  ├────►│ ark-design │
-     └──────────┘     └────────────┘     └────────────┘
-          │                                    │
-          │ （需求已明确时可跳过）                  │
-          ▼                                    ▼
-   ┌────────────┐                       ┌───────────┐
-   │  ark-plan  ├──────────────────────►│ ark-tasks │
-   └────────────┘                       └───────────┘
-                                               │
-       ┌───────────────────────────────────────┘
-       ▼
-┌──────────────┐     ┌──────────┐     ┌──────────────┐
-│ark-implement ├────►│ ark-test ├────►│ ark-validate │
-│ ark-debug    │     └──────────┘     └──────────────┘
-│ ark-refactor │                            │
-└──────────────┘                            │
-       ▲                                    │
-       │              ┌──────────────┐      │
-       │              │ ark-handoff  │◄─────┘
-       │              └──────────────┘
-       │                     │
-       └── ark-next ◄───────┘
-            ark-sync
-```
+
+`/ark:ark` 会读取 `docs/ark/` 下的 Artifact，输出项目状态、非 fresh 的 Artifact、活跃任务、阻塞项和推荐下一步。
 
 ---
 
-## 指令辨析
+## Mode A：全新项目
 
-ARK 的 19 个 Skill 各有明确职责边界，但有些指令从名字上看容易混淆。以下逐一辨析。
+Mode A 适合从空目录开始创建 Python 后端项目。它会生成项目骨架、质量工具配置、ARK Artifact 和 Claude Code 项目上下文。
 
-### `/ark:ark-intake` vs `/ark:ark-spec` — "聊需求用哪个？"
+### 适用场景
 
-| | `/ark:ark-intake` | `/ark:ark-spec` |
-|---|---|---|
-| **做什么** | 澄清任务：搞清楚你想做什么、有多大、该走什么流程 | 规格化：把澄清后的需求写成正式的规格文档 |
-| **输入** | 原始用户请求（可能模糊） | 已澄清的需求、领域上下文、验收期望 |
-| **输出** | 任务理解、规模判断、约束、假设、推荐流程路径 | `docs/ark/spec.md`：目标、范围、非目标、验收标准 |
-| **写 Artifact 吗** | 不写任何 Artifact | 只写 `spec.md` |
-| **典型时机** | 收到一个请求，还不太清楚要做什么 | 需求已清楚，要正式写成文档 |
+- 新项目从零开始
+- 早期实验项目需要整理为标准 Python 结构
+- 希望一开始就启用 ruff、pyright、pytest 和 ARK Artifact 工作流
 
-**关系**：`intake` 是"搞清楚要做什么"，`spec` 是"把需求正式写成规格"。它们是上下游，不是替代关系。
+### 示例：创建全新 API 项目
 
-```
-"我想加个用户认证"  →  /ark:ark-intake（澄清范围）  →  /ark:ark-spec（写规格）
-"需求我清楚了"      →  直接 /ark:ark-spec（跳过 intake）
-"这个太慢了"        →  /ark:ark-intake（High fuzziness，帮你表达需求）
+假设当前目录为空：
+
+```text
+my-api/
 ```
 
-### `/ark:ark-plan` vs `/ark:ark-tasks` — "规划工作用哪个？"
+在 Claude Code 中执行：
 
-| | `/ark:ark-plan` | `/ark:ark-tasks` |
-|---|---|---|
-| **做什么** | 制定阶段级执行策略 | 拆分为可追踪的粒度任务 |
-| **产出** | `docs/ark/plan.md`：阶段划分、里程碑、风险、验证策略 | `docs/ark/tasks.md`：任务列表 + 状态（Todo/Doing/Done/Blocked） |
-| **粒度** | 阶段级——"先做 A，再做 B，B 完成后验证" | 任务级——"任务 1：创建用户模型（Todo，高优先级）" |
-| **回答的问题** | "分几个阶段？每个阶段的入口/出口是什么？" | "当前有哪些具体任务？各自什么状态？" |
-
-**关系**：`plan` 先出阶段策略，`tasks` 再把阶段拆成可追踪任务。`plan` 的建议下一步就是 `/ark:ark-tasks`。
-
-```
-/ark:ark-plan  →  "分 3 个阶段：数据层 → API 层 → 集成测试"
-/ark:ark-tasks  →  "阶段 1 拆为：T1 创建模型(Doing) T2 写迁移(Todo) T3 补测试(Todo)"
+```text
+/ark:ark-init
 ```
 
-### `/ark:ark-test` vs `/ark:ark-validate` — "验证代码用哪个？"
+ARK 会先检测当前目录：
 
-| | `/ark:ark-test` | `/ark:ark-validate` |
-|---|---|---|
-| **做什么** | 写测试代码并执行 | 记录"验证了什么、证据是什么" |
-| **改代码吗** | **是** — 创建/修改测试文件 | **绝不** — 纯记录，连一行 import 都不改 |
-| **产出** | 测试文件 + 执行结果摘要 | `docs/ark/validation.md`：已验证项、未覆盖项、风险结论 |
-| **回答的问题** | "测试怎么写？跑出来的结果是什么？" | "当前验证了什么？还有什么没验证？验证强度够不够？" |
+```text
+当前目录检测结果：
+- 未检测到 pyproject.toml / setup.py / src / tests / Python 包目录
 
-**关系**：`test` 产生测试代码和执行结果，`validate` 把这些结果（连同其他验证手段）记录为正式证据。`test` 的输出是 `validate` 的输入。
-
-```
-/ark:ark-test     →  写了 5 个测试，跑出 4 passed 1 failed
-/ark:ark-validate  →  记录：已验证 X（测试通过），未验证 Y（需要真实环境），风险 Z
+请选择初始化模式：
+1. 模式 A — 全新项目（从零开始创建）[推荐]
+2. 模式 B — 已有项目（植入 ARK 工作流）
 ```
 
-### `/ark:ark-analyze` vs `/ark:ark-review` — "看代码用哪个？"
+选择 Mode A 后，ARK 会要求确认核心参数：
 
-| | `/ark:ark-analyze` | `/ark:ark-review` |
-|---|---|---|
-| **做什么** | 理解整个代码库的架构和模块关系 | 评审具体代码变更的质量 |
-| **范围** | 全局 — 整个项目 | 局部 — 具体的改动文件 |
-| **适用时机** | 第一次接触项目、重构前重新理解 | 实现完成后、合并前 |
-| **产出** | 项目概览、模块地图、数据流、可选预填充 spec/design | 问题清单（Critical/Major/Minor）、风险点、合并建议 |
-
-**关系**：`analyze` 是"认识这个项目"，`review` 是"这批改得好不好"。前者面向全局认知，后者面向局部质量。
-
-```
-接手陌生项目  →  /ark:ark-analyze（建立全局认知）
-实现完一个功能  →  /ark:ark-review（检查改动质量）
+```text
+project name: my-api
+标准化包名: my_api
+target directory: 当前目录
+Python version: 3.12
+是否创建 pytest 测试: 是
+是否生成 CI 质量门禁: 询问确认
 ```
 
-### `/ark:ark-sync` vs `/ark:ark-next` — "中断后恢复用哪个？"
+### Mode A 会做什么
 
-| | `/ark:ark-sync` | `/ark:ark-next` |
-|---|---|---|
-| **做什么** | 修文档失真 — 让 Artifact 重新匹配代码现实 | 裁决下一步 — 告诉你现在最该做什么 |
-| **条件判断** | 文档是否过期、状态是否冲突 | 哪个环节未闭合、什么是最高优先级 |
-| **会改文件吗** | 会 — 可修正状态字段（不改变语义内容） | 不会 — 只读 Artifact，输出建议 |
-| **产出** | 一致性评估 + 建议更新的 Artifact 列表 | 当前阶段 + 最重要未完成项 + 推荐的下一个 Skill |
+Mode A 的执行重点：
 
-**关系**：如果你怀疑文档过期了，先 `/ark:ark-sync` 修状态，再 `/ark:ark-next` 看该做什么。如果文档状态可信，直接 `/ark:ark-next` 即可。
+1. 检测 `uv`、Git 状态和目标目录冲突。
+2. 创建 `src/` layout。
+3. 生成或补齐 `pyproject.toml`。
+4. 安装默认开发质量工具：ruff、pyright。
+5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json`。
+6. 创建 `CLAUDE.md` 和 `MEMORY.md`。
+7. 创建 `docs/ark/` 下 7 个核心 Artifact。
+8. 在 Artifact 顶部写入 schema 版本头。
+9. 询问是否生成 GitHub Actions 质量门禁。
+10. 询问是否执行 `git init`。
 
-```
-隔了 3 天回来，不确定文档是否过期  →  /ark:ark-sync → /ark:ark-next
-刚中断 10 分钟，文档应该还准    →  直接 /ark:ark-next
-```
+如果你只想快速开始，读到这里即可；下面是 Mode A 的详细产物和初始化记录说明。
 
----
+### Mode A 典型产物
 
-## 10 个让 ARK 与众不同的机制
-
-### 1. 增量锚定分析 (`/ark:ark-analyze`)
-
-4 阶段写入工作文档，每阶段从文件读取而非依赖上下文记忆，防止 AI 幻觉。分析结果区分 `[fact]`（事实）、`[inferred]`（推断）、`[uncertain]`（不确定）三级可信度，所有推断必须标注依据。
-
-### 2. 3 级模糊度分流 (`/ark:ark-intake`)
-
-用户输入不一定清晰。ARK 根据信号自动分级：
-- **Low**（目标明确）→ 直接输出分析结果
-- **Medium**（有方向但模糊）→ 封闭式提问，每题给 2-3 个选项，最多 3 题
-- **High**（只有感受/否定）→ 示例驱动启发，提供常见场景的专业表达作为脚手架
-
-### 3. 批次实施机制 (`/ark:ark-implement`)
-
-改动涉及 3+ 文件时自动触发批次拆分。每个批次定义 4 要素：目标、涉及文件、修改锚点、完成信号。批次完成点就是天然的中断安全点——所有文件修改已落盘、局部检查已执行。即使会话中断，下次也能从上一个完成批次继续。
-
-### 4. 只验证不修复 (`/ark:ark-validate`)
-
-验证和修复是两件不同的事。`/ark:ark-validate` 的硬边界是：**只记录验证状态，绝不修改代码**。即使发现只差一行 import，也必须交给 `/ark:ark-debug` 处理。mock 环境的验证结果永远不报告为"通过"。
-
-### 5. 裁决优先级序列 (`/ark:ark-next`)
-
-中断恢复不是拍脑袋。`/ark:ark-next` 按确定性决策链裁决：状态可信性 → 验证闭环 → 活跃执行项 → 回退规划层。依次读取 handoff → tasks → plan → validation → spec/design，找到第一个未闭合的环节。
-
-### 6. Inspect & Respect (`/ark:ark-init` Mode B)
-
-在已有项目上启用 ARK 时，只检测不修改。不触碰 `pyproject.toml`、代码目录、`.gitignore` 等任何已有文件。质量工具（ruff、pyright）只报告检测结果和建议，绝不自动注入配置。
-
-### 7. 变量探测规则
-
-模板生成从不硬编码。Python 版本从 `pyproject.toml` 的 `requires-python` 探测，源码目录从实际目录结构探测，测试目录检查 `tests/`/`test/` 是否存在。探测失败时诚实退化并标注默认值。
-
-### 8. 渐进式任务规模适配
-
-Small / Medium / Large 三档，每档有明确的特征、推荐流程和最低 Artifact 要求。出现升级信号（跨文件、跨会话、架构影响）时自动升级。默认按 Medium 处理——宁可轻微过度规划，不可草率执行。
-
-### 9. 文件即状态的跨会话恢复
-
-不受上下文窗口限制。`/ark:ark-handoff` 记录完成/未完成/风险/关键文件，`/ark:ark-next` 读取所有 Artifact 裁决恢复路径。即使隔了三天、换了设备，只要文件在，状态就在。
-
-### 10. 预填充与审查确认分离
-
-`/ark:ark-analyze` 可以从代码反推并预填充 `spec.md` 和 `design.md`，但会标注为 `<!-- 由 /ark:ark-analyze 自动生成，需人工确认 -->`。后续必须经过 `/ark:ark-spec` 或 `/ark:ark-design` 审查确认，不能直接当作已确认的需求或设计使用。
-
----
-
-## 项目结构
-
-安装 ARK 插件并执行 `/ark:ark-init` 后，你的项目会获得以下结构（以全新项目为例）：
-
-```
-my_project/
-├── docs/                        # 项目文档
-│   └── ark/                     # ARK Artifact 目录
-│       ├── spec.md              # 需求规格
-│       ├── design.md            # 技术设计
-│       ├── plan.md              # 执行计划
-│       ├── tasks.md             # 任务列表
-│       ├── decisions.md         # 决策记录
-│       ├── validation.md        # 验证记录
-│       └── handoff.md           # 交接文档
-├── src/my_project/              # 源代码（src layout）
-│   └── __init__.py
-├── tests/                       # 测试
+```text
+my-api/
+├── docs/
+│   └── ark/
+│       ├── spec.md
+│       ├── design.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── decisions.md
+│       ├── validation.md
+│       └── handoff.md
+├── src/
+│   └── my_api/
+│       └── __init__.py
+├── tests/
 │   ├── __init__.py
 │   └── conftest.py
+├── .claude/
+│   ├── ruff-hook.py
+│   └── settings.local.json
+├── .github/
+│   └── workflows/
+│       └── python-quality.yml    # 仅在用户确认生成 CI 时存在
+├── .gitignore
+├── CHANGELOG.md
+├── CLAUDE.md
+├── MEMORY.md
 ├── pyproject.toml
-├── CLAUDE.md                    # Claude Code 项目上下文
-├── MEMORY.md                    # ARK 规则入口
-└── .claude/settings.local.json  # ARK hook 与权限配置
+├── pyrightconfig.json
+└── README.md
 ```
+
+### Artifact 版本头
+
+每个核心 Artifact 顶部都会包含：
+
+```markdown
+<!-- ark-artifact: spec -->
+<!-- schema-version: 1.0 -->
+```
+
+`ark-sync` 会使用这些版本头判断旧项目 Artifact 是否为 `unknown`，但缺少版本头不会阻塞工作流。
+
+### 能力快照
+
+Mode A 会在项目 `CLAUDE.md` 中记录初始化时的能力快照：
+
+```markdown
+## ARK 能力快照
+<!-- ark-init: 仅初始化时参考，运行时各 Skill 按需重新检查 -->
+- git: 可用
+- uv: 可用, 0.x.x
+- pytest: 可用
+- ruff: 可用
+- pyright: 可用
+```
+
+这只是初始化时参考。各 Skill 执行时会按需重新检查关键能力。
+
+### Mode A 后的推荐下一步
+
+Mode A 完成后，推荐直接用自然语言开始开发：
+
+```text
+帮我加一个用户注册和登录功能
+```
+
+ARK 会把它当作新需求，倾向采用渐进流程：
+
+```text
+ark-intake → ark-spec → ark-design → ark-plan
+  → ark-tasks → ark-implement → ark-test → ark-validate
+```
+
+也可以描述更窄的任务：
+
+| 你可以直接说 | ARK 倾向 |
+|--------------|----------|
+| “帮我加一个用户登录功能” | 新需求澄清与规划 |
+| “这个接口返回 500，帮我修” | bug 定位与修复 |
+| “继续上次的任务” | 读取 Artifact 并裁决下一步 |
+| “检查这次改动有没有风险” | code review |
+| “我不确定现在该做什么” | 读取项目状态并推荐下一步 |
+
+显式命令适合在你想强制指定流程时使用：
+
+```text
+/ark:ark          # 查看状态和推荐下一步
+/ark:ark-debug    # 强制进入 debug 流程
+/ark:ark-review   # 强制进入 review 流程
+```
+
+---
+
+## Mode B：已有项目
+
+Mode B 适合把 ARK 接入已有代码库。它遵循 **Inspect & Respect**：先检查，再建议；默认不修改已有代码和项目质量配置。
+
+### 适用场景
+
+- 接手一个已有 Python 项目
+- 在老项目上启用 ARK Artifact 工作流
+- 希望 Claude Code 后续开发有稳定的状态文件
+- 不希望初始化过程改动业务代码或现有工程配置
+
+### 示例：接入已有 FastAPI 项目
+
+假设当前目录已经存在：
+
+```text
+backend/
+├── app/
+│   ├── main.py
+│   └── routers/
+├── tests/
+├── pyproject.toml
+└── README.md
+```
+
+执行：
+
+```text
+/ark:ark-init
+```
+
+ARK 会检测到已有项目：
+
+```text
+当前目录检测结果：
+- pyproject.toml
+- app/
+- tests/
+- README.md
+
+请选择初始化模式：
+1. 模式 A — 全新项目（从零开始创建）
+2. 模式 B — 已有项目（植入 ARK 工作流）[推荐]
+```
+
+选择 Mode B 后，ARK 会扫描项目布局、包名、Python 版本、关键依赖和已有质量工具。
+
+如果你只想接入后继续开发，知道 Mode B 默认不改业务代码即可；下面是它会创建的文件、不会触碰的范围和输出示例。
+
+### Mode B 会创建什么
+
+如果文件不存在，Mode B 会创建：
+
+```text
+backend/
+├── docs/
+│   └── ark/
+│       ├── spec.md
+│       ├── design.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── decisions.md
+│       ├── validation.md
+│       └── handoff.md
+├── CLAUDE.md
+└── MEMORY.md
+```
+
+它还可能创建 Claude Code 本地辅助文件：
+
+```text
+.claude/
+├── ruff-hook.py
+└── settings.local.json
+```
+
+如果 `.claude/settings.local.json` 已存在且缺少 ARK hook，ARK 只会在用户确认后合并缺失的 hook/permissions，不覆盖已有字段。
+
+### Mode B 默认不会做什么
+
+Mode B 默认不修改：
+
+- 任何已有业务代码
+- `pyproject.toml`
+- `setup.py`
+- `setup.cfg`
+- `requirements*.txt`
+- `.gitignore`
+- 已有 `src/`、`app/`、包目录或 `tests/`
+- 已有质量工具配置
+
+如果 `CLAUDE.md` 已存在，能力快照只会在用户确认后更新；未确认时，ARK 只在输出摘要中报告当前探测结果，不写文件。
+
+### Mode B 的质量工具策略
+
+Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
+
+| 项目 | Mode B 行为 |
+|------|-------------|
+| `pyrightconfig.json` | 不自动创建，只报告建议 |
+| `pyproject.toml [tool.ruff]` | 不自动追加，只报告建议 |
+| ruff / pyright 依赖 | 缺失时提示影响，用户确认后才安装 |
+| `.claude/settings.local.json` | 不存在时可生成；存在时确认后合并缺失 hook |
+| CI 质量门禁 | 只提示建议，不自动生成 |
+
+### Mode B 输出示例
+
+一次成功的 Mode B 初始化输出通常应包含：
+
+```text
+### 模式 B（已有项目）
+
+#### 1. 项目扫描摘要
+- 项目布局类型：app layout
+- 技术栈：FastAPI, SQLAlchemy, pytest
+- 包名与 Python 版本：backend / 3.12
+
+#### 2. 执行结果
+| 步骤 | 状态 |
+|------|------|
+| 项目扫描 | 成功 |
+| CLAUDE.md | 基于 scan 生成 |
+| MEMORY.md | 使用模板 |
+| docs/ Artifact | 使用模板 |
+| 质量工具安装 | 已存在 / 跳过（用户选择） |
+| 能力探测 | 用户未确认，仅报告 |
+| CI 质量门禁 | 建议配置 |
+
+#### 3. 下一步
+- 强烈建议：直接让 ARK 分析项目（对应 `/ark:ark-analyze`）
+```
+
+### Mode B 后的推荐下一步
+
+Mode B 的重点是先建立对现有项目的可靠认知。初始化后，推荐直接说：
+
+```text
+帮我分析这个已有项目的架构、入口和主要模块
+```
+
+ARK 会倾向进入 `ark-analyze`：扫描代码库，输出项目概览、模块地图、入口路径、外部接口和不确定项。它可以预填充 `spec.md` 和 `design.md`，但会标注为待人工确认。
+
+接下来你可以继续用自然语言推进：
+
+```text
+确认一下这个项目当前实际支持哪些能力
+根据刚才的分析，帮我制定后续重构计划
+继续推进上次未完成的任务
+```
+
+如果自动路由未触发，或你想明确指定流程，可以手动调用：
+
+```text
+/ark:ark-analyze
+/ark:ark-spec
+/ark:ark-design
+/ark:ark-plan
+```
+
+---
+
+## 推荐工作流
+
+ARK 不是强制线性流程。日常使用时，你可以直接描述目标；下面展示的是 ARK 倾向采用的 Skill 流程，而不是要求你逐条手工执行的命令清单。
+
+### 新功能
+
+```text
+“帮我给系统加用户登录”
+  ↓
+ark-intake      # 澄清目标、范围、规模
+  ↓
+ark-spec        # 写入 spec.md
+  ↓
+ark-design      # 写入 design.md
+  ↓
+ark-plan        # 写入 plan.md
+  ↓
+ark-tasks       # 写入 tasks.md
+  ↓
+ark-implement   # 分批实现，可用 sub-agent worker
+  ↓
+ark-test        # 补测试
+  ↓
+ark-validate    # 记录验证证据
+```
+
+### Bug 修复
+
+```text
+“这个接口报错了，帮我定位并修复”
+  ↓
+ark-debug       # 收集现象、错误信息、复现步骤，定位根因
+  ↓
+ark-implement   # 最小修复
+  ↓
+ark-test        # 回归测试
+  ↓
+ark-validate    # 记录证据；失败时推荐回到 ark-debug
+```
+
+### 接手项目
+
+```text
+“帮我接手这个已有项目，先看懂架构”
+  ↓
+ark-analyze
+  ↓
+ark-spec        # 审查确认 analyze 反推的需求
+  ↓
+ark-design      # 审查确认 analyze 反推的设计
+  ↓
+ark-plan
+```
+
+### 中断恢复
+
+```text
+“继续上次的任务”
+  ↓
+ark-next          # 读取 handoff.md / tasks.md / plan.md，裁决下一步
+  ↓
+继续执行推荐的 Skill
+  ↓
+ark-handoff       # 需要收口或中断时，主动记录恢复点
+```
+
+如果你怀疑文档已经过期，可以直接说：
+
+```text
+“先同步一下代码和 Artifact 状态，再告诉我下一步”
+  ↓
+ark-sync          # 同步 Artifact 与文件现实
+  ↓
+ark-next
+```
+
+---
+
+## 自动路由倾向
+
+ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务，Claude 会优先选择对应 Skill；如果自动触发未发生，会输出推荐入口。显式命令不是日常使用的唯一入口，而是强制指定流程的工具。
+
+这项能力有一个前提：当前项目已经通过 `/ark:ark-init` 接入 ARK，并且项目 `MEMORY.md` 引用的 ARK 规则已被当前 Claude Code 会话加载。ARK 不是全局运行时调度器；如果同一环境里安装了多个工作流插件，Claude 可能受到其他规则影响。
+
+在多插件环境中，如果你希望明确走 ARK，推荐这样描述：
+
+```text
+按 ARK 工作流，帮我加一个用户登录功能
+```
+
+或者先使用显式入口读取项目状态、查看推荐下一步，再按推荐继续：
+
+```text
+/ark:ark
+```
+
+| 用户意图 | 优先 Skill |
+|----------|------------|
+| 新需求、新功能、目标未澄清 | `ark-intake` |
+| 实现已有 plan/task/batch | `ark-implement` |
+| bug、报错、异常、失败 | `ark-debug` |
+| 继续、推进、不确定下一步 | `ark-next` |
+| 审查、review、检查代码 | `ark-review` |
+| 重构、优化结构 | `ark-refactor` |
+| 文档、README、说明 | `ark-docs` |
+| 体检、状态、同步 | `ark-sync` |
+| 分析项目、接手 | `ark-analyze` |
+| 初始化、新项目 | `ark-init` |
+
+常见自然语言输入：
+
+```text
+帮我加一个用户登录功能
+这个 Mongo 查询偶尔报错，帮我定位
+继续上次没完成的任务
+检查这次改动有没有回归风险
+同步一下代码和 Artifact 状态
+```
+
+显式入口仍然保留，适合在自动路由未触发、你想强制指定流程、或需要教学演示时使用：
+
+```text
+/ark:ark
+/ark:ark-debug
+/ark:ark-implement
+```
+
+---
+
+## Skill 一览
+
+| 分类 | Skill | 职责 |
+|------|-------|------|
+| 入口 | `/ark:ark` | 读取项目状态，推荐下一步 |
+| 启动 | `/ark:ark-init` | 初始化全新项目或接入已有项目 |
+| 说明 | `/ark:ark-helper` | 回答 ARK 用法、概念和通用流程 |
+| 澄清 | `/ark:ark-intake` | 澄清目标、范围、规模和推荐流程 |
+| 分析 | `/ark:ark-analyze` | 读取代码库，建立架构认知，可预填充 spec/design |
+| 规划 | `/ark:ark-spec` | 写需求规格 |
+| 规划 | `/ark:ark-design` | 写技术设计 |
+| 规划 | `/ark:ark-plan` | 写阶段计划 |
+| 规划 | `/ark:ark-tasks` | 拆分任务和状态 |
+| 决策 | `/ark:ark-decide` | 记录重要工程决策 |
+| 实施 | `/ark:ark-implement` | 最小可行实现，支持 batch 和 checkpoint |
+| 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案 |
+| 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构 |
+| 审查 | `/ark:ark-review` | 评审代码变更和风险 |
+| 验证 | `/ark:ark-test` | 创建和组织测试 |
+| 验证 | `/ark:ark-validate` | 记录验证证据，只验证不修复 |
+| 恢复 | `/ark:ark-handoff` | 写入恢复点 |
+| 恢复 | `/ark:ark-next` | 根据 Artifact 裁决下一步 |
+| 恢复 | `/ark:ark-sync` | 检查并同步 Artifact 与文件现实 |
+| 文档 | `/ark:ark-docs` | 更新 README 或其他项目说明 |
+
+---
+
+## Sub-agent 模式
+
+ARK 会在 Medium/Large 任务中优先使用 sub-agent 缓解 context rot，但主 agent 始终是状态合并者。
+
+| 场景 | sub-agent 角色 | 写权限 |
+|------|----------------|--------|
+| `ark-analyze` 阶段二/三扫描 | reader | 不写任何文件 |
+| `ark-validate` 执行测试/脚本 | collector | 不写任何文件 |
+| `ark-implement` batch 实施 | worker | 只写 batch write set 内的源文件 |
+
+所有核心 Artifact 都由主 agent 统一写入。`ark-implement` 的 worker 完成后，主 agent 会检查 diff 是否超出 write set；越界时停止并报告，不自动合并。
+
+Agent tool 不可用时，Skill 会退回单上下文执行，并在输出中记录：
+
+```text
+Sub-agent 状态：未启用
+原因：当前环境未提供 Agent tool / 任务规模不需要 / 用户禁用
+降级影响：context rot 风险较高，建议按 batch 收口，及时 handoff
+```
+
+---
+
+## Artifact 可信度
+
+ARK 使用四态判断 Artifact 是否还能作为执行依据：
+
+| 状态 | 含义 | 示例 |
+|------|------|------|
+| `fresh` | 内容与文件现实、Artifact 之间关系和验证记录一致 | tasks.md 的 Doing 项与当前代码改动一致 |
+| `stale` | 代码或任务状态已经变化，但 Artifact 未反映 | batch 2 已完成，但 tasks.md 仍停在 batch 1 |
+| `conflicting` | Artifact 之间互相矛盾，或与文件现实冲突 | plan.md 的阶段顺序与 design.md 描述的模块关系冲突 |
+| `unknown` | 缺少证据，或旧项目缺少 schema 版本头 | 接手旧项目时 Artifact 没有版本头，且无法确认是否仍有效 |
+
+判断优先级：
+
+1. 当前文件现实
+2. Artifact 之间一致性
+3. 已执行验证记录
+4. `git diff` / `git log`（如可用）
+
+无 Git 项目仍可依据前三项判断，不会必然降级为 `unknown`。
 
 ---
 
 ## 规则系统
 
-ARK 内置 7 个规则文件，通过 MEMORY.md 加载：
+ARK 内置 9 个规则文件，通过项目 `MEMORY.md` 引用。
 
-| 规则文件 | 内容 |
+| 规则文件 | 作用 |
 |----------|------|
-| `ark.md` | 核心身份、原则、强制行为约束 |
-| `artifact-roles.md` | 每个 Artifact 的职责边界 |
+| `ark.md` | 核心身份、原则、路由倾向、旧项目升级、Definition of Done |
+| `artifact-roles.md` | Artifact 职责、Design vs Decide 边界、可信度四态 |
 | `artifact-update-policy.md` | Artifact 回写条件和禁止性约束 |
-| `task-sizing-rules.md` | 任务规模完整判定规则 |
-| `task-sizing-summary.md` | 任务规模快速判断表 |
-| `python-backend-conventions.md` | Python 后端编码规范 |
-| `user-preferences.md` | 用户偏好默认值 |
+| `capability-policy.md` | 依赖能力和降级策略 |
+| `sub-agent-protocol.md` | sub-agent 写权限、输出格式和复核流程 |
+| `task-sizing-summary.md` | 任务规模快速判断 |
+| `task-sizing-rules.md` | 任务规模完整规则 |
+| `python-backend-conventions.md` | Python 后端编码和维护性规范 |
+| `user-preferences.md` | 默认 Python 版本、工具和用户偏好 |
 
-### Skill 版本策略
-
-Skill frontmatter 中的 `version` 表示该 Skill 的指令契约版本。只有当输入/输出格式、职责边界或关键工作流发生破坏性变化时才提升版本；普通文案修正不必提升。
-
----
-
-## 常见问题
-
-### ARK 适合什么人？
-
-适合使用 Claude Code 进行 Python 后端开发的个人开发者和小团队。特别是经常处理跨会话的中大型任务、需要清晰的任务追踪和验证记录的场景。
-
-### ARK 和手写 CLAUDE.md + skills 有什么区别？
-
-手写 CLAUDE.md 和 skills 是一次性的静态指令，没有跨会话的状态管理。ARK 的核心差异是：
-
-- **Artifact 是活的** — 随实现推进持续更新，不是写完就固定的文档
-- **Skill 之间有协作约束** — 实现不验证、验证不修复，强制分离关注点
-- **中断恢复是内置的** — handoff → next 的裁决链让你从任何断点恢复
-- **任务规模自适应** — 自动判断该走轻流程还是完整流程
-
-### ARK 支持其他语言吗？
-
-当前专注于 Python 后端。规则中的编码规范和项目脚手架是 Python 特有的，但 Artifact 工作流本身（spec、plan、tasks、validation 等）是语言无关的。
-
-### 已有项目可以用吗？
-
-可以。`/ark:ark-init` 的模式 B 专为已有项目设计，不修改已有代码目录和项目质量配置（如 `pyproject.toml`、`pyrightconfig.json`）。它只会按策略创建 ARK 工作流文件和本地 Claude 辅助配置；安装质量工具或合并 hooks 需要用户确认。
-
-### 我必须走完整流程吗？
-
-不是。小任务可以跳过 spec/design/plan，直接从 intake → implement → validate。ARK 的设计是**渐进式**的——任务越复杂，用到的 Artifact 越多。
-
-### Artifact 文件会污染我的仓库吗？
-
-初始生成的 Artifact 文件保持轻量，均为纯文本，适合直接纳入 Git 管理并随项目演进持续维护。`/ark:ark-sync` 可以检测并清理过期内容。
+项目 `MEMORY.md` 由用户维护，不自动覆盖；其引用的插件规则文件会随插件更新生效。
 
 ---
 
-## 许可证
+## FAQ
+
+### ARK 会替我自动执行完整流程吗？
+
+不会。ARK 有自动路由倾向，但不会把一个 Skill 自动串到下一个 Skill。以 Artifact 为主要产出的 Skill 完成后会停止，并只建议下一步。
+
+### Mode B 会改我的业务代码吗？
+
+不会。Mode B 遵循 Inspect & Respect，不修改已有业务代码或项目配置；详细边界见上面的 Mode B 说明。
+
+### Mode B 会安装 ruff 或 pyright 吗？
+
+只有用户确认后才会安装。即使安装了工具，Mode B 也不会自动往 `pyproject.toml` 注入 ruff 配置。
+
+### `ark-test` 和 `ark-validate` 有什么区别？
+
+`ark-test` 可以创建或修改测试文件，并执行测试。`ark-validate` 只记录验证事实和证据，不修改源码，也不修复失败。
+
+### Artifact 文件是否应该提交到 Git？
+
+通常应该提交。ARK 的核心价值就是让项目状态随代码演进，被版本控制记录下来。
+
+### ARK 和 superpowers / GSD 有什么区别？
+
+ARK 的核心是项目内 Artifact 状态治理，强调 `docs/ark/` 文件、验证证据和中断恢复。superpowers 更偏通用技能触发和执行策略，GSD 更偏 coordinator/sub-agent 式任务分解。它们可以共存，但多插件环境中建议明确写“按 ARK 工作流...”来避免路由歧义。
+
+### ARK 支持非 Python 项目吗？
+
+Artifact 工作流本身可以用于其他语言，但当前初始化、质量工具和编码规范主要针对 Python 后端项目。
+
+---
+
+## License
 
 MIT License © 2026 Yingshufeng. See [LICENSE](LICENSE) for details.

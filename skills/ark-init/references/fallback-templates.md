@@ -276,13 +276,15 @@ uv run pyright
 - `${CLAUDE_PLUGIN_ROOT}/rules/user-preferences.md` - 用户偏好
 - `${CLAUDE_PLUGIN_ROOT}/rules/python-backend-conventions.md` - 编码规范
 - `${CLAUDE_PLUGIN_ROOT}/rules/artifact-roles.md` - Artifact 职责速查
+- `${CLAUDE_PLUGIN_ROOT}/rules/capability-policy.md` - 能力降级策略
+- `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md` - Sub-agent 写权限隔离
 - `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md` - 任务规模快速判断
 
 ## 使用说明
 
 1. 以上规则文件定义了 ARK 框架的工作方式和约束
 2. 执行 `/ark` 命令时，应遵循这些规则
-3. 规则文件由用户手动维护，不自动更新
+3. 本 MEMORY.md 由用户维护，不自动覆盖；其引用的插件规则文件随插件更新生效
 4. 完整的详细规则见：
    - `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`（Artifact 回写完整协议）
    - `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-rules.md`（任务规模完整规则）

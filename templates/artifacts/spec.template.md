@@ -1,3 +1,6 @@
+<!-- ark-artifact: spec -->
+<!-- schema-version: 1.0 -->
+
 # Spec
 
 ## 背景

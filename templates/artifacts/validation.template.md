@@ -1,3 +1,6 @@
+<!-- ark-artifact: validation -->
+<!-- schema-version: 1.0 -->
+
 # Validation
 
 <!-- 本文件记录验证状态。三类内容必须严格分开：已执行 / 建议未执行 / 暂时无法验证。-->

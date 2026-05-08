@@ -34,6 +34,62 @@ version: "1.0"
 - 在必要且明确时，可小幅回写：`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/handoff.md`
 - 对 `docs/ark/validation.md` 与 `docs/ark/decisions.md`，更偏向建议更新
 
+## Artifact 可信度判断
+
+sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-roles.md`）：
+
+**fresh**：
+  - tasks.md 中的任务状态与文件现实一致
+  - plan.md 描述的阶段与 tasks.md 完成情况匹配
+  - validation.md 覆盖的验证项与当前代码状态一致
+
+**stale**：
+  - 文件变更影响该 Artifact，但 Artifact 未反映
+  - handoff.md 记录的"下一步"与当前 tasks.md Doing 状态不匹配
+
+**conflicting**：
+  - plan.md 与 tasks.md 步骤/任务数不匹配
+  - design.md 描述的架构与实际代码结构不符
+  - spec.md 的 scope 与 plan.md 的 scope 不一致
+
+**unknown**：
+  - Artifact 无版本头（旧项目）
+  - 刚接手项目，无法验证一致性
+  - 无足够证据判断
+
+判断依据（按优先级）：
+  1. 当前文件现实
+  2. Artifact 之间一致性
+  3. 已执行验证记录
+  4. git diff / git log（如可用）
+
+无 git 项目依据 1-3 即可判断，不必然 unknown。
+
+## 版本头检测
+
+检查每个 Artifact 顶部是否有版本头注释：
+```
+<!-- ark-artifact: <name> -->
+<!-- schema-version: X.Y -->
+```
+
+- 无版本头 → 标记 unknown，建议重新执行对应 Skill 或手动补充
+- 版本低于当前插件 → 提示格式差异，但不自动修改
+
+## 职责边界
+
+ark-sync 只判断状态一致性，职责严格限定为：
+- Artifact 之间是否矛盾
+- Artifact 与当前文件现实是否匹配
+- Artifact 版本头是否存在
+- 任务状态与代码变更是否反映
+
+ark-sync **不做**：
+- 代码质量评审（那是 ark-review）
+- 功能正确性验证（那是 ark-validate）
+- 代码结构分析（那是 ark-analyze）
+- 无法确认时标 unknown，不做深度推断
+
 ## 工作流
 1. 读取关键 Artifact，优先查看 `plan`、`tasks`、`validation`、`handoff`。
 2. 检查代码与文档是否描述同一阶段。
@@ -79,6 +135,10 @@ version: "1.0"
 
 ### 1. 当前状态判断
 一致 / 基本一致 / 明显失真
+
+### 1.5 Artifact 可信度矩阵
+
+| Artifact | 可信度 | 判断依据 | 建议 |
 
 ### 2. 已发现问题
 文档过期项、状态冲突项、缺失验证项、可疑 handoff 项

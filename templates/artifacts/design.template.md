@@ -1,3 +1,6 @@
+<!-- ark-artifact: design -->
+<!-- schema-version: 1.0 -->
+
 # Design
 
 ## 问题陈述

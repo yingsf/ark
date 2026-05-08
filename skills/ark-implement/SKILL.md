@@ -99,6 +99,44 @@ version: "1.0"
 - 更新 `docs/ark/tasks.md` 记录批次进展（在任务备注区记录当前批次）
 - 输出当前批次完成状态，建议下一批次或停止
 
+### Sub-agent Batch 模式
+
+Medium/Large 任务可启用 batch sub-agent 模式缓解 context rot：
+
+1. **检查 Agent tool 是否可用**
+   - 可用：每个 batch spawn 独立 sub-agent
+   - 不可用：单上下文顺序执行，输出降级说明
+
+2. **sub-agent 遵循** `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`
+   - 只写 batch write set 内的源文件
+   - 不写 docs/ark/*
+
+3. **Write Set 审计**
+   - 执行前：主 agent 记录 batch write set（本批声明要修改的文件列表）
+   - 执行后：检查 diff 是否超出 write set
+   - 越界 → 停止并报告，列出意外修改的文件，不自动合并
+   - 正常 → 复核通过后主 agent 更新 Artifact
+
+4. **batch 完成后主 agent**：
+   - 复核 diff
+   - 运行 ruff check + pyright（如可用）
+   - 更新 tasks.md
+   - 进入 Git Checkpoint 流程
+
+5. **降级输出**
+
+   Agent tool 不可用时：
+   ```
+   Sub-agent 状态：未启用
+   原因：当前环境未提供 Agent tool
+   降级影响：context rot 风险较高，建议按 batch 收口，及时 handoff
+   ```
+
+   正常启用时：
+   ```
+   Sub-agent 状态：已启用（N 个 worker）
+   ```
+
 ### 中断安全
 
 - 批次完成点是天然的中断安全点——当前批次所有文件修改已落盘、局部检查已执行、已知未完成内容已列清
@@ -117,6 +155,29 @@ version: "1.0"
 
 ### 建议更新 `docs/ark/decisions.md`
 - 做出了非平凡技术取舍或选用了新的实现路线
+
+## Deviation Handling
+
+实施中发现的问题按以下规则处理：
+
+| 发现类型 | 处理方式 | 记录到 |
+|---------|---------|--------|
+| 当前 batch 范围内的 bug | 自动修复 | tasks.md |
+| 阻塞当前 batch，不改架构 | 自动处理或标记 Blocked | tasks.md |
+| 需要改变阶段顺序 | 更新执行顺序 | plan.md |
+| 需要改变架构或不可逆取舍 | 停止，推荐 ark-decide | — |
+| 无关但值得注意 | 记录风险 | handoff.md risks 段 |
+
+## Git Checkpoint
+
+每个 batch 完成后，根据任务大小决定 checkpoint 条件：
+
+- **Small 任务**：batch 完成 → 可选 checkpoint commit
+- **Medium/Large 任务**：batch 完成 → 相关 test 子集通过 → validate evidence 草稿可用 → 建议 checkpoint commit
+
+commit 范围：该 batch 修改的文件
+commit 格式：`<type>(<scope>): <batch-goal>`
+不自动提交，等用户确认
 
 ## 验证要求
 - 实现内容应与已定义目标一致
@@ -148,6 +209,9 @@ version: "1.0"
 - 若本次修改涉及可测试逻辑（新增/修改的公共方法、条件分支、错误处理）→ `/ark:ark-test` → `/ark:ark-validate`
 - 若本次修改不涉及可测试逻辑（纯配置、文档、样式）→ `/ark:ark-validate`
 - 若会话即将中断 → `/ark:ark-handoff`
+
+### 6. Sub-agent 状态
+- Sub-agent 状态：已启用（N 个 worker）/ 未启用（原因：...）
 
 ## 备注
 `/ark:ark-implement` 的目标不是「尽可能多写代码」，而是「以最低风险推进真实进展」。

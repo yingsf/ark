@@ -1,3 +1,6 @@
+<!-- ark-artifact: tasks -->
+<!-- schema-version: 1.0 -->
+
 # Tasks
 
 <!-- 本文件跟踪当前阶段的细粒度任务状态。由 /ark:ark-tasks 初始化，由 implement / debug / sync 小幅更新。-->

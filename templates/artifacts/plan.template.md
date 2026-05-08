@@ -1,3 +1,6 @@
+<!-- ark-artifact: plan -->
+<!-- schema-version: 1.0 -->
+
 # Plan
 
 ## 目标

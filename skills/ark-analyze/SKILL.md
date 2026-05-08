@@ -40,6 +40,30 @@ version: "2.0"
 - 可预填充：`docs/ark/spec.md`、`docs/ark/design.md`
 - 可引用：`docs/ark/plan.md`、`docs/ark/tasks.md`（如已存在）
 
+## Sub-agent Read-only 扫描
+
+阶段二/三的逐模块扫描可使用 sub-agent 加速：
+
+- sub-agent 只读代码，**不写任何文件**
+- 每个 sub-agent 负责一个模块/目录的扫描
+- sub-agent 返回 fact summary（`[fact]`/`[inferred]`/`[uncertain]` 标注）
+- 主 agent 收集所有 fact summary → 合并写入 `.ark-analysis.md`
+- sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`
+
+当 Agent tool 不可用时，主 agent 顺序扫描（现有行为不变），输出中记录降级说明：
+
+```
+Sub-agent 状态：未启用
+原因：当前环境未提供 Agent tool
+降级影响：context rot 风险较高，建议按 batch 收口，及时 handoff
+```
+
+正常启用时输出中记录：
+
+```
+Sub-agent 状态：已启用（N 个 reader）
+```
+
 ## 核心原则：增量锚定分析
 
 本 skill 采用**增量锚定分析**（Incremental Grounded Analysis）策略，将分析拆分为多个阶段，每阶段将发现的事实写入**分析工作文档**（`docs/ark/.ark-analysis.md`），下阶段从文件读取而非依赖上下文记忆。
@@ -343,6 +367,9 @@ version: "2.0"
 - 若要确认结构机制、模块关系、实现解释：可显式执行 `/ark:ark-design`
 - 若准备推进开发，但需求、范围或成功标准仍未清晰：先显式执行 `/ark:ark-intake`
 - 若目标已经明确，且需要拆分阶段与实施步骤：可显式执行 `/ark:ark-plan`
+
+### 10. Sub-agent 状态
+- Sub-agent 状态：已启用（N 个 reader）/ 未启用（原因：...）
 
 ## 备注
 `/ark:ark-analyze` 的目标不是产出完美的文档，而是「让陌生代码库在短时间内变得可理解」。
