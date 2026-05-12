@@ -177,7 +177,7 @@ htmlcov/
 
 ## README.md
 
-```markdown
+````markdown
 # <project_name>
 
 > TODO: Add project description.
@@ -221,7 +221,7 @@ All notable changes to this project will be documented in this file.
 
 ## CLAUDE.md
 
-```markdown
+````markdown
 # <project_name>
 
 ## Project Overview
@@ -234,16 +234,15 @@ All notable changes to this project will be documented in this file.
 文件级（日常编辑）：
 ```bash
 uv run ruff format <file>
-uv run ruff check --fix <file>
 ```
 
-全项目级（手动整理时）：
+稳定点质量整理：
 ```bash
 uv sync
 uv run pytest
 uv run pytest tests/test_xxx.py -v
-uv run ruff format .
 uv run ruff check --fix .
+uv run ruff format .
 uv run pyright
 ```
 
@@ -264,7 +263,18 @@ uv run pyright
 1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
 2. 改动完成后更新对应 Artifact（tasks / validation / decisions）
 3. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
-```
+
+## Code Style
+
+- 使用 type hints，所有公开函数必须有参数和返回值类型注解
+- 公共类、公共函数、关键方法使用中文 Google 风格 docstring
+- 复杂类的 docstring 应说明职责、设计特点和关键 Attributes
+- 复杂逻辑、边界条件、降级策略、资源生命周期、并发控制应补充中文注释
+- 注释解释原因、约束和风险，避免重复代码表面含义
+- 导入顺序：stdlib → third-party → local，之间用空行分隔
+- 优先使用 `pathlib.Path` 而非 `os.path`
+- 异常处理不要裸 `except:`，至少捕获 `Exception`
+````
 
 ---
 

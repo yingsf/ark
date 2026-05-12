@@ -217,7 +217,8 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 3. 识别包名和 Python 版本（从 `pyproject.toml` 或 `setup.py`）。
 4. 识别技术栈（框架、关键依赖、工具链）。
 5. 推断项目名：`pyproject.toml` 中的 `name` 字段 > 根目录下的包目录名 > 当前目录名。
-6. 将扫描结果用于生成 `CLAUDE.md`。
+6. 观察已有代码中的 docstring 和注释风格（语言、是否使用 Google 风格、公共接口说明充分度），只做轻量采样，不批量改代码。
+7. 将扫描结果用于生成 `CLAUDE.md`。
 
 #### B-第二步：创建工作流文件
 只创建不存在的文件；若文件存在但为空或仅含空行，视为可初始化对象。不触碰已有代码结构。
@@ -227,6 +228,12 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 - `CLAUDE.md`（基于扫描到的真实项目结构动态生成，不使用通用模板）
 - `MEMORY.md`（使用模板或 fallback，见 `references/fallback-templates.md`，不得自定义内容）
 
+Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
+- 若现有项目已有明确 docstring / 注释风格，记录并延续该风格
+- 若未观察到明确风格或风格混乱，写入 ARK 默认中文 Google 风格作为后续新增/修改代码的默认约定
+- 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认覆盖或追加后才修改
+- 不批量修改任何已有源码注释
+
 **不触碰（任何情况下不得修改）：**
 - `pyproject.toml`、`setup.py`、`setup.cfg` 等已有配置
 - `src/`、`<包名>/`、`tests/` 等已有代码目录（无论何种 layout 均不触碰）
@@ -234,7 +241,12 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 - 任何已有代码文件
 
 #### B-第三步：处理冲突
-对每个已存在的工作流文件（`CLAUDE.md`、`MEMORY.md`、`docs/` 下的文件）：若非空则询问覆盖 / 跳过；若为空或仅含空行则直接初始化。
+对每个已存在的工作流文件（`CLAUDE.md`、`MEMORY.md`、`docs/` 下的文件）：若为空或仅含空行则直接初始化；若非空则询问处理方式。
+
+- `CLAUDE.md`：覆盖 / 追加"Documentation & Comments"章节 / 跳过
+- 其他工作流文件：覆盖 / 跳过
+
+追加章节只用于补充 Mode B 扫描得到的注释/docstring 风格约定，不得重写用户已有内容。
 
 #### B-第三点五步：质量工具配置（Inspect & Respect）
 
@@ -279,6 +291,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 包名必须是合法的 Python 标识符
 - 除了 `__init__.py`，不应创建其他 `.py` 文件
 - docs/ Artifact 必须自动创建
+- `CLAUDE.md` 应包含中文 Google 风格 docstring 与中文注释规范
 - uv 不可用或命令失败不应导致整个流程中断
 - `.gitignore` 创建必须在 `uv init` 之后执行
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
@@ -286,6 +299,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 **模式 B（已有项目）：**
 - 不得修改任何已有代码文件或项目配置
 - `CLAUDE.md` 必须基于真实项目结构生成
+- `CLAUDE.md` 必须体现注释风格扫描结果：延续既有风格，或在无明确风格时采用 ARK 默认中文 Google 风格
 - docs/ Artifact 必须自动创建
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
 
@@ -332,12 +346,13 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 项目布局类型
 - 技术栈（框架、关键依赖）
 - 包名与 Python 版本
+- 注释/docstring 风格：已识别既有风格 / 未发现明确约定，采用 ARK 默认中文 Google 风格 / 未扫描（原因）
 
 #### 2. 执行结果
 | 步骤 | 状态 |
 |------|------|
 | 项目扫描 | 成功 / 失败（原因）|
-| CLAUDE.md | 基于 scan 生成 / 跳过（已存在）|
+| CLAUDE.md | 基于 scan 生成 / 追加注释风格章节 / 跳过（已存在）|
 | MEMORY.md | 使用模板 / 跳过（已存在）|
 | docs/ Artifact | 使用模板 / 使用空文件 / 跳过（已存在）|
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|

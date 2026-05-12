@@ -50,6 +50,7 @@ ARK 的处理方式是把关键状态落到项目文件中：
 - **Artifact 可信度四态**：`fresh / stale / conflicting / unknown` 帮助判断文档是否还能作为执行依据。
 - **能力降级策略**：Agent tool、git、uv、pytest、ruff、pyright 不可用时，不中断工作流，但会在输出中说明降级影响。
 - **Mode A / Mode B 初始化**：既能创建全新 Python 项目，也能以 Inspect & Respect 方式接入已有项目。
+- **中文 Google 风格注释规范**：implement 会为公共接口、关键方法和复杂逻辑补充服务维护的中文 docstring / 注释；Mode B 会先尊重既有项目风格。
 - **验证硬边界**：`ark-validate` 只记录验证证据，不修改源码，不用 mock 结果冒充真实通过。
 
 ---
@@ -219,7 +220,7 @@ Mode A 的执行重点：
 3. 生成或补齐 `pyproject.toml`。
 4. 安装默认开发质量工具：ruff、pyright。
 5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。
-6. 创建 `CLAUDE.md` 和 `MEMORY.md`。
+6. 创建 `CLAUDE.md` 和 `MEMORY.md`，并在 `CLAUDE.md` 中写入默认中文 Google 风格 docstring / 注释规范。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
 8. 在 Artifact 顶部写入 schema 版本头。
 9. 询问是否执行 `git init`。
@@ -413,6 +414,16 @@ Mode B 默认不修改：
 - 已有质量工具配置
 
 如果 `CLAUDE.md` 已存在，能力快照只会在用户确认后更新；未确认时，ARK 只在输出摘要中报告当前探测结果，不写文件。
+
+### Mode B 的注释风格策略
+
+Mode B 会轻量采样已有代码中的 docstring 和注释风格：
+
+- 已有项目风格明确时，后续 `/ark:ark-implement` 优先延续项目风格。
+- 未发现明确约定或风格混乱时，ARK 默认采用中文 Google 风格：公共类、公共函数、关键方法写中文 docstring，复杂逻辑、边界条件、降级策略、资源生命周期和并发控制补中文注释。
+- 如果 `CLAUDE.md` 不存在，Mode B 生成的项目上下文会记录上述判断。
+- 如果 `CLAUDE.md` 已存在，Mode B 不静默覆盖，只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认后才修改。
+- Mode B 不批量修改任何已有源码注释。
 
 ### Mode B 的质量工具策略
 
@@ -693,7 +704,7 @@ ARK 内置 9 个规则文件，通过项目 `MEMORY.md` 引用。
 | `sub-agent-protocol.md` | sub-agent 写权限、输出格式和复核流程 |
 | `task-sizing-summary.md` | 任务规模快速判断 |
 | `task-sizing-rules.md` | 任务规模完整规则 |
-| `python-backend-conventions.md` | Python 后端编码和维护性规范 |
+| `python-backend-conventions.md` | Python 后端编码、中文 Google 风格注释和维护性规范 |
 | `user-preferences.md` | 默认 Python 版本、工具和用户偏好 |
 
 项目 `MEMORY.md` 由用户维护，不自动覆盖；其引用的插件规则文件会随插件更新生效。
