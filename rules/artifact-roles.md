@@ -51,9 +51,10 @@
 无 git 的项目依据 1-3 即可判断，不必然 unknown。
 
 关键 Skill 入口要求：
-- ark-implement：检查 plan.md + tasks.md 可信度
+- ark-implement：开始前检查 plan.md + tasks.md 可信度；实现后检查本次改动是否引发 spec.md / design.md 漂移
 - ark-validate：检查 tasks.md 可信度
-- ark-next：检查 handoff.md + tasks.md + plan.md 可信度
+- ark-next：检查 handoff.md + tasks.md + plan.md 可信度；若 spec.md / design.md 明显 stale 或 conflicting，应优先推荐 ark-sync
+- ark-sync：输出完整 Artifact 可信度矩阵，包括 spec.md / design.md；对 spec/design 只建议对应 Skill，不直接修正
 - 非 fresh 时推荐 ark-sync
 
 > 完整的回写条件与禁止性约束见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`

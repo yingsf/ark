@@ -45,6 +45,7 @@ version: "1.0"
 - 可读取：`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`
 - 可在必要时回写：`docs/ark/plan.md`、`docs/ark/tasks.md`
 - 若出现关键取舍，应建议更新：`docs/ark/decisions.md`
+- 若本次实现改变规格或设计现实，应建议 `/ark:ark-spec` 或 `/ark:ark-design`；不得直接回写 `docs/ark/spec.md` 或 `docs/ark/design.md`
 
 ## 工作流
 
@@ -54,7 +55,8 @@ version: "1.0"
 3. 完成修改，保持最小改动范围，并同步补齐必要 docstring 和中文注释。
 4. 在修改完成点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行）；若工具修改了文件，重新读取当前内容或 diff。
 5. 检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求。
-6. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
+6. 执行 spec/design 漂移检查：只识别本次实现是否改变需求或设计现实，发现后在输出中建议对应 Skill，不直接回写 spec/design。
+7. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
 
 ### Medium / Large 任务
 1. 读取相关代码和 Artifact，确认当前 plan 状态有效。
@@ -63,7 +65,7 @@ version: "1.0"
 4. **批次评估**：若出现批次触发信号（见下方「批次实施机制」），拆分为实施批次并只完成当前批次。否则正常执行。
 5. 选择最小可行修改：小步推进、局部修改、可验证、可回退。每个批次内的修改应构成一个相对完整的子问题。
 6. 避免混入无关改动（风格清理、无关重命名、大面积重构）。
-7. **批次执行**：每完成一个批次后，在稳定点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行），检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求，输出批次完成状态，更新 tasks.md 记录批次进展。然后建议下一批次或停止。
+7. **批次执行**：每完成一个批次后，在稳定点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行），检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求，执行 spec/design 漂移检查，输出批次完成状态，更新 tasks.md 记录批次进展。然后建议下一批次或停止。
 8. 实施后检查是否需要回写 Artifact（见下方回写规则）。
 9. 若当前会话需要中断，优先完成当前批次再执行 `/ark:ark-handoff`。若处于批次中间且无法完成，handoff 应记录当前批次进展。
 10. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
@@ -205,6 +207,20 @@ Medium/Large 任务可启用 batch sub-agent 模式缓解 context rot：
 ### 建议更新 `docs/ark/decisions.md`
 - 做出了非平凡技术取舍或选用了新的实现路线
 
+### 建议更新 `docs/ark/spec.md`
+只建议，不直接回写。出现以下任一情况时，输出中推荐 `/ark:ark-spec`：
+- 本次实现新增、删除或改变用户可感知能力
+- 能力范围、非目标、验收标准或成功条件发生变化
+- 外部接口、MCP/API 契约、导入导出能力、权限或数据可见范围发生变化
+- 实现结果与 `spec.md` 中的能力承诺、范围或验收描述不一致
+
+### 建议更新 `docs/ark/design.md`
+只建议，不直接回写。出现以下任一情况时，输出中推荐 `/ark:ark-design`：
+- 模块边界、职责划分、调用链、数据流或依赖方向发生变化
+- 新增或替换核心抽象、运行时组件、服务层、仓储层、适配器或外部系统集成方式
+- 接口契约、资源生命周期、并发/限流/缓存/降级策略发生变化
+- 实现路线与 `design.md` 的既有方案明显不同，但不一定达到 decisions.md 的不可逆决策标准
+
 ## Deviation Handling
 
 实施中发现的问题按以下规则处理：
@@ -214,6 +230,8 @@ Medium/Large 任务可启用 batch sub-agent 模式缓解 context rot：
 | 当前 batch 范围内的 bug | 自动修复 | tasks.md |
 | 阻塞当前 batch，不改架构 | 自动处理或标记 Blocked | tasks.md |
 | 需要改变阶段顺序 | 更新执行顺序 | plan.md |
+| 需求范围、验收标准或能力承诺变化 | 建议 ark-spec | — |
+| 模块边界、接口契约或运行机制变化 | 建议 ark-design | — |
 | 需要改变架构或不可逆取舍 | 停止，推荐 ark-decide | — |
 | 无关但值得注意 | 记录风险 | handoff.md risks 段 |
 
@@ -235,6 +253,7 @@ commit 格式：`<type>(<scope>): <batch-goal>`
 - 若执行 ruff / pyright / pytest 等检查命令返回非 0，不得表述为"pass / 通过"。若失败项被判断为既有问题，应写"检查未通过，但未发现本次改动新增问题"。最终验证结论应交由 `/ark:ark-validate` 记录
 - 在不扩大 scope 的前提下，新增或修改的公共接口应补充中文 Google 风格 docstring；复杂、关键、非直观或涉及降级/资源/并发边界的逻辑，应补充必要中文注释。注释以清晰、克制、服务维护为原则，不做无关文档化扩展
 - 若新增/修改公共接口、关键方法或复杂逻辑后缺少必要 docstring/注释，不得将本次实现视为完整完成；应在当前 scope 内补齐，或明确说明为何项目既有风格不要求补充
+- 每个完成点必须执行 spec/design 漂移检查。发现漂移时只能建议 `/ark:ark-spec` 或 `/ark:ark-design`，不得直接修改 `docs/ark/spec.md` 或 `docs/ark/design.md`
 - 触发批次信号时，不得跳过批次拆分直接一次性完成全部修改
 - 不得为了对抗 format hook 而把原本可小步完成的修改扩大为整文件重写；如果 hook 在编辑后改动了文件，应先重新读取当前内容或 diff，再继续做最小修改
 - 实现代码应遵循 python-backend-conventions.md 中的可维护性规范：避免高复杂度函数（多层分支/嵌套判断应拆分辅助函数）、优先使用公开接口（不直接访问 protected 成员）、主动识别并处理大段重复代码。对中大型、分批实施的任务，还应评估当前批次与前序批次是否形成跨文件重复；若当前不适合立即抽取，必须将去重整理显式记录为后续收口任务。当快速实现会明显增加结构债时，应优先做小范围重构，而非留到 review 才处理
@@ -255,6 +274,11 @@ commit 格式：`<type>(<scope>): <batch-goal>`
 - 本批完成信号 / 未完成项：
 ### 3. 假设 / 限制 / 延期项
 ### 4. Artifact 回写
+- `plan.md`：已更新 / 无需更新
+- `tasks.md`：已更新 / 无需更新
+- `decisions.md`：建议更新 / 无需更新
+- `spec.md`：若发现漂移，建议 `/ark:ark-spec` 并说明原因；无漂移可省略
+- `design.md`：若发现漂移，建议 `/ark:ark-design` 并说明原因；无漂移可省略
 ### 5. 建议下一步
 
 - 若本次修改涉及可测试逻辑（新增/修改的公共方法、条件分支、错误处理）→ `/ark:ark-test` → `/ark:ark-validate`

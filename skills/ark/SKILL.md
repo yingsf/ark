@@ -69,6 +69,8 @@ version: "1.0"
 
 4. **推荐下一步**
    - 基于 Artifact 状态和阶段判断
+   - 若 spec.md / design.md 可能 stale 或 conflicting，但原因需要统一校准，优先推荐 `/ark:ark-sync`
+   - 若 spec.md / design.md 的更新原因已经明确，可推荐 `/ark:ark-spec` 或 `/ark:ark-design`
    - 给出 1-2 个推荐，附理由
    - 等用户选择后激活对应 Skill
 

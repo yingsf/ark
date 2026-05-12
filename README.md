@@ -562,10 +562,20 @@ ark-handoff       # 需要收口或中断时，主动记录恢复点
 ```text
 “先同步一下代码和 Artifact 状态，再告诉我下一步”
   ↓
-ark-sync          # 同步 Artifact 与文件现实
+ark-sync          # 同步 Artifact 与文件现实，识别 spec/design 是否过期或冲突
   ↓
 ark-next
 ```
+
+### spec/design 漂移处理
+
+`spec.md` 和 `design.md` 是活文档，但正式写入仍由专责 Skill 完成：
+
+- `ark-implement`：编码完成点识别本次实现是否改变需求范围、验收标准、外部接口、模块边界或运行机制；只建议 `/ark:ark-spec` / `/ark:ark-design`，不直接改 `spec.md` / `design.md`。
+- `ark-debug`：修复后如果发现错误语义、边界条件或设计假设过期，也只建议对应 Skill。
+- `ark-refactor`：若重构改变模块边界、依赖方向或资源生命周期，建议更新 `design.md`；若外部行为实际变化，先回到 spec/design 确认。
+- `ark-sync`：事后做全局一致性校准，标记 `spec.md` / `design.md` 为 `stale` 或 `conflicting`，并推荐后续 Skill。
+- `ark-spec` / `ark-design`：真正负责把确认后的需求或设计变化写入 Artifact。
 
 ---
 
@@ -634,15 +644,15 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 规划 | `/ark:ark-plan` | 写阶段计划 |
 | 规划 | `/ark:ark-tasks` | 拆分任务和状态 |
 | 决策 | `/ark:ark-decide` | 记录重要工程决策 |
-| 实施 | `/ark:ark-implement` | 最小可行实现，支持 batch 和 checkpoint |
-| 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案 |
-| 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构 |
+| 实施 | `/ark:ark-implement` | 最小可行实现，支持 batch 和 checkpoint；识别本次实现引发的 spec/design 漂移 |
+| 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案；识别修复暴露的需求/设计漂移 |
+| 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构；识别设计现实变化 |
 | 审查 | `/ark:ark-review` | 评审代码变更和风险 |
 | 验证 | `/ark:ark-test` | 创建和组织测试 |
 | 验证 | `/ark:ark-validate` | 记录验证证据，只验证不修复 |
 | 恢复 | `/ark:ark-handoff` | 写入恢复点 |
 | 恢复 | `/ark:ark-next` | 根据 Artifact 裁决下一步 |
-| 恢复 | `/ark:ark-sync` | 检查并同步 Artifact 与文件现实 |
+| 恢复 | `/ark:ark-sync` | 检查并同步 Artifact 与文件现实，标记 spec/design 过期或冲突 |
 | 文档 | `/ark:ark-docs` | 更新 README 或其他项目说明 |
 
 ---

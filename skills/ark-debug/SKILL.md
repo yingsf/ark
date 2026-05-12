@@ -53,9 +53,10 @@ version: "1.0"
 - 必要时：Artifact 回写建议
 
 ## 相关 Artifact
-- 可读取：`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/design.md`
+- 可读取：`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`
 - 可在必要时回写：`docs/ark/plan.md`、`docs/ark/tasks.md`
 - 若修复路径引入重要取舍：建议更新 `docs/ark/decisions.md`
+- 若修复暴露需求或设计漂移：建议 `/ark:ark-spec` 或 `/ark:ark-design`，不得直接回写 `spec.md` / `design.md`
 - 应为 `docs/ark/validation.md` 提供输入
 
 ## 工作流
@@ -67,6 +68,7 @@ version: "1.0"
 6. 形成修复方案，必须包含对应验证方式（如何确认已修复）。
 7. 修复完成后建议执行 `/ark:ark-test` 补充回归测试。
 8. 检查是否需要回写 Artifact（见下方回写规则）。
+9. 执行修复后 spec/design 漂移检查：只识别 bug 修复是否改变需求或设计现实，发现后建议对应 Skill，不直接回写 spec/design。
 
 ## 回写规则
 
@@ -79,6 +81,14 @@ version: "1.0"
 
 ### 建议更新 `docs/ark/decisions.md`
 - 修复路径引入了非平凡的技术取舍
+
+### 建议更新 `docs/ark/spec.md`
+- 修复后错误语义、验收标准、用户可感知行为或能力边界发生变化
+- 原 spec 对失败行为、边界条件或非目标的描述被根因分析证明不成立
+
+### 建议更新 `docs/ark/design.md`
+- 修复改变异常转换、降级策略、接口契约、资源生命周期、并发/缓存/重试等设计机制
+- 根因证明原 design 对模块职责、调用链或外部依赖的描述已过期
 
 ## 验证要求
 - 必须区分症状与根因
@@ -97,6 +107,9 @@ version: "1.0"
 ### 4. 修复方案（附验证方式）
 ### 5. 建议下一步（通常：`/ark:ark-test` 补充回归 → `/ark:ark-validate`）
 ### 6. Artifact 回写
+- `plan.md` / `tasks.md` / `decisions.md`：已更新 / 建议更新 / 无需更新
+- `spec.md`：若发现漂移，建议 `/ark:ark-spec` 并说明原因；无漂移可省略
+- `design.md`：若发现漂移，建议 `/ark:ark-design` 并说明原因；无漂移可省略
 
 ## 备注
 不要在未理解失败模式前直接打补丁。根因不清楚时，先假设、再验证、再修复。

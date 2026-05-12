@@ -82,6 +82,12 @@
 
 其他 Skill 通常不直接回写这两个文件。如发现内容过期，应建议重新执行对应 Skill，而不是随意修改。
 
+允许其他 Skill 识别并报告 spec/design 漂移，但不得直接落盘：
+- `/ark:ark-implement`：本次实现改变能力范围、验收标准、外部接口、MCP/API 契约、模块边界、数据流、运行时机制、资源生命周期、并发/降级策略时，建议 `/ark:ark-spec` 或 `/ark:ark-design`
+- `/ark:ark-debug`：修复 bug 时发现原需求边界、验收标准、错误语义、降级策略或设计假设不成立时，建议 `/ark:ark-spec` 或 `/ark:ark-design`
+- `/ark:ark-refactor`：重构改变模块边界、依赖方向、接口组织、资源生命周期等设计现实，或发现“不变行为”边界实际不清时，建议 `/ark:ark-design` 或 `/ark:ark-spec`
+- `/ark:ark-sync`：全局一致性检查中发现 spec/design 与代码现实、plan、tasks 或 validation 冲突时，标记 stale/conflicting 并建议对应 Skill
+
 ---
 
 ## 实施过程中的回写规则
@@ -90,6 +96,8 @@
 - 原计划与现实偏差明显 → 更新 `docs/ark/plan.md`
 - 某项任务完成 / 开始 / 阻塞 → 更新 `docs/ark/tasks.md`
 - 出现关键技术取舍 → 建议更新 `docs/ark/decisions.md`（不强制直接写入）
+- 本次实现改变需求范围、验收标准、对外能力或非目标边界 → 建议 `/ark:ark-spec`，不直接回写 `docs/ark/spec.md`
+- 本次实现改变模块边界、接口契约、数据流、运行时机制、资源生命周期、并发/降级策略 → 建议 `/ark:ark-design`，不直接回写 `docs/ark/design.md`
 
 **plan.md 回写触发样例：**
 
@@ -118,11 +126,14 @@
 - 根因导致原计划失效 → 更新 `docs/ark/plan.md`
 - 新的阻塞或诊断任务出现 → 更新 `docs/ark/tasks.md`
 - 修复路径引入重要取舍 → 建议更新 `docs/ark/decisions.md`
+- 修复暴露需求边界、验收标准、错误语义或设计假设过期 → 建议 `/ark:ark-spec` 或 `/ark:ark-design`
 
 ### `/ark:ark-refactor`
 - 重构范围超出预期 → 更新 `docs/ark/plan.md`
 - 任务状态变化 → 更新 `docs/ark/tasks.md`
 - 引入不可逆结构性选择 → 建议更新 `docs/ark/decisions.md`
+- 重构改变设计现实但不改变需求承诺 → 建议 `/ark:ark-design`
+- 重构过程中发现外部行为或能力边界实际发生变化 → 停止扩大重构范围，建议 `/ark:ark-spec` 或 `/ark:ark-design` 重新确认
 
 ### `/ark:ark-review`
 - 发现严重问题导致计划需要调整 → 建议更新 `docs/ark/plan.md`
@@ -135,6 +146,8 @@
 - plan 已失真
 - handoff 与当前阶段不符
 - validation 漏记关键结果
+- spec.md 的范围、能力承诺、验收标准、外部接口与代码现实或 plan/tasks 不一致
+- design.md 的模块结构、接口边界、数据流、关键运行机制与代码现实不一致
 
 ### `/ark:ark-analyze`
 - 首次分析已有代码库 → 预填充 `docs/ark/spec.md`（当前系统在做什么）
