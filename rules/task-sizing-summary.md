@@ -13,6 +13,7 @@
 | **Large** | 多模块或多阶段、架构影响、高风险或高返工成本、需要完整恢复能力 | `intake → spec → design → plan → tasks → implement → test → validate → handoff` |
 
 > Medium 中的 `design` 是有条件可选：若改动涉及新模块、接口边界或架构决策，应执行；否则可跳过。
+> 流程中的 Artifact 落盘由对应 Skill 完成；`intake` 只负责澄清、分流和建议落盘位置，不直接写入 `docs/ark/*`。
 
 ## 一句话判断法
 

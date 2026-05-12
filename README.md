@@ -487,7 +487,7 @@ ARK 不是强制线性流程。日常使用时，你可以直接描述目标；�
 ```text
 “帮我给系统加用户登录”
   ↓
-ark-intake      # 澄清目标、范围、规模
+ark-intake      # 澄清目标、范围、规模；不写 Artifact
   ↓
 ark-spec        # 写入 spec.md
   ↓
@@ -614,7 +614,7 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 入口 | `/ark:ark` | 读取项目状态，推荐下一步 |
 | 启动 | `/ark:ark-init` | 初始化全新项目或接入已有项目 |
 | 说明 | `/ark:ark-helper` | 回答 ARK 用法、概念和通用流程 |
-| 澄清 | `/ark:ark-intake` | 澄清目标、范围、规模和推荐流程 |
+| 澄清 | `/ark:ark-intake` | 澄清目标、范围、规模和推荐流程；只分流与建议落盘，不直接写 Artifact |
 | 分析 | `/ark:ark-analyze` | 读取代码库，建立架构认知，可预填充 spec/design |
 | 规划 | `/ark:ark-spec` | 写需求规格 |
 | 规划 | `/ark:ark-design` | 写技术设计 |

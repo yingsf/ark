@@ -65,6 +65,8 @@ ARK 通过路由倾向工作：描述你的任务，Claude 会优先倾向匹配
 - 审查代码变更 → ark-review
 - 不确定下一步 → ark（查看状态）或 ark-next（裁决下一步）
 
+`ark-intake` 只负责澄清、分流和建议落盘位置，不直接写入 Artifact；正式写入由 `ark-spec`、`ark-plan` 等对应 Skill 完成。
+
 ### 核心 Artifact 各自管什么？
 
 - spec.md — 要做什么（目标和范围）

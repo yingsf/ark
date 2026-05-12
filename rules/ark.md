@@ -111,6 +111,8 @@ Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handof
 
 ## 典型任务类型
 
+流程说明：`intake` 只负责澄清、分流和建议落盘位置，不直接写入 Artifact。流程中的 Artifact 写入由 `spec`、`design`、`plan`、`tasks`、`validate`、`handoff`、`decide` 等对应 Skill 完成。
+
 ### 小任务
 
 典型示例：小 bug 修复、定点代码修改、补一两个测试
