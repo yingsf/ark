@@ -65,9 +65,6 @@ init 在执行前必须先确认项目模式：
 
 ```
 my_project/                  # 项目根目录
-├── .github/                 # CI/CD 配置（可选）
-│   └── workflows/
-│       └── ci.yml
 ├── docs/                    # 文档 + ark Artifact
 │   └── ark/                 # ARK 核心 Artifact
 │       ├── spec.md

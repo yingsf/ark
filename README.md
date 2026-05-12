@@ -208,7 +208,6 @@ project name: my-api
 target directory: 当前目录
 Python version: 3.12
 是否创建 pytest 测试: 是
-是否生成 CI 质量门禁: 询问确认
 ```
 
 ### Mode A 会做什么
@@ -223,8 +222,7 @@ Mode A 的执行重点：
 6. 创建 `CLAUDE.md` 和 `MEMORY.md`。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
 8. 在 Artifact 顶部写入 schema 版本头。
-9. 询问是否生成 GitHub Actions 质量门禁。
-10. 询问是否执行 `git init`。
+9. 询问是否执行 `git init`。
 
 如果你只想快速开始，读到这里即可；下面是 Mode A 的详细产物和初始化记录说明。
 
@@ -250,9 +248,6 @@ my-api/
 ├── .claude/
 │   ├── ruff-hook.py
 │   └── settings.local.json
-├── .github/
-│   └── workflows/
-│       └── python-quality.yml    # 仅在用户确认生成 CI 时存在
 ├── .gitignore
 ├── CHANGELOG.md
 ├── CLAUDE.md
@@ -427,7 +422,6 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | `pyproject.toml [tool.ruff]` | 不自动追加，只报告建议 |
 | ruff / pyright 依赖 | 缺失时提示影响，用户确认后才安装 |
 | `.claude/settings.local.json` | 不存在时可生成；存在时确认后合并缺失 hook |
-| CI 质量门禁 | 只提示建议，不自动生成 |
 
 ### Mode B 输出示例
 
@@ -450,7 +444,6 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | docs/ Artifact | 使用模板 |
 | 质量工具安装 | 已存在 / 跳过（用户选择） |
 | 能力探测 | 用户未确认，仅报告 |
-| CI 质量门禁 | 建议配置 |
 
 #### 3. 下一步
 - 强烈建议：直接让 ARK 分析项目（对应 `/ark:ark-analyze`）

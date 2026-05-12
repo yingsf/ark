@@ -171,13 +171,6 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 - `${CLAUDE_PLUGIN_ROOT}/templates/project/claude-project-settings.template.json`
 - `${CLAUDE_PLUGIN_ROOT}/templates/project/pyproject-ruff.snippet.toml`
 
-### 第四点七步：CI 质量门禁（Mode A）
-
-询问用户是否生成 CI 质量门禁配置：
-- 模板路径：`${CLAUDE_PLUGIN_ROOT}/templates/project/github-actions-python.yml.template`
-- 生成目标：`.github/workflows/python-quality.yml`
-- 如项目未启用 pyright 或 pytest，提醒用户删除模板中对应步骤
-
 ### 第五步：处理冲突
 对每个已存在的文件，询问用户：覆盖 / 跳过 / 中止。
 
@@ -270,10 +263,6 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 
 **安装后仍不自动注入配置：** 即使安装了工具，配置生成仍遵循 B-第三点五步的 Inspect & Respect 策略。
 
-#### B-第三点九步：CI 质量门禁提示（Mode B）
-
-仅提示，不自动生成：若项目无 `.github/workflows/` 下的 CI 配置，建议配置 CI 质量门禁，模板可参考 `${CLAUDE_PLUGIN_ROOT}/templates/project/github-actions-python.yml.template`。
-
 #### B-第四步：输出结果摘要
 见「固定输出格式」中的模式 B 部分。
 
@@ -321,7 +310,6 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 | MEMORY.md | 使用模板 / 使用 fallback |
 | docs/ Artifact | 使用模板 / 使用空文件 |
 | 质量工具安装 | 已安装 / 跳过（原因）|
-| CI 质量门禁 | 已生成 / 跳过（用户选择）|
 
 #### 3. 目录树
 输出简洁的最终目录树。
@@ -347,7 +335,6 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 | docs/ Artifact | 使用模板 / 使用空文件 / 跳过（已存在）|
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|
 | 能力探测 | 已写入 / 用户未确认，仅报告 / 跳过（原因）|
-| CI 质量门禁 | 已存在 / 建议配置 / 跳过（原因）|
 
 #### 3. 下一步
 - **强烈建议**：`/ark:ark-analyze`（理解代码库并预填充 artifact）
