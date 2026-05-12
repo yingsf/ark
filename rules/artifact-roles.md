@@ -12,6 +12,8 @@
 | `docs/ark/validation.md` | 验证了什么，证据是什么 | `/ark:ark-validate` | 记录「准备验证什么」（那是 plan 的职责）|
 | `docs/ark/handoff.md` | 下次从哪里继续 | `/ark:ark-handoff` | 代替 plan 作为主执行文档、代替 tasks 管理状态 |
 
+扩展文档（如 `docs/solution/*`、`docs/design/*`、`docs/contracts/*`、`docs/data-sources/*`）不属于核心 Artifact。它们由 `/ark:ark-solution` 按需创建和维护，`docs/ark/design.md` 只保留摘要和索引，不复制正文。
+
 ## 核心约束
 
 - **不得混用**：每个 Artifact 主要回答一个问题，不应将多个职责写入同一文件
@@ -23,9 +25,12 @@
 
 `spec` 管目标 · `design` 管方案 · `plan` 管推进 · `tasks` 管状态 · `decisions` 管取舍 · `validation` 管证据 · `handoff` 管恢复
 
+`solution/contracts/data-sources` 等扩展文档管专题细节，不进入 7 个核心 Artifact。
+
 ## Design vs Decide 边界
 
 - **design.md**：记录方案如何工作，以及局部技术权衡
+- **扩展文档**：记录某个专题的详细方案、模块级设计、接口契约或数据源元信息；由 design.md 建索引
 - **decisions.md**：只记录满足以下全部条件的选择——不可逆或高回退成本、影响长期维护方向、未来可能被团队质疑或推翻
 
 一般性技术权衡留在 design.md，不重复进 decisions.md。触发 ark-decide 时需判断：如果该选择在 3 个月内不太可能被重新审视，留 design.md 即可。
@@ -53,8 +58,11 @@
 关键 Skill 入口要求：
 - ark-implement：开始前检查 plan.md + tasks.md 可信度；实现后检查本次改动是否引发 spec.md / design.md 漂移
 - ark-validate：检查 tasks.md 可信度
-- ark-next：检查 handoff.md + tasks.md + plan.md 可信度；若 spec.md / design.md 明显 stale 或 conflicting，应优先推荐 ark-sync
-- ark-sync：输出完整 Artifact 可信度矩阵，包括 spec.md / design.md；对 spec/design 只建议对应 Skill，不直接修正
+- ark-next：检查 handoff.md + tasks.md + plan.md 可信度；若 spec.md / design.md 或扩展文档明显 stale/conflicting，应优先推荐 ark-sync
+- ark-sync：输出完整 Artifact 可信度矩阵，包括 spec.md / design.md；并输出扩展文档可信度摘要；对 spec/design 只建议对应 Skill，不直接修正
+- ark-solution：维护扩展文档正文；不直接回写 `docs/ark/*`
 - 非 fresh 时推荐 ark-sync
 
 > 完整的回写条件与禁止性约束见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`
+
+> 扩展文档规则见 `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md`，真实性锚点规则见 `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md`。

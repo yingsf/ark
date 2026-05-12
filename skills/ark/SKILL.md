@@ -45,7 +45,7 @@ version: "1.0"
 
 ## 相关 Artifact
 
-- 读取：handoff.md > tasks.md > plan.md > validation.md > spec.md/design.md
+- 读取：handoff.md > tasks.md > plan.md > validation.md > spec.md/design.md > 扩展文档索引
 - **不更新任何 Artifact**
 
 ## 工作流
@@ -58,6 +58,8 @@ version: "1.0"
 2. **读取 Artifact 状态**
    - 优先级：handoff.md > tasks.md > plan.md > validation.md > spec.md/design.md
    - 判断每个关键 Artifact 的可信度（fresh/stale/conflicting/unknown）
+   - 检查 `docs/ark/design.md` 中是否存在扩展文档索引，必要时查看索引目标是否存在
+   - 检查项目画像和真实性锚点是否能解释当前 plan/tasks/validation
 
 3. **输出状态报告**
 
@@ -66,11 +68,14 @@ version: "1.0"
    - Artifact 可信度：<列出非 fresh 的 Artifact>
    - 活跃任务：<从 tasks.md 读取 Doing 状态的任务>
    - 阻塞项：<从 tasks.md 读取 Blocked 状态的任务>
+   - 真实性锚点：<是否已有最小真实闭环，或仍停留在替身/unknown>
 
 4. **推荐下一步**
    - 基于 Artifact 状态和阶段判断
    - 若 spec.md / design.md 可能 stale 或 conflicting，但原因需要统一校准，优先推荐 `/ark:ark-sync`
    - 若 spec.md / design.md 的更新原因已经明确，可推荐 `/ark:ark-spec` 或 `/ark:ark-design`
+   - 若专题方案、接口契约、集成或数据源元信息缺失/过期，可推荐 `/ark:ark-solution`
+   - 若 tasks 推进较多但真实锚点仍缺失，优先推荐 `/ark:ark-sync` 或 `/ark:ark-plan`
    - 给出 1-2 个推荐，附理由
    - 等用户选择后激活对应 Skill
 
@@ -79,6 +84,7 @@ version: "1.0"
 - 状态判断必须基于 Artifact 实际内容，不得猜测
 - 可信度判断遵循 rules/artifact-roles.md 的四态定义
 - 推荐必须是 ARK 已定义的合法 Skill
+- 不得把 mock/fake/in-memory/合成数据状态描述为真实闭环完成
 - 不得自动执行任何后续 Skill
 - 不得更新任何 Artifact
 
@@ -95,6 +101,7 @@ version: "1.0"
 - Artifact 可信度：<列出非 fresh 的 Artifact 及判断依据>
 - 活跃任务：<Doing 状态的任务列表>
 - 阻塞项：<Blocked 状态的任务列表>
+- 真实性锚点：<真实入口 / 真实依赖 / 数据源 / 契约状态>
 
 ### 2. 推荐下一步
 

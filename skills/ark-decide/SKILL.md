@@ -32,6 +32,7 @@ version: "1.0"
 
 ## 相关 Artifact
 - `docs/ark/decisions.md`
+- 若决策影响专题方案、接口契约、集成或数据源元信息，应在输出中建议 `/ark:ark-solution`，不得由 decide 直接修改扩展文档。
 
 ## 工作流
 1. 明确需要记录的决策是什么（用一句话表达）。
@@ -41,12 +42,14 @@ version: "1.0"
 5. 解释理由：相比其他方案的核心优势是什么？
 6. 记录已知影响与副作用。
 7. 追加到 `docs/ark/decisions.md`（新记录加在最前面）。
+8. 若决策需要同步扩展文档或全局设计索引，输出建议 `/ark:ark-solution` 或 `/ark:ark-design`。
 
 ## 验证要求
 - 每条决策记录必须有「理由」节，不能只有「选了 A」
 - 备选方案至少列举 2 个（只有 1 个通常意味着没有实质决策）
 - 影响节应诚实记录已知副作用，不得只写优点
 - 不得修改 `docs/ark/decisions.md` 以外的核心 Artifact
+- 不得直接修改扩展文档；如需同步专题方案或契约，建议 `/ark:ark-solution`
 
 ## 停止条件
 - 决策记录已追加到 `docs/ark/decisions.md`

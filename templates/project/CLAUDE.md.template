@@ -6,6 +6,16 @@
 
 本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
 
+## ARK 项目画像
+<!-- ark-init: 初始快照；后续由 ark-analyze / ark-sync 按真实项目演进建议更新 -->
+- 项目类型：unknown
+- 运行入口：待确认
+- 真实性锚点：待确认
+- 数据源：无 / 项目外部管理 / 本地路径元信息待确认（ARK 不托管数据内容）
+- 外部依赖：无 / 待确认
+- 契约边界：HTTP / MCP / CLI / SDK / 文件格式 / 事件 / 待确认
+- 替身边界：mock/fake/in-memory 仅用于测试或短期替代，真实验证需单独记录
+
 ## Commands
 
 ```bash
@@ -45,11 +55,23 @@ uv run pyright
 | `docs/ark/validation.md` | 完成验证后 |
 | `docs/ark/handoff.md` | 阶段暂停或会话结束前 |
 
+## Extension Docs
+
+详细方案、专题设计、接口契约、集成说明、数据源元信息等不写入 `docs/ark/`。
+按需使用 `/ark:ark-solution` 写入项目自有扩展文档：
+
+- `docs/solution/`：专题详细方案
+- `docs/design/`：模块或子系统详细设计
+- `docs/contracts/`：HTTP/MCP/API/CLI/SDK/文件格式/事件契约
+- `docs/integrations/`：外部系统接入
+- `docs/data-sources/`：数据源元信息（不存放数据内容）
+
 ## Working Pattern
 
 1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
 2. 改动完成后更新对应 Artifact（tasks / validation / decisions）
-3. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
+3. 对涉及真实依赖、真实数据或公开契约的任务，优先建立最小真实闭环
+4. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
 
 ## Code Style
 
@@ -68,6 +90,7 @@ uv run pyright
 - 测试函数命名：`test_<function>_<scenario>_<expected>`
 - 公共 fixture 放在 `tests/conftest.py`
 - 每个新增的公开函数都必须有对应测试
+- 区分 mock/fake 测试与真实组件、真实数据样例或最小真实闭环验证
 
 ## Commit Messages
 
@@ -94,3 +117,5 @@ chore: 工具链
 - 不要创建 `utils.py` 万能工具模块
 - 不要在测试中 `mock.patch` 内部实现，优先依赖注入
 - 不要未读 `docs/ark/tasks.md` 就开始编码
+- 不要把 mock/fake/in-memory/合成数据结果描述为真实验证通过
+- 不要把敏感数据、密钥、连接串或大体量数据内容写入 ARK 文档

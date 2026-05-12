@@ -4,7 +4,7 @@
 
 ark 的全称是 **Artifact-driven Reactive Kernel**。
 
-ark 是一套面向个人软件开发工作流的 Claude Code Skill 系统，主要聚焦于 **Python 后端工程研发**。
+ark 是一套面向个人软件开发工作流的 Claude Code Skill 系统。它默认服务于 Python 工程实践，同时通过项目画像兼容后端服务、库/SDK、CLI、前端、数据/AI、插件和混合型项目。
 
 ark 不是一组零散 prompt 的集合，而是一套可复用的工作内核，结合了：
 
@@ -18,8 +18,9 @@ ark 不是一组零散 prompt 的集合，而是一套可复用的工作内核�
 1. 将复杂任务转化为可恢复、可追踪的文件化进展
 2. 减少长任务或中断任务中的上下文丢失
 3. 提供稳定但轻量的工程工作流
-4. 支持 Python 后端项目从初始化到交付的全过程
+4. 支持 Python 工程项目从初始化到交付的全过程，并通过项目画像适配不同项目类型
 5. 让计划、决策和验证结果清晰可见、可审计
+6. 让实现尽早进入与项目类型匹配的真实运行闭环，而不是长期停留在占位代码或替身环境中
 
 ## 核心原则
 
@@ -46,6 +47,13 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 ### 5. Validation Is Part of the Work
 没有验证记录，不宣称完成。验证意识是实施工作的内置环节，不是可选附件。
 
+### 6. Reality Anchored
+计划、任务、实现和验证必须围绕项目的真实入口、真实依赖、真实数据源或真实契约建立最小闭环。
+
+不同项目的真实性锚点不同：后端服务关注启动入口、配置、外部依赖和 API；库关注安装、导入和公开契约；CLI 关注真实命令、文件输入和退出码；数据/AI 项目关注数据源元信息、样例范围和处理链路。
+
+项目数据由项目自身管理。ARK 只记录数据源元信息和验证证据，不托管数据内容。
+
 ## 强制行为约束
 
 以下是 ark 下 Claude 必须遵守的行为规则：
@@ -69,6 +77,7 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 | 用户意图 | 优先激活 |
 |---------|---------|
 | 新需求、新功能、添加能力、目标未澄清 | ark-intake |
+| 专题方案、详细设计、接口契约、集成方案、数据源元信息 | ark-solution |
 | 实现已有 plan/task/batch、按计划继续开发 | ark-implement |
 | bug、报错、异常、失败 | ark-debug |
 | 继续、推进、不确定当前该做什么 | ark-next |
@@ -113,6 +122,8 @@ Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handof
 
 流程说明：`intake` 只负责澄清、分流和建议落盘位置，不直接写入 Artifact。流程中的 Artifact 写入由 `spec`、`design`、`plan`、`tasks`、`validate`、`handoff`、`decide` 等对应 Skill 完成。
 
+详细方案、专题设计、契约、集成和数据源元信息不写入 `docs/ark/` 核心 Artifact；按需由 `ark-solution` 写入项目自有扩展文档目录，并由 `ark-design` 建立摘要和索引。
+
 ### 小任务
 
 典型示例：小 bug 修复、定点代码修改、补一两个测试
@@ -123,19 +134,19 @@ Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handof
 
 典型示例：已有模块上的新功能、中等规模重构、组件替换
 
-推荐流程：`intake → plan → design（如需要）→ implement → test → validate`
+推荐流程：`intake → design/solution（如需要）→ plan → implement → test → validate`
 
 ### 大任务
 
 典型示例：新项目初始化、架构调整、多阶段重构、长期演进任务
 
-推荐流程：`init → spec → design → plan → tasks → implement → test → validate → handoff`
+推荐流程：`init → spec → design → solution（按需）→ plan → tasks → implement → test → validate → handoff`
 
 ### 项目接手
 
 典型示例：接手已有项目、在现有代码库上启用 ark 工作流、需要对陌生代码库建立全局认知后推进开发
 
-推荐流程：`init（已有模式）→ analyze → spec（审查确认）→ design（审查确认）→ plan → implement → test → validate → handoff`
+推荐流程：`init（已有模式）→ analyze → spec（审查确认）→ design → solution（按需确认细节）→ plan → implement → test → validate → handoff`
 
 > 任务规模判断见 `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md`
 
@@ -155,6 +166,10 @@ Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handof
 
 > 每个 Artifact 的职责边界与回写协议见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`
 
+扩展文档是项目自有文档，不属于 7 个核心 Artifact。详细规则见 `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md`。
+
+项目画像、真实性锚点、数据源元信息和验证保真度规则见 `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md`。
+
 ## 非目标
 
 ark 不追求成为：
@@ -163,3 +178,4 @@ ark 不追求成为：
 - 团队治理平台
 - 覆盖所有语言的通用系统
 - 一键全自动黑盒工具
+- 项目数据托管或数据目录管理工具

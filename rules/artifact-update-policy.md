@@ -2,6 +2,7 @@
 
 本文件定义 ark 中各 Artifact 的回写条件与禁止性约束。
 各 Artifact 的职责边界与「不应用于」说明见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-roles.md`。
+扩展文档不属于核心 Artifact，其写入规则见 `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md`。
 
 ## 核心原则
 
@@ -90,6 +91,34 @@
 
 ---
 
+## 扩展文档回写条件
+
+扩展文档包括 `docs/solution/*`、`docs/design/*`、`docs/contracts/*`、`docs/integrations/*`、`docs/data-sources/*`、`docs/operations/*`、`docs/runbooks/*`、`docs/migration/*`、`docs/security/*`、`docs/research/*`、`docs/examples/*` 等项目自有文档。
+
+主更新者：`/ark:ark-solution`
+
+允许更新：
+- 专题详细方案
+- 模块级或组件级详细设计
+- HTTP/MCP/API/CLI/SDK/文件格式/事件契约
+- 外部系统集成说明
+- 数据源元信息（位置、格式、脱敏状态、样例范围、访问方式），不包含数据内容
+- 运维、迁移、安全、调研、示例等专题文档
+
+其他 Skill 通常只识别扩展文档漂移并建议更新：
+- `/ark:ark-implement`：实现改变专题方案、详细设计、接口契约、集成方式或数据源使用方式时，建议 `/ark:ark-solution`
+- `/ark:ark-debug`：修复证明扩展文档中的失败语义、契约、集成假设或数据说明过期时，建议 `/ark:ark-solution`
+- `/ark:ark-refactor`：重构改变模块级详细设计或契约组织时，建议 `/ark:ark-solution`
+- `/ark:ark-sync`：检查扩展文档索引与文件现实，输出可信度摘要并建议 `/ark:ark-solution`
+- `/ark:ark-design`：维护 `docs/ark/design.md` 中的扩展文档索引和全局摘要，不代替 `/ark:ark-solution` 写专题正文
+
+禁止：
+- 把扩展文档正文写入 `docs/ark/spec.md` 或 `docs/ark/design.md`
+- 把 `data-sources` 当成数据托管目录
+- 将探索性 research 文档直接当作 active 设计依据，除非已被 spec/design 或 decisions 确认
+
+---
+
 ## 实施过程中的回写规则
 
 ### `/ark:ark-implement`
@@ -98,6 +127,7 @@
 - 出现关键技术取舍 → 建议更新 `docs/ark/decisions.md`（不强制直接写入）
 - 本次实现改变需求范围、验收标准、对外能力或非目标边界 → 建议 `/ark:ark-spec`，不直接回写 `docs/ark/spec.md`
 - 本次实现改变模块边界、接口契约、数据流、运行时机制、资源生命周期、并发/降级策略 → 建议 `/ark:ark-design`，不直接回写 `docs/ark/design.md`
+- 本次实现改变专题方案、详细设计、接口契约、集成方式、数据源元信息或替身边界 → 建议 `/ark:ark-solution`，不直接回写扩展文档
 
 **plan.md 回写触发样例：**
 
@@ -127,6 +157,7 @@
 - 新的阻塞或诊断任务出现 → 更新 `docs/ark/tasks.md`
 - 修复路径引入重要取舍 → 建议更新 `docs/ark/decisions.md`
 - 修复暴露需求边界、验收标准、错误语义或设计假设过期 → 建议 `/ark:ark-spec` 或 `/ark:ark-design`
+- 修复证明扩展文档中的专题方案、契约、集成假设或数据源说明过期 → 建议 `/ark:ark-solution`
 
 ### `/ark:ark-refactor`
 - 重构范围超出预期 → 更新 `docs/ark/plan.md`
@@ -134,6 +165,7 @@
 - 引入不可逆结构性选择 → 建议更新 `docs/ark/decisions.md`
 - 重构改变设计现实但不改变需求承诺 → 建议 `/ark:ark-design`
 - 重构过程中发现外部行为或能力边界实际发生变化 → 停止扩大重构范围，建议 `/ark:ark-spec` 或 `/ark:ark-design` 重新确认
+- 重构改变扩展文档覆盖的模块级详细设计、契约组织或专题方案 → 建议 `/ark:ark-solution`
 
 ### `/ark:ark-review`
 - 发现严重问题导致计划需要调整 → 建议更新 `docs/ark/plan.md`
@@ -148,6 +180,8 @@
 - validation 漏记关键结果
 - spec.md 的范围、能力承诺、验收标准、外部接口与代码现实或 plan/tasks 不一致
 - design.md 的模块结构、接口边界、数据流、关键运行机制与代码现实不一致
+- design.md 的扩展文档索引与项目实际扩展文档不一致
+- 扩展文档正文与核心 Artifact 或代码现实不一致
 
 ### `/ark:ark-analyze`
 - 首次分析已有代码库 → 预填充 `docs/ark/spec.md`（当前系统在做什么）
@@ -164,6 +198,8 @@
 4. **plan 不是 validation 的替代品**：计划中的「准备怎么验」不能等同于「已经验证」
 5. **冲突必须先显式化**：若发现文档与实现冲突，必须先指出冲突，再修正，不得直接跳过
 6. **不得将推测写成结论**：所有 Artifact 内容必须区分事实与推断
+7. **核心 Artifact 不承载扩展正文**：详细方案、专题设计、契约、数据源元信息等不得塞入 `docs/ark/*`
+8. **不得托管项目数据**：ARK 只记录数据源元信息和验证证据，不写入敏感数据或大体量数据内容
 
 ---
 

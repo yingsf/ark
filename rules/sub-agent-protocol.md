@@ -7,7 +7,7 @@ description: sub-agent 写权限隔离、输出格式、复核流程，确保主
 
 ## 适用范围
 
-ark-analyze (scanner)、ark-validate (evidence collector)、ark-implement (batch worker)
+ark-analyze (scanner)、ark-validate (evidence collector)、ark-implement (batch worker)、ark-solution（仅在主 agent 明确分配独立扩展文档写集时）
 
 ## 写权限
 
@@ -16,10 +16,13 @@ ark-analyze (scanner)、ark-validate (evidence collector)、ark-implement (batch
 | analyze scanner | 无（只返回结果） | 所有文件 |
 | validate collector | 无（只返回结果） | 所有文件 |
 | implement worker | batch write set 内的源文件 | docs/ark/*、.claude/*、write set 外的文件 |
+| solution writer | 明确分配的扩展文档 write set | docs/ark/*、源代码、write set 外的文件 |
 
 统一规则：**任何 sub-agent 不写 docs/ark/* 下任何文件。所有核心 Artifact 由主 agent 统一写入。**
 
-## Write Set 审计（仅 implement worker）
+扩展文档虽可由 `ark-solution` 管理，但 sub-agent 只能在主 agent 明确指定的扩展文档 write set 内写入，且不得写项目数据内容。
+
+## Write Set 审计（implement worker / solution writer）
 
 每个 batch 执行前：
 1. 主 agent 记录 **batch write set**（该 batch 声明要修改的文件列表）

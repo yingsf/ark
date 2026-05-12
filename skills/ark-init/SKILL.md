@@ -30,6 +30,7 @@ version: "1.0"
 ## 建议确认的输入
 - Python version：默认 `3.12`，可选范围 `3.10`–`3.14`
 - 是否创建 pytest 测试（默认启用）
+- 项目类型画像：backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown（Mode A 需确认；Mode B 先扫描推断，必要时请用户确认）
 
 ## 输出文件
 `.gitignore`、`pyproject.toml`、`README.md`、`CHANGELOG.md`、`CLAUDE.md`、`MEMORY.md`、
@@ -44,6 +45,8 @@ version: "1.0"
 自动创建完整的 7 个核心 Artifact：
 `docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`、
 `docs/ark/decisions.md`、`docs/ark/validation.md`、`docs/ark/handoff.md`
+
+扩展文档目录（如 `docs/solution/`、`docs/contracts/`、`docs/data-sources/`）不由 init 默认创建；仅在后续 `/ark:ark-solution` 按需生成。
 
 ## 目标目录结构
 ```
@@ -93,6 +96,32 @@ Agent tool 可用性不在此时探测，由各 Skill 执行时检查工具集�
 Mode A（全新项目）：生成能力快照。
 Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确认后更新；未确认时只在输出摘要中报告当前探测结果，不写文件。若 CLAUDE.md 不存在则正常生成。
 
+## ARK 项目画像
+
+初始化时应在 `CLAUDE.md` 中写入或建议写入轻量项目画像（见 `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md`）：
+
+```markdown
+## ARK 项目画像
+<!-- ark-init: 初始快照；后续由 ark-analyze / ark-sync 按真实项目演进建议更新 -->
+- 项目类型：backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown
+- 运行入口：待确认 / <实际入口>
+- 真实性锚点：<最小真实闭环，例如服务启动 + 配置加载 + 核心 API 调用>
+- 数据源：无 / 项目外部管理 / 本地路径元信息待确认（ARK 不托管数据内容）
+- 外部依赖：无 / 待确认 / <数据库、搜索、第三方 API 等>
+- 契约边界：HTTP / MCP / CLI / SDK / 文件格式 / 事件 / 待确认
+- 替身边界：mock/fake/in-memory 仅用于测试或短期替代，真实验证需单独记录
+```
+
+Mode A 项目画像：
+- 必须询问项目类型；若用户不确定，可写 `unknown`，并建议后续 `/ark:ark-analyze` 或 `/ark:ark-intake`
+- 不得因为用户选择 data-AI 而创建 `data/` 目录；数据由项目管理
+- 若是 library/CLI 等无外部基础设施项目，真实性锚点应围绕安装、导入、命令执行或公开契约，而不是数据库
+
+Mode B 项目画像：
+- 基于实际文件推断项目类型、入口、依赖、数据源信号和契约边界
+- 若 `CLAUDE.md` 已存在且非空，未获确认不得静默追加；只在输出中建议追加"ARK 项目画像"章节
+- 推断必须标注不确定项，不得把目录名暗示写成确定结论
+
 ## 核心原则
 - 除了 `__init__.py`，不要创建其他 `.py` 文件
 - 包名目录必须是合法的 Python 标识符
@@ -135,7 +164,7 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 - 检测 Git 仓库状态
 
 ### 第二步：交互确认
-收集并确认项目名、目标目录、Python 版本、是否启用测试。
+收集并确认项目名、目标目录、Python 版本、是否启用测试、项目类型画像。
 
 ### 第三步：选择执行路径
 
@@ -218,7 +247,8 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 4. 识别技术栈（框架、关键依赖、工具链）。
 5. 推断项目名：`pyproject.toml` 中的 `name` 字段 > 根目录下的包目录名 > 当前目录名。
 6. 观察已有代码中的 docstring 和注释风格（语言、是否使用 Google 风格、公共接口说明充分度），只做轻量采样，不批量改代码。
-7. 将扫描结果用于生成 `CLAUDE.md`。
+7. 识别项目类型、运行入口、外部依赖、契约边界和数据源信号；数据源只记录元信息，不读取或复制数据内容。
+8. 将扫描结果用于生成 `CLAUDE.md`。
 
 #### B-第二步：创建工作流文件
 只创建不存在的文件；若文件存在但为空或仅含空行，视为可初始化对象。不触碰已有代码结构。
@@ -232,6 +262,7 @@ Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
 - 若现有项目已有明确 docstring / 注释风格，记录并延续该风格
 - 若未观察到明确风格或风格混乱，写入 ARK 默认中文 Google 风格作为后续新增/修改代码的默认约定
 - 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认覆盖或追加后才修改
+- 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"ARK 项目画像"章节，用户确认后才修改
 - 不批量修改任何已有源码注释
 
 **不触碰（任何情况下不得修改）：**
@@ -243,10 +274,10 @@ Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
 #### B-第三步：处理冲突
 对每个已存在的工作流文件（`CLAUDE.md`、`MEMORY.md`、`docs/` 下的文件）：若为空或仅含空行则直接初始化；若非空则询问处理方式。
 
-- `CLAUDE.md`：覆盖 / 追加"Documentation & Comments"章节 / 跳过
+- `CLAUDE.md`：覆盖 / 追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 跳过
 - 其他工作流文件：覆盖 / 跳过
 
-追加章节只用于补充 Mode B 扫描得到的注释/docstring 风格约定，不得重写用户已有内容。
+追加章节只用于补充 Mode B 扫描得到的注释/docstring 风格约定或 ARK 项目画像，不得重写用户已有内容。
 
 #### B-第三点五步：质量工具配置（Inspect & Respect）
 
@@ -292,6 +323,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 除了 `__init__.py`，不应创建其他 `.py` 文件
 - docs/ Artifact 必须自动创建
 - `CLAUDE.md` 应包含中文 Google 风格 docstring 与中文注释规范
+- `CLAUDE.md` 应包含 ARK 项目画像；数据源只记录元信息，不创建或托管数据目录
 - uv 不可用或命令失败不应导致整个流程中断
 - `.gitignore` 创建必须在 `uv init` 之后执行
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
@@ -300,6 +332,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 不得修改任何已有代码文件或项目配置
 - `CLAUDE.md` 必须基于真实项目结构生成
 - `CLAUDE.md` 必须体现注释风格扫描结果：延续既有风格，或在无明确风格时采用 ARK 默认中文 Google 风格
+- `CLAUDE.md` 应生成或建议追加 ARK 项目画像，包含项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息
 - docs/ Artifact 必须自动创建
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
 
@@ -331,6 +364,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | MEMORY.md | 使用模板 / 使用 fallback |
 | docs/ Artifact | 使用模板 / 使用空文件 |
 | 质量工具安装 | 已安装 / 跳过（原因）|
+| 项目画像 | 已写入 / 待确认 / unknown |
 
 #### 3. 目录树
 输出简洁的最终目录树。
@@ -346,6 +380,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 项目布局类型
 - 技术栈（框架、关键依赖）
 - 包名与 Python 版本
+- 项目类型画像：类型、运行入口、真实性锚点、外部依赖、契约边界、数据源元信息
 - 注释/docstring 风格：已识别既有风格 / 未发现明确约定，采用 ARK 默认中文 Google 风格 / 未扫描（原因）
 
 #### 2. 执行结果
@@ -357,6 +392,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | docs/ Artifact | 使用模板 / 使用空文件 / 跳过（已存在）|
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|
 | 能力探测 | 已写入 / 用户未确认，仅报告 / 跳过（原因）|
+| 项目画像 | 已写入 / 用户未确认，仅报告 / 待后续 analyze |
 
 #### 3. 下一步
 - **强烈建议**：`/ark:ark-analyze`（理解代码库并预填充 artifact）

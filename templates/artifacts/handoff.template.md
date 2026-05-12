@@ -38,6 +38,17 @@ YYYY-MM-DD
 - `docs/ark/decisions.md`：fresh / stale / conflicting / unknown
 - `docs/ark/validation.md`：fresh / stale / conflicting / unknown
 
+## 扩展文档信任状态
+<!-- 对 solution/design/contracts/data-sources 等扩展文档标注可信度；无扩展文档可写“无” -->
+- 无
+
+## 真实性锚点状态
+- 项目类型：
+- 最小真实闭环：已建立 / 部分建立 / 未建立 / 不适用
+- 真实入口：
+- 真实依赖 / 数据源 / 契约：
+- 替身边界：
+
 ## 恢复顺序
 <!-- 明确下次会话的恢复动作序列，比"关键文件"更强 -->
 1. 先读 `docs/ark/{artifact}` — 原因

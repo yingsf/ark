@@ -229,6 +229,16 @@ All notable changes to this project will be documented in this file.
 <project_name> 是一个 Python 项目，使用 src layout，包名为 `<project_name>`。
 本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
 
+## ARK 项目画像
+<!-- ark-init: 初始快照；后续由 ark-analyze / ark-sync 按真实项目演进建议更新 -->
+- 项目类型：unknown
+- 运行入口：待确认
+- 真实性锚点：待确认
+- 数据源：无 / 项目外部管理 / 本地路径元信息待确认（ARK 不托管数据内容）
+- 外部依赖：无 / 待确认
+- 契约边界：HTTP / MCP / CLI / SDK / 文件格式 / 事件 / 待确认
+- 替身边界：mock/fake/in-memory 仅用于测试或短期替代，真实验证需单独记录
+
 ## Commands
 
 文件级（日常编辑）：
@@ -258,11 +268,23 @@ uv run pyright
 | `docs/ark/validation.md` | 完成验证后 |
 | `docs/ark/handoff.md` | 阶段暂停或会话结束前 |
 
+## Extension Docs
+
+详细方案、专题设计、接口契约、集成说明、数据源元信息等不写入 `docs/ark/`。
+按需使用 `/ark:ark-solution` 写入项目自有扩展文档：
+
+- `docs/solution/`：专题详细方案
+- `docs/design/`：模块或子系统详细设计
+- `docs/contracts/`：HTTP/MCP/API/CLI/SDK/文件格式/事件契约
+- `docs/integrations/`：外部系统接入
+- `docs/data-sources/`：数据源元信息（不存放数据内容）
+
 ## Working Pattern
 
 1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
 2. 改动完成后更新对应 Artifact（tasks / validation / decisions）
-3. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
+3. 对涉及真实依赖、真实数据或公开契约的任务，优先建立最小真实闭环
+4. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
 
 ## Code Style
 
@@ -274,6 +296,11 @@ uv run pyright
 - 导入顺序：stdlib → third-party → local，之间用空行分隔
 - 优先使用 `pathlib.Path` 而非 `os.path`
 - 异常处理不要裸 `except:`，至少捕获 `Exception`
+
+## Do NOT
+
+- 不要把 mock/fake/in-memory/合成数据结果描述为真实验证通过
+- 不要把敏感数据、密钥、连接串或大体量数据内容写入 ARK 文档
 ````
 
 ---
@@ -292,6 +319,8 @@ uv run pyright
 - `${CLAUDE_PLUGIN_ROOT}/rules/python-backend-conventions.md` - 编码规范
 - `${CLAUDE_PLUGIN_ROOT}/rules/artifact-roles.md` - Artifact 职责速查
 - `${CLAUDE_PLUGIN_ROOT}/rules/capability-policy.md` - 能力降级策略
+- `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md` - 项目画像、真实性锚点与验证保真度
+- `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md` - 扩展文档承载规则
 - `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md` - Sub-agent 写权限隔离
 - `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md` - 任务规模快速判断
 

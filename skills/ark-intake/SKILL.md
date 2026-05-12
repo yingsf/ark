@@ -59,6 +59,7 @@ version: "1.0"
 3. 识别已知假设，明确标注哪些是假设、哪些是事实。
 4. 判断任务规模：small / medium / large（依据 `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md`）。
 5. 根据规模映射出推荐的流程路径。若任务涉及理解陌生代码库或接手已有项目，推荐路径应以 `/ark:ark-analyze` 为起点。
+6. 若任务明显需要专题方案、接口契约、集成说明或数据源元信息，推荐 `/ark:ark-solution` 作为下游落盘入口；intake 本身不写扩展文档。
 
 ### 步骤四：Artifact 反馈分流
 
@@ -77,6 +78,7 @@ version: "1.0"
 |----------|------------|
 | 需求目标、范围、非目标、能力边界、验收标准 | `/ark:ark-spec` |
 | 技术方案、模块关系、接口边界、数据流、权衡 | `/ark:ark-design` |
+| 专题详细方案、接口契约、集成说明、数据源元信息 | `/ark:ark-solution` |
 | 阶段顺序、执行步骤、风险、验证策略 | `/ark:ark-plan` |
 | 任务状态、优先级、Doing / Done / Blocked | `/ark:ark-tasks` |
 | 验证结果、未覆盖项、风险结论 | `/ark:ark-validate` |
@@ -151,7 +153,7 @@ version: "1.0"
 ### 3. 规模判断
 **规模：** small / medium / large
 **依据：** 列出判断依据（影响范围、风险、跨会话性等）
-**推荐流程：** `intake → plan → ...`
+**推荐流程：** small 用 `intake → implement/debug → test → validate`；medium/large 按缺口选择 `intake → spec（如需要）→ design/solution（如需要）→ plan → ...`
 
 ### 4. 已知约束
 ### 5. 假设（明确标注）
@@ -163,6 +165,7 @@ version: "1.0"
 
 **建议落盘位置：**
 - `docs/ark/spec.md`：由 `/ark:ark-spec` 写入，内容摘要：...
+- `docs/solution/*` / `docs/contracts/*` / `docs/data-sources/*`：由 `/ark:ark-solution` 写入，内容摘要：...
 - `docs/ark/plan.md`：由 `/ark:ark-plan` 写入，内容摘要：...
 - 无需落盘：原因：...
 
@@ -180,3 +183,5 @@ version: "1.0"
 模糊输入不是用户的错误——用户可能不知道如何表达需求。intake 的职责是提供合适的脚手架，帮助用户把模糊意图转化为可操作的技术请求，而不是在模糊输入面前停摆或强行猜测执行。
 
 intake 只负责澄清、分流和整理下游输入，不负责正式写入 Artifact。规格、设计、计划、任务、验证、交接和决策的落盘分别由对应 Skill 完成。
+
+专题方案、接口契约、集成和数据源元信息由 `/ark:ark-solution` 写入项目自有扩展文档；`intake` 只负责识别并推荐。

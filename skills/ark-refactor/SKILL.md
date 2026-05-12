@@ -36,6 +36,7 @@ version: "1.0"
 - 可引用 `docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`
 - 若重构改变设计现实：建议 `/ark:ark-design`，不得直接回写 `design.md`
 - 若重构发现外部行为或能力边界实际变化：停止扩大重构范围，建议 `/ark:ark-spec` 或 `/ark:ark-design`
+- 若重构改变专题详细设计、契约组织、集成方式或数据源元信息：建议 `/ark:ark-solution`
 - 应为 `docs/ark/validation.md` 提供输入
 
 ## 工作流
@@ -44,7 +45,7 @@ version: "1.0"
 3. 采用渐进式重构。
 4. 避免把新功能混入同一次重构。
 5. 在需要时加强回归安全网。
-6. 检查是否出现 spec/design 漂移：重构应保持外部行为稳定；若设计现实变化则建议 `/ark:ark-design`，若外部行为边界变化则停止并建议重新确认。
+6. 检查是否出现 spec/design/extension 漂移：重构应保持外部行为稳定；若设计现实变化则建议 `/ark:ark-design`，若扩展文档现实变化则建议 `/ark:ark-solution`，若外部行为边界变化则停止并建议重新确认。
 
 ## 验证要求
 - 不变行为必须显式化
@@ -52,6 +53,7 @@ version: "1.0"
 - 若存在混合 scope，应主动指出
 - 若模块边界、依赖方向、接口组织、资源生命周期发生变化，应建议 `/ark:ark-design`
 - 若外部行为、能力范围、验收标准发生变化，不得继续把它当作纯重构；应建议 `/ark:ark-spec` 或 `/ark:ark-design`
+- 若专题详细设计、接口契约、集成方式或数据源元信息发生变化，应建议 `/ark:ark-solution`
 
 ## 停止条件
 - 结构目标得到改善，且行为变化风险处于可接受范围
@@ -83,6 +85,7 @@ version: "1.0"
 ### 5.5 Artifact 更新建议
 - `design.md`：建议 `/ark:ark-design` / 无需更新
 - `spec.md`：建议 `/ark:ark-spec` / 无需更新
+- 扩展文档：建议 `/ark:ark-solution` / 无需更新
 
 ### 6. 建议下一步
 - 通常：`/ark:ark-test` → `/ark:ark-validate`

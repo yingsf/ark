@@ -24,6 +24,7 @@ version: "1.0"
 
 ## 输入
 - 当前仓库状态、`docs/ark/handoff.md`、`docs/ark/tasks.md`、`docs/ark/plan.md`、`docs/ark/validation.md`
+- 项目画像、`docs/ark/spec.md`、`docs/ark/design.md`、扩展文档索引（如存在）
 
 ## 输出
 - 当前阶段判断、当前最重要的未完成项、当前阻塞项、推荐下一步动作与 Skill
@@ -37,18 +38,20 @@ version: "1.0"
 3. 再读取 `plan`，判断当前所在阶段。
 4. 再读取 `validation`，检查是否存在未验证实现。
 5. 再读取 `spec` 和 `design`，了解项目已确认的规格与架构。
-6. 依据裁决优先级序列判断下一步。
-7. 给出最小但清晰的下一步建议。
+6. 检查扩展文档索引和项目真实性锚点状态。
+7. 依据裁决优先级序列判断下一步。
+8. 给出最小但清晰的下一步建议。
 
 ## 裁决优先级序列
 
 推荐策略表前，必须按以下顺序逐项裁决：
 
 1. **判状态可信性** — Artifact 之间存在明显冲突（如 handoff 与 tasks 阶段判断相反、spec/design 与 plan/tasks 或文件现实明显冲突）→ 优先 `/ark:ark-sync`
-2. **判验证闭环** — Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
-3. **判规格/设计更新** — 已明确是需求边界、验收标准、能力承诺变化 → `/ark:ark-spec`；已明确是模块边界、接口契约、数据流或运行机制变化 → `/ark:ark-design`
-4. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
-5. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design` 或 `/ark:ark-intake`
+2. **判真实性锚点** — tasks 已推进较多但真实入口、真实依赖、真实数据源或公开契约仍无闭环，或 validation 把替身当真实通过 → 优先 `/ark:ark-sync`；若原因已明确是计划缺口 → `/ark:ark-plan`
+3. **判验证闭环** — Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
+4. **判规格/设计/扩展文档更新** — 已明确是需求边界、验收标准、能力承诺变化 → `/ark:ark-spec`；已明确是模块边界、接口契约、数据流或运行机制变化 → `/ark:ark-design`；已明确是专题方案、契约、集成或数据源元信息变化 → `/ark:ark-solution`
+5. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
+6. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design`、`/ark:ark-solution` 或 `/ark:ark-intake`
 
 ## 推荐策略
 
@@ -56,6 +59,8 @@ version: "1.0"
 |------|------------|
 | handoff 与 tasks 状态矛盾 | `/ark:ark-sync` |
 | spec/design 与 plan/tasks 或文件现实明显冲突 | `/ark:ark-sync` |
+| 扩展文档或 design 索引与文件现实冲突 | `/ark:ark-sync` 或 `/ark:ark-solution` |
+| 真实基础设施、数据源或公开契约长期未进入闭环 | `/ark:ark-sync` 或 `/ark:ark-plan` |
 | 功能已实现但无验证记录 | `/ark:ark-validate` |
 | 目标清晰、Doing 明确、无阻塞 | `/ark:ark-implement` |
 | 当前阶段准备暂停 | `/ark:ark-handoff` |
@@ -64,6 +69,7 @@ version: "1.0"
 | 需求明确但无执行计划 | `/ark:ark-plan` |
 | 需要补充或更新需求规格（范围、验收、能力承诺明确变化） | `/ark:ark-spec` |
 | 需要更新技术设计（模块边界、接口契约、数据流、运行机制明确变化） | `/ark:ark-design` |
+| 需要补充专题方案、接口契约、集成或数据源元信息 | `/ark:ark-solution` |
 | 实现已完成，合并前需评审 | `/ark:ark-review` |
 
 ## 固定输出格式
@@ -71,8 +77,9 @@ version: "1.0"
 ### 1. 当前阶段
 ### 2. 当前最重要的未完成项
 ### 3. 当前阻塞
-### 4. 推荐下一步
-### 5. 推荐 Skill
+### 4. 真实性锚点状态
+### 5. 推荐下一步
+### 6. 推荐 Skill
 
 ## 备注
 `/ark:ark-next` 不是重新做全套规划，而是帮助在当前状态下找到最合理的下一步。

@@ -64,6 +64,7 @@ ARK 通过路由倾向工作：描述你的任务，Claude 会优先倾向匹配
 - 写代码 / 实现功能 → ark-implement
 - 审查代码变更 → ark-review
 - 不确定下一步 → ark（查看状态）或 ark-next（裁决下一步）
+- 写专题方案、接口契约、集成或数据源元信息 → ark-solution
 
 `ark-intake` 只负责澄清、分流和建议落盘位置，不直接写入 Artifact；正式写入由 `ark-spec`、`ark-plan` 等对应 Skill 完成。
 
@@ -77,18 +78,31 @@ ARK 通过路由倾向工作：描述你的任务，Claude 会优先倾向匹配
 - validation.md — 验证了什么、证据是什么
 - handoff.md — 下次从哪里继续
 
+扩展文档不属于 7 个核心 Artifact。详细方案、专题设计、契约、集成和数据源元信息由 `ark-solution` 写入项目自有目录，例如 `docs/solution/`、`docs/contracts/`、`docs/data-sources/`。
+
 ### 小任务和大任务流程有什么区别？
 
 - Small：intake → implement/debug → test → validate
-- Medium：intake → plan → implement → test → validate
-- Large：init → spec → design → plan → tasks → implement → test → validate → handoff
+- Medium：intake → design/solution（如需要）→ plan → implement → test → validate
+- Large：init → spec → design → solution（按需）→ plan → tasks → implement → test → validate → handoff
 
 ### 接手一个已有项目怎么开始？
 
 1. ark-init Mode B（植入工作流，不碰代码）
 2. ark-analyze（扫描代码库，建立全局认知）
 3. ark-spec / ark-design（审查确认 analyze 的预填充结果）
-4. ark-plan（制定推进计划）
+4. ark-solution（如需要专题方案、契约、集成或数据源元信息）
+5. ark-plan（制定推进计划）
+
+### ark-solution 和 ark-design 有什么区别？
+
+- `ark-design` 维护 `docs/ark/design.md`，负责全局设计摘要、模块边界和扩展文档索引。
+- `ark-solution` 维护项目自有扩展文档，负责专题详细方案、详细设计、接口契约、集成说明和数据源元信息。
+- `ark-solution` 不直接修改 `docs/ark/*`；如果全局摘要或索引需要同步，它会建议后续执行 `ark-design`。
+
+### ARK 会管理 data 目录吗？
+
+不会。数据由项目自己管理，可能在本地目录、对象存储、测试夹具或外部系统中。ARK 只记录数据源元信息、脱敏状态、样例范围和验证证据，不托管数据内容。
 
 ## 与其他 Skill 的区别
 

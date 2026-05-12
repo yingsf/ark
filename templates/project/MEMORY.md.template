@@ -9,6 +9,8 @@
 - `${CLAUDE_PLUGIN_ROOT}/rules/python-backend-conventions.md` - 编码规范
 - `${CLAUDE_PLUGIN_ROOT}/rules/artifact-roles.md` - Artifact 职责速查
 - `${CLAUDE_PLUGIN_ROOT}/rules/capability-policy.md` - 能力降级策略
+- `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md` - 项目画像、真实性锚点与验证保真度
+- `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md` - 扩展文档承载规则
 - `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md` - Sub-agent 写权限隔离
 - `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md` - 任务规模快速判断
 
