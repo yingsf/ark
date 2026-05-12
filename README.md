@@ -218,7 +218,7 @@ Mode A 的执行重点：
 2. 创建 `src/` layout。
 3. 生成或补齐 `pyproject.toml`。
 4. 安装默认开发质量工具：ruff、pyright。
-5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json`。
+5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略）。
 6. 创建 `CLAUDE.md` 和 `MEMORY.md`。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
 8. 在 Artifact 顶部写入 schema 版本头。
@@ -247,7 +247,7 @@ my-api/
 │   └── conftest.py
 ├── .claude/
 │   ├── ruff-hook.py
-│   └── settings.local.json
+│   └── settings.local.json        # 本地辅助配置，默认不提交
 ├── .gitignore
 ├── CHANGELOG.md
 ├── CLAUDE.md
@@ -395,6 +395,8 @@ backend/
 └── settings.local.json
 ```
 
+`.claude/` 是本地辅助配置目录，默认被 ARK `.gitignore` 模板忽略，不作为必须提交的项目状态。团队如需共享 Claude Code 配置，应显式讨论后再调整 `.gitignore`。
+
 如果 `.claude/settings.local.json` 已存在且缺少 ARK hook，ARK 只会在用户确认后合并缺失的 hook/permissions，不覆盖已有字段。
 
 ### Mode B 默认不会做什么
@@ -421,7 +423,7 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | `pyrightconfig.json` | 不自动创建，只报告建议 |
 | `pyproject.toml [tool.ruff]` | 不自动追加，只报告建议 |
 | ruff / pyright 依赖 | 缺失时提示影响，用户确认后才安装 |
-| `.claude/settings.local.json` | 不存在时可生成；存在时确认后合并缺失 hook |
+| `.claude/settings.local.json` | 本地辅助配置；不存在时可生成，存在时确认后合并缺失 hook，默认不提交 |
 
 ### Mode B 输出示例
 
@@ -719,6 +721,8 @@ ARK 内置 9 个规则文件，通过项目 `MEMORY.md` 引用。
 ### Artifact 文件是否应该提交到 Git？
 
 通常应该提交。ARK 的核心价值就是让项目状态随代码演进，被版本控制记录下来。
+
+这条建议指 `docs/ark/*`、`CLAUDE.md`、`MEMORY.md` 等项目状态和规则入口；`.claude/` 是本地辅助配置，默认不提交。
 
 ### ARK 和 superpowers / GSD 有什么区别？
 

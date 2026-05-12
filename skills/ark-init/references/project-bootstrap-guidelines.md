@@ -89,6 +89,8 @@ my_project/                  # 项目根目录
 └── .venv/                   # 条件产物（由 uv 创建，不保证存在）
 ```
 
+`.claude/ruff-hook.py` 和 `.claude/settings.local.json` 可由初始化流程创建为 Claude Code 本地辅助文件，但默认被 `.gitignore` 忽略，不作为项目必须提交的结构。
+
 ## 核心原则
 
 ### 1. 最小化初始化
@@ -193,6 +195,9 @@ uv add pytest --dev  # 如启用测试
 - 备选：使用内联 fallback 内容
 
 **关键**：必须在 `uv init` 之后执行，避免被覆盖。
+
+ARK 模板默认忽略 `.claude/`。`.claude/ruff-hook.py` 与 `.claude/settings.local.json` 只服务本机 Claude Code hook，不应被描述为必须提交的文件。
+不得为了让 `.claude/` 文件在 `git status` 中可见而移除或绕过 `.gitignore` 中的 `.claude/` 忽略规则。
 
 ## CLAUDE.md
 
@@ -364,6 +369,8 @@ CLAUDE.md 应反映：
 - `.claude/settings.local.json`（本地配置，含 ruff hooks + permissions；hook 命令引用 `.claude/ruff-hook.py`）
 - `pyproject.toml` 中追加 `[tool.ruff]` 配置（如不存在）
 
+`.claude/` 默认保持本地可用但不纳入 Git。初始化输出不得建议提交 `.claude/ruff-hook.py` 或 `.claude/settings.local.json`。
+
 ##### Mode B（已有项目）：Inspect & Respect
 
 **文件分类：**
@@ -371,7 +378,7 @@ CLAUDE.md 应反映：
 | 类别 | 文件 | Mode B 策略 |
 |------|------|------------|
 | ARK 工作流文件 | CLAUDE.md、MEMORY.md、docs/* | 可创建（如不存在） |
-| 本地辅助配置 | .claude/ruff-hook.py、.claude/settings.local.json | 可创建（如不存在） |
+| 本地辅助配置 | .claude/ruff-hook.py、.claude/settings.local.json | 可创建（如不存在），默认不提交 |
 | 项目质量配置 | pyrightconfig.json、pyproject.toml [tool.ruff] | 默认不创建，只报告建议 |
 
 对 ARK 工作流文件和本地辅助配置执行三段式：
@@ -397,6 +404,8 @@ CLAUDE.md 应反映：
 | `.claude/ruff-hook.py` | 若需要生成或合并 `.claude/settings.local.json` 的 hooks，先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；已存在且内容一致时跳过 |
 | `.claude/settings.json` / `.claude/settings.local.json` | 检测是否含 `hooks.PostToolUse`。若均不存在，生成 `.claude/settings.local.json`（hook 命令引用 `.claude/ruff-hook.py`）；若 `settings.local.json` 已存在但缺 hooks，提供可选确认动作：将 ruff 文件级 hooks 合并追加（不覆盖已有字段，用户确认后执行）|
 | `pyproject.toml [tool.ruff]` | 不追加。检测是否存在，在摘要中报告"建议手动补充"并列出可参考字段 |
+
+Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件，但现有 `.gitignore` 未忽略 `.claude/`，只在输出摘要中建议用户按需添加 `.claude/`；不得自动追加，也不得提示必须提交这些文件。
 
 **关于 Ruff src 范围：** Mode B 输出中的 Ruff 范围建议基于 init 阶段的轻量扫描，仅为初步探测结果。建议用户执行 `/ark:ark-analyze` 后根据真实项目结构确认或补充完整范围（如加入 `tests/` 等）。
 

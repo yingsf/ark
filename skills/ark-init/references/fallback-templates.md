@@ -166,6 +166,9 @@ htmlcov/
 # Environment
 .env
 .env.local
+
+# Claude Code local helper files (not committed by default)
+.claude/
 ```
 
 ---

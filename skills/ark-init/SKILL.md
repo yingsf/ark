@@ -38,6 +38,8 @@ version: "1.0"
 
 > `.venv/` 由 uv 按需创建，不是保证产物。
 
+> `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 是 Claude Code 本地辅助文件，默认被 `.gitignore` 忽略，不作为必须提交的项目产物。
+
 ## 相关 Artifact
 自动创建完整的 7 个核心 Artifact：
 `docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`、
@@ -165,6 +167,9 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 3. **`.claude/settings.local.json`** — 本地配置，含 ruff hooks + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
 4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<project_name>`、`<source_and_test_dirs>`
 
+`.claude/` 目录默认由 ARK `.gitignore` 模板忽略。不得提示用户必须提交 `.claude/ruff-hook.py` 或 `.claude/settings.local.json`；若团队确实需要共享 Claude Code 配置，应由用户显式调整 `.gitignore`。
+不得为了让 `.claude/` 文件在 `git status` 中可见而移除或绕过 `.gitignore` 中的 `.claude/` 忽略规则。
+
 模板路径：
 - `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py`（复制到项目 `.claude/` 下）
 - `${CLAUDE_PLUGIN_ROOT}/templates/project/pyrightconfig.template.json`
@@ -242,6 +247,8 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 2. **`.claude/ruff-hook.py`** — 若 `.claude/settings.local.json` 需要生成或合并 hooks，则先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；已存在且内容一致时跳过
 3. **`.claude/settings.local.json`** — 不存在时直接生成（hook 命令引用 `.claude/ruff-hook.py`）；已存在但缺少 `hooks.PostToolUse` 时，提供可选确认动作：将 ruff 文件级 hooks 合并追加到已有配置（不覆盖用户已有的 permissions 等字段，用户确认后才执行）
 4. **`pyproject.toml [tool.ruff]`** — 绝不自动追加，仅报告建议
+
+Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件，但现有 `.gitignore` 未忽略 `.claude/`，只在输出摘要中建议用户按需添加 `.claude/`；不得自动追加，也不得提示必须提交这些文件。
 
 所有检测结果和跳过原因必须在输出摘要中体现。跳过原因应先说明 Mode B 制度分类（项目质量配置默认不创建），再补充具体仓库背景（如项目未纳入该文件等），不得以 gitignore 等非制度因素作为主判断依据。
 
