@@ -92,6 +92,8 @@ docstring-code-format = true
 
 ## .claude/settings.local.json（Mode A / Mode B 统一）
 
+PostToolUse hook 只执行文件级 `ruff format`。`ruff check --fix` 保留给 `/ark:ark-implement` 在批次完成等稳定点执行，不在每次编辑后自动运行。
+
 ```json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",

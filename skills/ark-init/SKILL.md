@@ -162,9 +162,9 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 
 基于探测变量（见 `references/project-bootstrap-guidelines.md` 的"变量探测规则"）生成以下文件：
 
-1. **`.claude/ruff-hook.py`** — 将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到目标项目的 `.claude/` 目录下。这是 hook 命令的执行入口，使用本地副本避免 `${CLAUDE_PLUGIN_ROOT}` 变量不展开的 bug。
+1. **`.claude/ruff-hook.py`** — 将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到目标项目的 `.claude/` 目录下。这是文件级 format hook 的执行入口，只执行 `ruff format`，使用本地副本避免 `${CLAUDE_PLUGIN_ROOT}` 变量不展开的 bug。
 2. **`pyrightconfig.json`** — 替换 `<python_version>`、`<source_and_test_dirs>` 为探测值
-3. **`.claude/settings.local.json`** — 本地配置，含 ruff hooks + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
+3. **`.claude/settings.local.json`** — 本地配置，含 ruff format hook + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
 4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<project_name>`、`<source_and_test_dirs>`
 
 `.claude/` 目录默认由 ARK `.gitignore` 模板忽略。不得提示用户必须提交 `.claude/ruff-hook.py` 或 `.claude/settings.local.json`；若团队确实需要共享 Claude Code 配置，应由用户显式调整 `.gitignore`。
@@ -244,7 +244,7 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 
 摘要：
 1. **`pyrightconfig.json`** — 不创建，仅报告探测结果和配置建议
-2. **`.claude/ruff-hook.py`** — 若 `.claude/settings.local.json` 需要生成或合并 hooks，则先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；已存在且内容一致时跳过
+2. **`.claude/ruff-hook.py`** — 若 `.claude/settings.local.json` 需要生成或合并 hooks，则先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；该 hook 只执行 `ruff format`；已存在且内容一致时跳过
 3. **`.claude/settings.local.json`** — 不存在时直接生成（hook 命令引用 `.claude/ruff-hook.py`）；已存在但缺少 `hooks.PostToolUse` 时，提供可选确认动作：将 ruff 文件级 hooks 合并追加到已有配置（不覆盖用户已有的 permissions 等字段，用户确认后才执行）
 4. **`pyproject.toml [tool.ruff]`** — 绝不自动追加，仅报告建议
 

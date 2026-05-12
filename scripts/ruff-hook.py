@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ARK ruff hook: format + lint fix on the edited file."""
+"""ARK ruff hook: format the edited file without lint auto-fix."""
 import json
 from pathlib import Path
 import subprocess
@@ -16,13 +16,14 @@ def main() -> None:
         if path.suffix not in {".py", ".pyi"}:
             return
 
-        for command in (
-            ["uv", "run", "ruff", "check", "--fix", file_path],
+        result = subprocess.run(
             ["uv", "run", "ruff", "format", file_path],
-        ):
-            result = subprocess.run(command, timeout=15, capture_output=True, text=True)
-            if result.returncode != 0:
-                sys.stderr.write(result.stderr or result.stdout)
+            timeout=15,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            sys.stderr.write(result.stderr or result.stdout)
     except Exception as exc:
         sys.stderr.write(f"ark ruff hook skipped: {exc}\n")
         pass

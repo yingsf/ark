@@ -218,7 +218,7 @@ Mode A 的执行重点：
 2. 创建 `src/` layout。
 3. 生成或补齐 `pyproject.toml`。
 4. 安装默认开发质量工具：ruff、pyright。
-5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略）。
+5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。
 6. 创建 `CLAUDE.md` 和 `MEMORY.md`。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
 8. 在 Artifact 顶部写入 schema 版本头。
