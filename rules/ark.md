@@ -104,9 +104,9 @@ ARK 插件更新后：
 
 ## Definition of Done
 
-Small 完成：目标达成 + 验证说明。
-Medium 完成：plan/tasks 更新 + validation 记录 + 关键状态同步。
-Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handoff 可恢复。
+Small 完成：目标达成 + 验证说明；若进入 tasks，Done 必须有 validation 证据。
+Medium 完成：plan/tasks 更新 + validation 记录 + 关键状态同步；实现完成但未验证时停在 Ready for validation。
+Large 完成：7 个核心 Artifact 状态一致 + validation 有证据 + handoff 可恢复；核心命题与不变量在 spec/design/plan/tasks 中保持承接。
 
 （后续如需细化可拆到独立规则文件）
 

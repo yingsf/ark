@@ -60,6 +60,8 @@ version: "1.0"
    - 判断每个关键 Artifact 的可信度（fresh/stale/conflicting/unknown）
    - 检查 `docs/ark/design.md` 中是否存在扩展文档索引，必要时查看索引目标是否存在
    - 检查项目画像和真实性锚点是否能解释当前 plan/tasks/validation
+   - 检查核心命题与不变量是否在 spec/design/plan/tasks 之间持续承接
+   - 检查 Ready for validation 和 Done 任务是否有对应 validation 记录
 
 3. **输出状态报告**
 
@@ -67,6 +69,7 @@ version: "1.0"
    - 当前阶段：<从 Artifact 推断>
    - Artifact 可信度：<列出非 fresh 的 Artifact>
    - 活跃任务：<从 tasks.md 读取 Doing 状态的任务>
+   - 待验证任务：<从 tasks.md 读取 Ready for validation 状态的任务>
    - 阻塞项：<从 tasks.md 读取 Blocked 状态的任务>
    - 真实性锚点：<是否已有最小真实闭环，或仍停留在替身/unknown>
 
@@ -76,6 +79,7 @@ version: "1.0"
    - 若 spec.md / design.md 的更新原因已经明确，可推荐 `/ark:ark-spec` 或 `/ark:ark-design`
    - 若专题方案、接口契约、集成或数据源元信息缺失/过期，可推荐 `/ark:ark-solution`
    - 若 tasks 推进较多但真实锚点仍缺失，优先推荐 `/ark:ark-sync` 或 `/ark:ark-plan`
+   - 若存在 Ready for validation 项或 Done 项缺验证记录，优先推荐 `/ark:ark-validate` 或 `/ark:ark-sync`
    - 给出 1-2 个推荐，附理由
    - 等用户选择后激活对应 Skill
 
@@ -100,6 +104,7 @@ version: "1.0"
 - 当前阶段：<初始化/规划/实施/验证/收尾>
 - Artifact 可信度：<列出非 fresh 的 Artifact 及判断依据>
 - 活跃任务：<Doing 状态的任务列表>
+- 待验证任务：<Ready for validation 状态的任务列表>
 - 阻塞项：<Blocked 状态的任务列表>
 - 真实性锚点：<真实入口 / 真实依赖 / 数据源 / 契约状态>
 

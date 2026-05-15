@@ -1,5 +1,6 @@
 <!-- ark-artifact: handoff -->
-<!-- schema-version: 1.0 -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
 
 # Handoff
 
@@ -28,6 +29,13 @@ YYYY-MM-DD
 ## 风险 / 阻塞
 - 风险或阻塞 1（解除条件：...）
 - 风险或阻塞 2
+
+## 下一次必须继承的结论
+- 核心命题与不变量：
+- 当前真实闭环状态：
+- validation 未覆盖项：
+- 已定 decisions：
+- 不要重复讨论的问题：
 
 ## Artifact 信任状态
 <!-- 对每个核心 Artifact 标注可信度（fresh / stale / conflicting / unknown），帮助 next 判断应优先读取哪个 -->

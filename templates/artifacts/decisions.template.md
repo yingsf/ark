@@ -1,5 +1,6 @@
 <!-- ark-artifact: decisions -->
-<!-- schema-version: 1.0 -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
 
 # Decisions
 

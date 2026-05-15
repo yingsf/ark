@@ -19,7 +19,10 @@ select = [
   "RUF"  # Ruff-specific rules
 ]
 ignore = [
-  "E501" # line length controlled by formatter
+  "E501",   # line length controlled by formatter
+  "RUF001", # allow Chinese fullwidth punctuation in project docs/docstrings
+  "RUF002", # allow Chinese fullwidth punctuation in docstrings
+  "RUF003"  # allow Chinese fullwidth punctuation in comments
 ]
 
 [tool.ruff.lint.isort]

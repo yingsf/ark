@@ -214,7 +214,8 @@ Mode B 项目画像：
 每个 Artifact 顶部必须包含版本头注释：
 ```
 <!-- ark-artifact: <name> -->
-<!-- schema-version: 1.0 -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
 ```
 
 模板文件中已包含版本头，使用模板时无需额外添加。使用空文件或 fallback 时需手动写入版本头。

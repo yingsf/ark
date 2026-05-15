@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.4-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -266,10 +266,20 @@ my-api/
 
 ```markdown
 <!-- ark-artifact: spec -->
-<!-- schema-version: 1.0 -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
 ```
 
 `ark-sync` 会使用这些版本头判断旧项目 Artifact 是否为 `unknown`，但缺少版本头不会阻塞工作流。
+
+### Artifact 协议要点
+
+- `spec.md` 记录「核心命题与不变量」：不同项目可对应产品精髓、业务闭环、公开 API、命令契约、数据/AI 评估闭环或 Claude 插件宿主约束。
+- `design.md` / `plan.md` / `tasks.md` 应持续承接核心命题；实施阶段只代表工程推进顺序，不应裁剪已确认范围。
+- `tasks.md` 使用 `Todo → Doing → Ready for validation → Done` 的主路径。实现完成但尚未验证时进入 `Ready for validation`，只有 `validation.md` 有真实证据时才能进入 `Done`。
+- `ark-implement` 会读取 `validation.md`、`handoff.md`、`decisions.md` 和相关扩展文档中的前序结论；`ark-validate` 负责记录验证证据并闭合 Done 状态。
+- `ark-sync` 会检查上游变更是否已传播到下游 Artifact，并指出推荐修复顺序。
+- 每个完成点建议形成 checkpoint commit；ARK 只给出建议，不自动提交。
 
 ### 能力快照
 

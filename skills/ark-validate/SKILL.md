@@ -28,10 +28,11 @@ version: "1.0"
 
 **只验证和记录，不修复。**
 
-validate 的职责是验证实现是否满足目标，并将验证状态如实记录到 `docs/ark/validation.md`。
+validate 的职责是验证实现是否满足目标，将验证状态如实记录到 `docs/ark/validation.md`，并在验证闭环时对 `docs/ark/tasks.md` 做最小状态迁移。
 
 - **可以**：运行测试、启动服务、观察行为、执行命令、读取代码
 - **不可以**：修改任何源代码文件，无论改动多小
+- **仅允许的非 validation 回写**：将对应任务从 Ready for validation 迁移到 Done / Blocked，并写入 validation 记录引用或失败原因
 - 发现验证失败时，**只记录失败事实**（失败项、错误信息、复现条件），不得直接修复
 - 即使是一行代码的问题（如缺少 import、拼写错误），也必须交给 `/ark:ark-debug` 处理
 - 输出中必须推荐 `/ark:ark-debug` 作为修复入口
@@ -43,6 +44,7 @@ validate 的职责是验证实现是否满足目标，并将验证状态如实�
 
 ## 相关 Artifact
 - `docs/ark/validation.md`（主写入）
+- `docs/ark/tasks.md`（仅允许对应任务的 Ready for validation → Done / Blocked 状态迁移）
 
 ## 验证方法优先级
 
@@ -138,18 +140,21 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 9. 评估验证强度：弱（主要依赖手工或替身）/ 中（有自动化但真实锚点覆盖不全）/ 强（自动化覆盖主要路径 + 真实锚点或最小真实闭环）。
 10. **如果发现验证失败**：记录失败项、错误信息、复现条件，不得修复代码，在输出中推荐 `/ark:ark-debug`。
 11. 写入 `docs/ark/validation.md`。
+12. 若验证通过且能对应到 `tasks.md` 中的 Ready for validation 项，可将该任务迁移到 Done，并写入 validation 记录引用；若验证失败，保持 Ready for validation 或转 Blocked，并记录失败事实和建议 `/ark:ark-debug`。
 
 ## 验证要求
 - 严格区分事实、建议与限制
 - 若验证很弱，应直接说明而不是美化
 - 验证强度评估必须有依据，不得主观拔高
 - **不得修改任何源代码文件**，即使改动极小（一行 import、一个拼写错误）
-- 不得修改 `docs/ark/validation.md` 以外的核心 Artifact
+- 不得修改 `docs/ark/validation.md` 以外的核心 Artifact；唯一例外是对 `docs/ark/tasks.md` 中对应任务做 Ready for validation → Done / Blocked 的最小状态迁移
 - 发现验证失败时，在输出中明确推荐 `/ark:ark-debug` 作为修复入口
 - 当验证未通过但失败项被判断为既有问题时，必须同时记录三项：检查未通过的事实、失败项属于既有问题的判断、本次改动范围内是否发现新增问题。不得将此场景总结为"通过"
 - 每条已执行验证必须标注保真度 L0-L5
 - 不得把 mock/fake/in-memory/合成数据验证写成真实依赖、真实数据或最小真实闭环通过
 - 数据相关验证不得写入敏感原文、密钥、连接串或大体量数据内容
+- Ready for validation → Done 迁移必须有真实验证记录支撑；不得仅凭实现完成或计划验证将任务标记为 Done
+- Done 任务必须引用 `validation.md` 中的具体记录；验证失败时不得写成 Done
 
 ## 停止条件
 - 当前验证状态已可读、可信、可追踪
@@ -179,7 +184,13 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 
 - 若验证强度不足且可补充测试 → `/ark:ark-test` 后再 `/ark:ark-validate`
 - 若发现需要修复的问题 → `/ark:ark-debug`
-- 若验证已闭环 → `/ark:ark-tasks` 将对应任务标记为 Done
+- 若验证已闭环 → 将对应 Ready for validation 任务标记为 Done，并补充 `validation.md` 记录引用；如当前 Skill 未执行状态迁移，建议 `/ark:ark-tasks` 或 `/ark:ark-sync` 补齐
+
+### 7.5 Checkpoint 建议
+- 建议 checkpoint commit：是 / 否
+- 建议 message：
+- 建议纳入文件：
+- 不建议纳入文件：
 
 ### 8. Sub-agent 状态
 - Sub-agent 状态：已启用（N 个 collector）/ 未启用（原因：...）

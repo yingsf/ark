@@ -9,6 +9,8 @@
 - **谁最了解这部分状态，谁来更新**：尽量保持回写职责与执行职责一致
 - **文档不是装饰**：如果 Artifact 长期不维护，必须明确指出其陈旧状态，而不是假装有效
 - **状态冲突必须显式化**：发现代码现实与文档现实不一致，必须先指出冲突，再修正，不得默认一致
+- **核心命题必须传递**：spec 中确认的核心命题与不变量，应在 design、plan 和关键 tasks 中持续可见
+- **Done 必须由验证闭环支撑**：实现完成但未验证的任务应进入 `Ready for validation`；只有已有 `validation.md` 证据时才能进入 `Done`
 
 ---
 
@@ -32,9 +34,10 @@
 主更新者：`/ark:ark-tasks`
 
 以下 Skill 在满足条件时可小幅更新：
-- `/ark:ark-implement`：一个任务实际已完成 / 当前进行中的任务已变化 / 新阻塞已出现
+- `/ark:ark-implement`：一个任务开始 / 实现已完成并进入 `Ready for validation` / 当前进行中的任务已变化 / 新阻塞已出现
+- `/ark:ark-validate`：验证通过后将对应任务从 `Ready for validation` 迁移到 `Done`，并补充 `validation.md` 记录引用
 - `/ark:ark-debug`：新的阻塞或诊断任务出现
-- `/ark:ark-sync`：tasks 状态明显过期
+- `/ark:ark-sync`：tasks 状态明显过期；仅在已有验证记录时修正为 `Done`
 
 **不应用于**：代替 spec 定义需求 · 代替 plan 定义阶段策略
 
@@ -83,6 +86,8 @@
 
 其他 Skill 通常不直接回写这两个文件。如发现内容过期，应建议重新执行对应 Skill，而不是随意修改。
 
+`spec.md` 应定义核心命题与不变量；`design.md` 应说明技术方案如何承接这些命题与不变量。若后续 Artifact、扩展文档或代码现实弱化了这些约束，应标记 stale/conflicting 并建议执行对应 Skill。
+
 允许其他 Skill 识别并报告 spec/design 漂移，但不得直接落盘：
 - `/ark:ark-implement`：本次实现改变能力范围、验收标准、外部接口、MCP/API 契约、模块边界、数据流、运行时机制、资源生命周期、并发/降级策略时，建议 `/ark:ark-spec` 或 `/ark:ark-design`
 - `/ark:ark-debug`：修复 bug 时发现原需求边界、验收标准、错误语义、降级策略或设计假设不成立时，建议 `/ark:ark-spec` 或 `/ark:ark-design`
@@ -123,7 +128,8 @@
 
 ### `/ark:ark-implement`
 - 原计划与现实偏差明显 → 更新 `docs/ark/plan.md`
-- 某项任务完成 / 开始 / 阻塞 → 更新 `docs/ark/tasks.md`
+- 某项任务开始 / 实现完成待验证 / 阻塞 → 更新 `docs/ark/tasks.md`
+- 实现完成但未由 `/ark:ark-validate` 记录验证证据 → 将任务置为 `Ready for validation`，不得置为 `Done`
 - 出现关键技术取舍 → 建议更新 `docs/ark/decisions.md`（不强制直接写入）
 - 本次实现改变需求范围、验收标准、对外能力或非目标边界 → 建议 `/ark:ark-spec`，不直接回写 `docs/ark/spec.md`
 - 本次实现改变模块边界、接口契约、数据流、运行时机制、资源生命周期、并发/降级策略 → 建议 `/ark:ark-design`，不直接回写 `docs/ark/design.md`
@@ -144,7 +150,9 @@
 **tasks.md 回写触发样例：**
 
 应触发：
-- Doing → Done（任务完成且验证已完成）
+- Todo → Doing（任务开始）
+- Doing → Ready for validation（实现完成但未验证）
+- Ready for validation → Done（验证已完成且 `validation.md` 有记录；通常由 `/ark:ark-validate` 触发）
 - Doing → Blocked（遇到阻塞）
 - 新增一个必须先完成的前置任务
 
@@ -171,6 +179,11 @@
 - 发现严重问题导致计划需要调整 → 建议更新 `docs/ark/plan.md`
 - review 结论影响验证策略 → 建议更新 `docs/ark/validation.md`
 
+### `/ark:ark-validate`
+- 真实执行验证并写入 `docs/ark/validation.md`
+- 验证通过且能对应到 `tasks.md` 的 Ready for validation 项 → 可将任务迁移到 Done，并写入 validation 章节引用
+- 验证失败 → 保持 Ready for validation 或转 Blocked，记录失败事实、复现条件和建议 `/ark:ark-debug`
+
 ### `/ark:ark-sync`
 优先指出并修正以下情况：
 - docs 与代码现实冲突
@@ -178,6 +191,9 @@
 - plan 已失真
 - handoff 与当前阶段不符
 - validation 漏记关键结果
+- Ready for validation 项缺少验证结论
+- Done 项缺少 `validation.md` 引用
+- spec/design/plan/tasks 对核心命题与不变量的承接断裂
 - spec.md 的范围、能力承诺、验收标准、外部接口与代码现实或 plan/tasks 不一致
 - design.md 的模块结构、接口边界、数据流、关键运行机制与代码现实不一致
 - design.md 的扩展文档索引与项目实际扩展文档不一致
@@ -193,13 +209,14 @@
 ## 禁止性约束
 
 1. **没有验证记录，不宣称完成**：中大型任务如无验证记录，不得写出「已完成且无风险」的结论
-2. **handoff 不是 plan 的替代品**：handoff 是恢复视图，不是执行主文档
-3. **tasks 不是 spec 的替代品**：任务列表不能代替需求定义
-4. **plan 不是 validation 的替代品**：计划中的「准备怎么验」不能等同于「已经验证」
-5. **冲突必须先显式化**：若发现文档与实现冲突，必须先指出冲突，再修正，不得直接跳过
-6. **不得将推测写成结论**：所有 Artifact 内容必须区分事实与推断
-7. **核心 Artifact 不承载扩展正文**：详细方案、专题设计、契约、数据源元信息等不得塞入 `docs/ark/*`
-8. **不得托管项目数据**：ARK 只记录数据源元信息和验证证据，不写入敏感数据或大体量数据内容
+2. **Done 不得绕过 validate**：实现完成但未验证的任务不得标记为 Done，应使用 Ready for validation
+3. **handoff 不是 plan 的替代品**：handoff 是恢复视图，不是执行主文档
+4. **tasks 不是 spec 的替代品**：任务列表不能代替需求定义
+5. **plan 不是 validation 的替代品**：计划中的「准备怎么验」不能等同于「已经验证」
+6. **冲突必须先显式化**：若发现文档与实现冲突，必须先指出冲突，再修正，不得直接跳过
+7. **不得将推测写成结论**：所有 Artifact 内容必须区分事实与推断
+8. **核心 Artifact 不承载扩展正文**：详细方案、专题设计、契约、数据源元信息等不得塞入 `docs/ark/*`
+9. **不得托管项目数据**：ARK 只记录数据源元信息和验证证据，不写入敏感数据或大体量数据内容
 
 ---
 

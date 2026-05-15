@@ -33,7 +33,7 @@ version: "1.0"
 | 文档可能过期 | `/ark:ark-sync` |
 
 ## 输入
-- 当前相关代码、`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`
+- 当前相关代码、`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/validation.md`、`docs/ark/handoff.md`、`docs/ark/decisions.md`
 - 项目画像、真实性锚点、相关扩展文档（如有）
 
 ## 输出
@@ -43,7 +43,7 @@ version: "1.0"
 - 对后续 test / validate 的建议
 
 ## 相关 Artifact
-- 可读取：`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`
+- 可读取：`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/validation.md`、`docs/ark/handoff.md`、`docs/ark/decisions.md`
 - 可在必要时回写：`docs/ark/plan.md`、`docs/ark/tasks.md`
 - 若出现关键取舍，应建议更新：`docs/ark/decisions.md`
 - 若本次实现改变规格或设计现实，应建议 `/ark:ark-spec` 或 `/ark:ark-design`；不得直接回写 `docs/ark/spec.md` 或 `docs/ark/design.md`
@@ -53,27 +53,30 @@ version: "1.0"
 
 ### Small 任务
 1. 确认目标（单点修改）。
-2. 执行 Reality Check：确认本次是否涉及真实入口、真实依赖、真实数据源或公开契约；若不涉及，说明原因。
-3. 观察同模块或相邻模块的注释/docstring 风格；若项目风格不明确，使用 ARK 默认中文 Google 风格。
-4. 完成修改，保持最小改动范围，并同步补齐必要 docstring 和中文注释。
-5. 在修改完成点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行）；若工具修改了文件，重新读取当前内容或 diff。
-6. 检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求。
-7. 执行 spec/design/extension 漂移检查：只识别本次实现是否改变需求、设计现实或扩展文档现实，发现后在输出中建议对应 Skill，不直接回写 spec/design 或扩展文档。
-8. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
+2. 读取并吸收相关 `validation.md` 未覆盖项、`handoff.md` 恢复提示、`decisions.md` 约束；若存在与当前目标冲突的前序结论，先停止并建议 `/ark:ark-sync`。
+3. 执行 Reality Check：确认本次是否涉及真实入口、真实依赖、真实数据源或公开契约；若不涉及，说明原因。
+4. 观察同模块或相邻模块的注释/docstring 风格；若项目风格不明确，使用 ARK 默认中文 Google 风格。
+5. 完成修改，保持最小改动范围，并同步补齐必要 docstring 和中文注释。
+6. 在修改完成点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行）；若工具修改了文件，重新读取当前内容或 diff。
+7. 检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求。
+8. 执行 spec/design/extension 漂移检查：只识别本次实现是否改变需求、设计现实或扩展文档现实，发现后在输出中建议对应 Skill，不直接回写 spec/design 或扩展文档。
+9. 若实现完成但尚未验证，tasks.md 只能更新为 Ready for validation，不得标记 Done。
+10. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
 
 ### Medium / Large 任务
-1. 读取相关代码和 Artifact，确认当前 plan 状态有效。
-2. 执行 Reality Check：读取项目画像、plan/tasks 中的真实性锚点和相关扩展文档，确认本批次如何推进真实闭环。
-3. 若 tasks 已推进很多但真实入口、真实依赖、真实数据源或公开契约仍缺失，先停止并建议 `/ark:ark-sync` 或 `/ark:ark-plan` 重新校准，不继续堆叠占位实现。
-4. 观察同模块或相邻模块的注释/docstring 风格；若项目风格不明确，使用 ARK 默认中文 Google 风格。
-5. 明确本次只完成哪一步，不默认顺手扩展范围。
-6. **批次评估**：若出现批次触发信号（见下方「批次实施机制」），拆分为实施批次并只完成当前批次。否则正常执行。
-7. 选择最小可行修改：小步推进、局部修改、可验证、可回退。每个批次内的修改应构成一个相对完整的子问题，并尽量靠近最小真实闭环。
-8. 避免混入无关改动（风格清理、无关重命名、大面积重构）。
-9. **批次执行**：每完成一个批次后，在稳定点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行），检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求，执行 spec/design/extension 漂移检查，输出批次完成状态，更新 tasks.md 记录批次进展。然后建议下一批次或停止。
-10. 实施后检查是否需要回写 Artifact（见下方回写规则）。
-11. 若当前会话需要中断，优先完成当前批次再执行 `/ark:ark-handoff`。若处于批次中间且无法完成，handoff 应记录当前批次进展。
-12. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
+1. 读取相关代码和 Artifact，确认当前 plan/tasks/validation/handoff 状态有效。
+2. 吸收前序结论：读取相关 validation 未覆盖项、handoff 恢复提示、decisions 约束、相关扩展文档；明确本次处理哪些、不处理哪些及原因。
+3. 执行 Reality Check：读取项目画像、plan/tasks 中的真实性锚点和相关扩展文档，确认本批次如何推进真实闭环。
+4. 若 tasks 已推进很多但真实入口、真实依赖、真实数据源或公开契约仍缺失，先停止并建议 `/ark:ark-sync` 或 `/ark:ark-plan` 重新校准，不继续堆叠占位实现。
+5. 观察同模块或相邻模块的注释/docstring 风格；若项目风格不明确，使用 ARK 默认中文 Google 风格。
+6. 明确本次只完成哪一步，不默认顺手扩展范围。
+7. **批次评估**：若出现批次触发信号（见下方「批次实施机制」），拆分为实施批次并只完成当前批次。否则正常执行。
+8. 选择最小可行修改：小步推进、局部修改、可验证、可回退。每个批次内的修改应构成一个相对完整的子问题，并尽量靠近最小真实闭环。
+9. 避免混入无关改动（风格清理、无关重命名、大面积重构）。
+10. **批次执行**：每完成一个批次后，在稳定点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行），检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求，执行 spec/design/extension 漂移检查，输出批次完成状态，更新 tasks.md 记录批次进展。然后建议下一批次或停止。
+11. 实施后检查是否需要回写 Artifact（见下方回写规则）。
+12. 若当前会话需要中断，优先完成当前批次再执行 `/ark:ark-handoff`。若处于批次中间且无法完成，handoff 应记录当前批次进展。
+13. 完成后建议 `/ark:ark-test` 和 `/ark:ark-validate`。
 
 ## Reality Check
 
@@ -222,8 +225,9 @@ Medium/Large 任务可启用 batch sub-agent 模式缓解 context rot：
 - 执行顺序需要调整
 
 ### 回写 `docs/ark/tasks.md`
-- 某任务已完成 → 移入 Done
 - 某任务已开始 → 移入 Doing
+- 某任务实现已完成但未验证 → 移入 Ready for validation
+- 某任务已完成且已有 validation.md 验证记录 → 可移入 Done（通常由 `/ark:ark-validate` 触发）
 - 出现新阻塞 → 加入 Blocked（附解除条件）
 
 ### 建议更新 `docs/ark/decisions.md`
@@ -276,10 +280,18 @@ commit 范围：该 batch 修改的文件
 commit 格式：`<type>(<scope>): <batch-goal>`
 不自动提交，等用户确认
 
+每个完成点的输出必须给出：
+- 建议 checkpoint commit：是 / 否
+- 建议 message：
+- 建议纳入文件：
+- 不建议纳入文件：
+
 ## 验证要求
 - 实现内容应与已定义目标一致
 - 任何额外扩 scope 都应显式指出
 - 改动后的行为应具备验证路径
+- 实现完成但未执行 `/ark:ark-validate` 或没有对应验证记录时，不得将 tasks.md 任务标记为 Done；最多进入 Ready for validation
+- 必须在输出中说明前序结论吸收情况，包括 validation 未覆盖项、handoff 恢复提示、decisions 约束和本次未处理原因
 - 若执行 ruff / pyright / pytest 等检查命令返回非 0，不得表述为"pass / 通过"。若失败项被判断为既有问题，应写"检查未通过，但未发现本次改动新增问题"。最终验证结论应交由 `/ark:ark-validate` 记录
 - 在不扩大 scope 的前提下，新增或修改的公共接口应补充中文 Google 风格 docstring；复杂、关键、非直观或涉及降级/资源/并发边界的逻辑，应补充必要中文注释。注释以清晰、克制、服务维护为原则，不做无关文档化扩展
 - 若新增/修改公共接口、关键方法或复杂逻辑后缺少必要 docstring/注释，不得将本次实现视为完整完成；应在当前 scope 内补齐，或明确说明为何项目既有风格不要求补充
@@ -300,6 +312,12 @@ commit 格式：`<type>(<scope>): <batch-goal>`
 
 ### 1. 本次实现目标
 ### 2. 主要修改（文件 + 变更摘要）
+### 2.1 前序结论吸收
+- `validation.md` 未覆盖项：
+- `handoff.md` 恢复提示：
+- `decisions.md` 约束：
+- 本次已处理：
+- 本次未处理及原因：
 ### 2.5 批次进展（批次实施时）
 - 当前批次：Batch n/m
 - 本批目标：
@@ -323,6 +341,12 @@ commit 格式：`<type>(<scope>): <batch-goal>`
 - 若本次修改涉及可测试逻辑（新增/修改的公共方法、条件分支、错误处理）→ `/ark:ark-test` → `/ark:ark-validate`
 - 若本次修改不涉及可测试逻辑（纯配置、文档、样式）→ `/ark:ark-validate`
 - 若会话即将中断 → `/ark:ark-handoff`
+
+### 5.5 Checkpoint 建议
+- 建议 checkpoint commit：是 / 否
+- 建议 message：
+- 建议纳入文件：
+- 不建议纳入文件：
 
 ### 6. Sub-agent 状态
 - Sub-agent 状态：已启用（N 个 worker）/ 未启用（原因：...）

@@ -48,20 +48,25 @@ sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_
 
 **stale**：
   - 文件变更影响该 Artifact，但 Artifact 未反映
+  - 上游 Artifact 的 `last-updated` 晚于下游，且下游未体现对应变化
   - handoff.md 记录的"下一步"与当前 tasks.md Doing 状态不匹配
   - spec.md 的能力范围、验收标准或外部接口可能受当前代码/plan 变化影响但未反映
   - design.md 的模块结构、接口边界、数据流或关键运行机制可能受当前代码变化影响但未反映
   - 扩展文档索引缺失新建的 solution/contracts/data-sources 文档
   - plan/tasks 已大量推进，但项目画像中的真实入口、真实依赖、真实数据源或公开契约仍未接入
+  - spec/design/plan/tasks 对核心命题与不变量的承接不完整或逐层弱化
+  - tasks.md 存在 Ready for validation 项但 validation.md 尚未记录对应验证结论
 
 **conflicting**：
   - plan.md 与 tasks.md 步骤/任务数不匹配
   - design.md 描述的架构与实际代码结构不符
   - spec.md 的 scope 与 plan.md 的 scope 不一致
+  - plan 将 spec 已确认的全量范围裁剪为阶段性范围，且未说明只是实施顺序
   - spec.md 的能力承诺、非目标或验收标准与代码现实明显相反
   - design.md 的模块边界、接口契约、数据流、资源生命周期、并发/降级策略与代码现实明显相反
   - 扩展文档正文与核心 Artifact 或代码现实明显相反
   - validation 把 mock/fake/in-memory/合成数据证据描述成真实验证通过
+  - Done 项缺少 validation.md 记录引用，或 validation 记录与 Done 结论相反
 
 **unknown**：
   - Artifact 无版本头（旧项目）
@@ -114,11 +119,13 @@ ark-sync **不做**：
 5. 检查 spec/design 漂移信号（见下方"spec/design 漂移检查"）。
 6. 检查扩展文档漂移信号和 design.md 中的扩展文档索引。
 7. 检查真实性锚点：plan/tasks/validation 是否已经建立与项目类型匹配的最小真实闭环；若长期停留在替身环境，标记为风险。
-8. 依据一致性判例表输出结论。
-9. 指出需要更新的具体文件与原因。
-10. 推荐下一步动作。
-11. 如状态非常明确且改动很小，可在严格白名单内直接修正（见下文"可直接修正范围"）。
-12. 扫描项目源代码目录结构（根据项目布局：src/ 下的子目录，或根目录下的包目录），当模块数 >= 3 时生成项目地图摘要。
+8. 检查核心命题与不变量传播：spec → design → plan → tasks 是否断裂或弱化。
+9. 检查上游变更传播：spec/design/solution/validation/handoff 的更新时间和内容是否已被下游反映。
+10. 依据一致性判例表输出结论。
+11. 指出需要更新的具体文件与原因。
+12. 推荐下一步动作。
+13. 如状态非常明确且改动很小，可在严格白名单内直接修正（见下文"可直接修正范围"）。
+14. 扫描项目源代码目录结构（根据项目布局：src/ 下的子目录，或根目录下的包目录），当模块数 >= 3 时生成项目地图摘要。
 
 ## spec/design 漂移检查
 
@@ -181,7 +188,7 @@ ark-sync **不做**：
 
 **允许直接修正**（仅限状态字段更新，不改变语义内容）：
 - `plan.md` 的当前状态字段（Status / Current phase / Last updated）
-- `tasks.md` 的单条状态迁移（如 Todo → Doing、Doing → Done）；其中 Doing → Done 仅在已有对应验证记录或验证已明确完成时允许直接修正
+- `tasks.md` 的单条状态迁移（如 Todo → Doing、Doing → Ready for validation、Ready for validation → Done）；其中 Ready for validation → Done 仅在已有对应验证记录或验证已明确完成时允许直接修正
 - `handoff.md` 的过期标注或最近阶段描述
 
 **不允许直接修正**（只能建议更新）：
@@ -221,6 +228,15 @@ ark-sync **不做**：
 - 真实依赖 / 数据源 / 契约：
 - 替身边界：
 - 最小真实闭环状态：
+
+### 1.8 变更传播判断
+- spec 是否晚于 design：
+- design 是否晚于 plan：
+- solution / contracts / integrations 是否晚于 tasks：
+- validation 是否覆盖 Done / Ready for validation：
+- handoff 是否反映当前任务：
+- 核心命题与不变量是否被下游承接：
+- 推荐修复顺序：
 
 ### 2. 已发现问题
 文档过期项、状态冲突项、缺失验证项、可疑 handoff 项

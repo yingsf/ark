@@ -19,6 +19,8 @@
 - **不得混用**：每个 Artifact 主要回答一个问题，不应将多个职责写入同一文件
 - **冲突必须先显式化**：发现文档与代码现实不符时，必须先指出冲突，再修正，不得直接跳过
 - **没有验证记录，不宣称完成**：中大型任务如无 `docs/ark/validation.md` 记录，不得写出「已完成且无风险」的结论
+- **Done 必须有证据**：`tasks.md` 中 `Done` 任务必须指向 `validation.md` 中的真实验证记录；实现完成但尚未验证的任务应进入 `Ready for validation`
+- **核心命题不可丢失**：spec 中确认的核心命题与不变量必须被 design、plan、关键 tasks 承接；若后续 Artifact 弱化或遗漏，应标记 stale 并建议同步
 - **过期文档必须说明**：如果 Artifact 长期未维护，必须明确标注其陈旧状态，不得假装有效
 
 ## 一句话规则
@@ -26,6 +28,35 @@
 `spec` 管目标 · `design` 管方案 · `plan` 管推进 · `tasks` 管状态 · `decisions` 管取舍 · `validation` 管证据 · `handoff` 管恢复
 
 `solution/contracts/data-sources` 等扩展文档管专题细节，不进入 7 个核心 Artifact。
+
+## Artifact 元信息
+
+核心 Artifact 顶部应包含：
+
+```md
+<!-- ark-artifact: <name> -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+```
+
+`last-updated` 用于 `ark-sync` 和 `ark-next` 判断上游变更是否已经传播到下游。旧项目或旧模板缺少该字段时，可信度可标为 `unknown` 或 `stale`，但不得仅因版本头差异覆盖用户内容。
+
+## 核心命题与不变量
+
+`核心命题与不变量` 是跨项目类型的总称：
+- 产品 / 平台：产品精髓、核心价值、不可拆分能力
+- 后端服务：业务闭环、外部契约、真实依赖边界
+- CLI：命令行为、输入输出、退出码语义
+- SDK / library：公开 API、兼容性承诺
+- 数据 / AI 项目：数据源、样例代表性、评估闭环
+- Claude 插件：命令入口、宿主约束、Artifact 语义
+
+承接规则：
+- `spec.md` 定义核心命题与不变量
+- `design.md` 说明技术方案如何保护这些不变量
+- `plan.md` 说明实施阶段只代表推进顺序，不裁剪已确认范围
+- `tasks.md` 的关键任务应能回溯到核心命题或真实性锚点
+- `sync` 发现承接断裂时标记 stale/conflicting 并推荐对应 Skill
 
 ## Design vs Decide 边界
 
@@ -56,10 +87,10 @@
 无 git 的项目依据 1-3 即可判断，不必然 unknown。
 
 关键 Skill 入口要求：
-- ark-implement：开始前检查 plan.md + tasks.md 可信度；实现后检查本次改动是否引发 spec.md / design.md 漂移
-- ark-validate：检查 tasks.md 可信度
-- ark-next：检查 handoff.md + tasks.md + plan.md 可信度；若 spec.md / design.md 或扩展文档明显 stale/conflicting，应优先推荐 ark-sync
-- ark-sync：输出完整 Artifact 可信度矩阵，包括 spec.md / design.md；并输出扩展文档可信度摘要；对 spec/design 只建议对应 Skill，不直接修正
+- ark-implement：开始前检查 plan.md + tasks.md + validation.md + handoff.md 可信度；实现后检查本次改动是否引发 spec.md / design.md / extension 漂移；实现完成但未验证时最多推进到 Ready for validation
+- ark-validate：检查 tasks.md 可信度；验证通过后可建议或执行 Ready for validation → Done 的状态迁移，并写入 validation 记录
+- ark-next：检查 handoff.md + tasks.md + plan.md + validation.md 可信度；若 spec.md / design.md 或扩展文档明显 stale/conflicting，应优先推荐 ark-sync
+- ark-sync：输出完整 Artifact 可信度矩阵、扩展文档可信度摘要和上游变更传播判断；对 spec/design/validation 只建议对应 Skill，不直接捏造正文或验证事实
 - ark-solution：维护扩展文档正文；不直接回写 `docs/ark/*`
 - 非 fresh 时推荐 ark-sync
 
