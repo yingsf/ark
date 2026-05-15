@@ -270,12 +270,12 @@ CLAUDE.md 应反映：
 - 项目实际使用的测试命令
 - ARK 项目画像：项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息
 - ark Working Pattern（任务执行起始指引）
-- 注释/docstring 风格扫描结果：已有明确风格时延续；没有明确约定或风格混乱时，采用 ARK 默认中文 Google 风格
+- 注释/docstring 风格扫描结果：已有明确风格时延续；没有明确约定或风格混乱时，采用 ARK 默认 `fastchain-enhanced` 中文 Google 风格
 
 Mode B 的注释风格处理遵循 Inspect & Respect：
 - 只轻量采样已有源码中的 docstring 和注释，不批量改代码
 - 已有项目风格明确时，在 `CLAUDE.md` 中记录并延续项目风格
-- 未发现明确约定时，在 `CLAUDE.md` 中写入 ARK 默认中文 Google 风格，作为后续新增/修改代码的默认约定
+- 未发现明确约定时，在 `CLAUDE.md` 中写入 ARK 默认 `fastchain-enhanced` 中文 Google 风格，作为后续新增/修改代码的默认约定
 - 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认后才修改
 - 若项目画像需要补充且 `CLAUDE.md` 已存在，只在输出摘要中建议可追加"ARK 项目画像"章节，用户确认后才修改
 

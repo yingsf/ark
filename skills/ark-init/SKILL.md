@@ -261,7 +261,7 @@ Mode B 项目画像：
 
 Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
 - 若现有项目已有明确 docstring / 注释风格，记录并延续该风格
-- 若未观察到明确风格或风格混乱，写入 ARK 默认中文 Google 风格作为后续新增/修改代码的默认约定
+- 若未观察到明确风格或风格混乱，写入 ARK 默认 `fastchain-enhanced` 中文 Google 风格作为后续新增/修改代码的默认约定
 - 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认覆盖或追加后才修改
 - 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"ARK 项目画像"章节，用户确认后才修改
 - 不批量修改任何已有源码注释
@@ -323,7 +323,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 包名必须是合法的 Python 标识符
 - 除了 `__init__.py`，不应创建其他 `.py` 文件
 - docs/ Artifact 必须自动创建
-- `CLAUDE.md` 应包含中文 Google 风格 docstring 与中文注释规范
+- `CLAUDE.md` 应包含 `fastchain-enhanced` 中文 Google 风格 docstring 与中文注释规范
 - `CLAUDE.md` 应包含 ARK 项目画像；数据源只记录元信息，不创建或托管数据目录
 - uv 不可用或命令失败不应导致整个流程中断
 - `.gitignore` 创建必须在 `uv init` 之后执行
@@ -332,7 +332,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 **模式 B（已有项目）：**
 - 不得修改任何已有代码文件或项目配置
 - `CLAUDE.md` 必须基于真实项目结构生成
-- `CLAUDE.md` 必须体现注释风格扫描结果：延续既有风格，或在无明确风格时采用 ARK 默认中文 Google 风格
+- `CLAUDE.md` 必须体现注释风格扫描结果：延续既有风格，或在无明确风格时采用 ARK 默认 `fastchain-enhanced` 中文 Google 风格
 - `CLAUDE.md` 应生成或建议追加 ARK 项目画像，包含项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息
 - docs/ Artifact 必须自动创建
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
@@ -382,7 +382,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - 技术栈（框架、关键依赖）
 - 包名与 Python 版本
 - 项目类型画像：类型、运行入口、真实性锚点、外部依赖、契约边界、数据源元信息
-- 注释/docstring 风格：已识别既有风格 / 未发现明确约定，采用 ARK 默认中文 Google 风格 / 未扫描（原因）
+- 注释/docstring 风格：已识别既有风格 / 未发现明确约定，采用 ARK 默认 `fastchain-enhanced` 中文 Google 风格 / 未扫描（原因）
 
 #### 2. 执行结果
 | 步骤 | 状态 |

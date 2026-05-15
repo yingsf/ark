@@ -99,10 +99,19 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "前序结论吸收",
             "Ready for validation",
             "Checkpoint 建议",
+            "fastchain-enhanced",
+            "注释详细度分级",
+            "句末中文终止标点",
         ],
         "skills/ark-validate/SKILL.md": [
             "Ready for validation → Done",
             "Checkpoint 建议",
+        ],
+        "skills/ark-review/SKILL.md": [
+            "fastchain-enhanced",
+            "注释详细度分级",
+            "句末中文终止标点",
+            "尾随解释注释",
         ],
         "skills/ark-sync/SKILL.md": [
             "变更传播判断",
@@ -114,6 +123,23 @@ def check_workflow_tokens(errors: list[str]) -> None:
         ],
         "skills/ark-handoff/SKILL.md": [
             "下一次必须继承的结论",
+        ],
+        "rules/python-backend-conventions.md": [
+            "fastchain-enhanced",
+            "L0 无需补充",
+            "L2 fastchain-enhanced",
+            "中文标点规则",
+            "解释性尾随注释",
+        ],
+        "templates/project/CLAUDE.md.template": [
+            "注释详细度：fastchain-enhanced",
+            "句末中文终止标点",
+            "解释性尾随注释",
+        ],
+        "skills/ark-init/references/fallback-templates.md": [
+            "注释详细度：fastchain-enhanced",
+            "句末中文终止标点",
+            "解释性尾随注释",
         ],
     }
 

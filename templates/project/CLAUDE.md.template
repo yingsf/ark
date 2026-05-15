@@ -76,10 +76,14 @@ uv run pyright
 ## Code Style
 
 - 使用 type hints，所有公开函数必须有参数和返回值类型注解
+- 注释详细度：fastchain-enhanced（核心路径详细，普通路径标准，简单路径克制）
 - 公共类、公共函数、关键方法使用中文 Google 风格 docstring
-- 复杂类的 docstring 应说明职责、设计特点和关键 Attributes
+- L2/L3 对象（核心 service / manager / provider / adapter、资源生命周期、外部依赖封装、启动链路、数据导入链路）使用增强 docstring，说明职责、设计原因、封装边界、生命周期和关键 Attributes
+- 简单私有 helper、薄包装、简单 getter/setter 不强制补 docstring
 - 复杂逻辑、边界条件、降级策略、资源生命周期、并发控制应补充中文注释
 - 注释解释原因、约束和风险，避免重复代码表面含义
+- 中文 docstring 和中文注释的描述句不使用句末中文终止标点（避免 `。`、`！`、`？`、`；`）
+- 业务解释类注释优先写在代码上方，不写解释性尾随注释
 - 导入顺序：stdlib → third-party → local，之间用空行分隔
 - 优先使用 `pathlib.Path` 而非 `os.path`
 - 异常处理不要裸 `except:`，至少捕获 `Exception`
