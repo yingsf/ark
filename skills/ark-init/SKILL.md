@@ -23,14 +23,19 @@ version: "1.0"
 - 当前需求只是一个很小的局部改动（不需要完整工作流）
 - 用户明确要求不在项目中添加任何文件
 
-## 必须确认的输入
+## Mode A 必须确认的输入
 - project name：默认从当前目录名获取，需经过 Python 标识符合法性处理后确认
 - target directory：默认当前目录
-
-## 建议确认的输入
 - Python version：默认 `3.12`，可选范围 `3.10`–`3.14`
 - 是否创建 pytest 测试（默认启用）
-- 项目类型画像：backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown（Mode A 需确认；Mode B 先扫描推断，必要时请用户确认）
+- 项目类型画像：backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown
+
+Mode A 不得静默使用 `unknown`。只有用户明确选择"不确定 / unknown"时，才可写入 `unknown`。
+
+## Mode B 输入策略
+- project name：优先从 `pyproject.toml`、包目录或当前目录推断
+- target directory：默认当前目录
+- 项目类型画像：先扫描推断，必要时请用户确认
 
 ## 输出文件
 `.gitignore`、`pyproject.toml`、`README.md`、`CHANGELOG.md`、`CLAUDE.md`、`MEMORY.md`、
@@ -113,7 +118,9 @@ Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确
 ```
 
 Mode A 项目画像：
-- 必须询问项目类型；若用户不确定，可写 `unknown`，并建议后续 `/ark:ark-analyze` 或 `/ark:ark-intake`
+- 必须询问项目类型，不得静默默认 `unknown`
+- 若用户选择 `unknown`，可写入 `unknown`，但下一步优先建议 `/ark:ark-intake` 澄清项目目标和类型
+- 不得默认建议 `/ark:ark-analyze`，除非用户明确表示要先分析已有代码，或当前目录已有实质代码
 - 不得因为用户选择 data-AI 而创建 `data/` 目录；数据由项目管理
 - 若是 library/CLI 等无外部基础设施项目，真实性锚点应围绕安装、导入、命令执行或公开契约，而不是数据库
 
@@ -154,6 +161,13 @@ Mode B 项目画像：
 
 检测规则：若当前目录存在以下任一文件/目录，标记为"检测到已有项目"：`pyproject.toml` / `setup.py` / `setup.cfg`、`src/` 目录、`requirements*.txt`、根目录下包含 `__init__.py` 的包目录、`tests/`、或常见入口文件（`main.py` / `app.py` / `manage.py`）。检测到时模式 B 标记为推荐。
 
+检测已有项目文件时不得使用未保护的 shell glob，例如裸 `requirements*.txt`。应使用以下任一安全方式：
+- `find . -maxdepth 1 -name 'requirements*.txt' -print`
+- zsh 中使用 `(N)` null glob
+- 逐项检测固定文件，再单独用 find 检测模式文件
+
+检测命令失败不得继续当作"未检测到项目文件"；必须修正检测方式后重新执行。
+
 ---
 
 以下为模式 A 的执行步骤（全新项目）：
@@ -164,7 +178,14 @@ Mode B 项目画像：
 - 检测 Git 仓库状态
 
 ### 第二步：交互确认
-收集并确认项目名、目标目录、Python 版本、是否启用测试、项目类型画像。
+Mode A 参数确认必须一次性列出：
+- 项目名
+- 目标目录
+- Python 版本
+- 是否启用测试
+- 项目类型画像
+
+若项目类型尚未由用户明确选择，必须先提问，不得进入 uv init。
 
 ### 第三步：选择执行路径
 
@@ -176,6 +197,15 @@ Mode B 项目画像：
 5. 确保 `pyproject.toml` 包含正确的 build-system 配置（src layout 需要）：若缺少 `[build-system]` 则追加 hatchling 配置，若缺少 `[tool.hatch.build.targets.wheel]` 则追加 `packages = ["src/<project_name>"]`
 6. `uv sync`
 7. `uv add --dev ruff pyright`（安装默认开发质量工具到 dev 依赖）
+
+`pyproject.toml` 的 build-system 必须写为：
+```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+```
+
+不得写成 `hatchling.backends`。
 
 **路径 B（uv 不可用）**：
 1. 手动创建目录结构
@@ -195,6 +225,17 @@ Mode B 项目画像：
 2. **`pyrightconfig.json`** — 替换 `<python_version>`、`<source_and_test_dirs>` 为探测值
 3. **`.claude/settings.local.json`** — 本地配置，含 ruff format hook + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
 4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<project_name>`、`<source_and_test_dirs>`
+
+每个质量工具配置写入后必须复查文件存在性和关键内容：
+- `.claude/ruff-hook.py`
+- `.claude/settings.local.json`
+- `pyrightconfig.json`
+- `pyproject.toml` 中 `[tool.ruff]`
+
+若任一写入失败：
+- 不得在最终摘要中写"已创建"
+- 必须写"失败（原因）/ 待手动处理"
+- 必须列出恢复命令或文件路径
 
 `.claude/` 目录默认由 ARK `.gitignore` 模板忽略。不得提示用户必须提交 `.claude/ruff-hook.py` 或 `.claude/settings.local.json`；若团队确实需要共享 Claude Code 配置，应由用户显式调整 `.gitignore`。
 不得为了让 `.claude/` 文件在 `git status` 中可见而移除或绕过 `.gitignore` 中的 `.claude/` 忽略规则。
@@ -365,15 +406,20 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | MEMORY.md | 使用模板 / 使用 fallback |
 | docs/ Artifact | 使用模板 / 使用空文件 |
 | 质量工具安装 | 已安装 / 跳过（原因）|
+| 质量工具配置 | 已创建 / 失败（原因）/ 待手动处理 |
 | 项目画像 | 已写入 / 待确认 / unknown |
 
 #### 3. 目录树
 输出简洁的最终目录树。
 
 #### 4. 下一步
-- 如有待处理事项（uv 未安装等），优先列出手动操作指引
-- 需求未定义：建议 `/ark:ark-spec`
-- 目标明确但需要拆解：建议 `/ark:ark-plan`
+按以下规则输出，不得混入 Mode B 的 analyze 默认建议：
+
+- 如有待处理事项（uv 未安装、配置文件写入失败等），优先列出手动操作指引
+- 项目类型为 `unknown` 或目标仍不清楚 → `/ark:ark-intake`
+- 已有明确产品 / 能力目标 → `/ark:ark-spec`
+- 已有明确技术目标且需要拆解 → `/ark:ark-plan`
+- 仅当用户明确要求分析已有代码，或当前目录已有实质代码时，才建议 `/ark:ark-analyze`
 
 ### 模式 B（已有项目）
 

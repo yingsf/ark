@@ -211,7 +211,10 @@ project name: my-api
 target directory: 当前目录
 Python version: 3.12
 是否创建 pytest 测试: 是
+项目类型: backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown
 ```
+
+Mode A 会要求确认项目类型；如果你选择 `unknown`，ARK 会优先建议 `/ark:ark-intake` 澄清目标和类型，而不是默认执行 `/ark:ark-analyze`。
 
 ### Mode A 会做什么
 
@@ -315,6 +318,8 @@ ark-intake → ark-spec → ark-design → ark-solution（按需）→ ark-plan
 ```
 
 `ark-solution` 只在需要专题详细方案、接口契约、集成说明或数据源元信息时介入；简单功能可以跳过。
+
+若初始化时项目类型选择为 `unknown` 或目标仍不清楚，推荐先执行 `/ark:ark-intake`。只有在目录中已有实质代码、或你明确希望分析已有代码时，Mode A 才建议 `/ark:ark-analyze`。
 
 也可以描述更窄的任务：
 

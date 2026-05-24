@@ -27,19 +27,23 @@ init 在执行前必须先确认项目模式：
 - CLAUDE.md 基于扫描到的真实项目结构动态生成
 - 推荐在完成后执行 `/ark:ark-analyze` 以理解代码库
 
-## 必须交互确认的输入
+## Mode A 必须交互确认的输入
 
-以下内容应始终确认：
+以下内容在全新项目模式下必须确认：
 
 - project name：默认从当前目录名获取，需经过 Python 标识符合法性处理后确认
 - target directory：默认当前目录
-
-## 建议交互确认的输入
-
-如果用户未提供，建议确认或主动给出默认值：
-
 - Python 版本：默认 `3.12`，可选范围从 `3.10` 到 `3.14`
 - 是否创建 pytest 测试（默认启用）
+- 项目类型画像：backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown
+
+Mode A 不得静默使用 `unknown`。只有用户明确选择"不确定 / unknown"时，才可写入 `unknown`。
+
+## Mode B 输入策略
+
+- project name：优先从 `pyproject.toml`、包目录或当前目录推断
+- target directory：默认当前目录
+- 项目类型画像：先扫描推断，必要时请用户确认
 
 ## 包管理工具
 
@@ -141,8 +145,11 @@ uv --version
 - `src/`
 - `tests/`
 - `docs/`
+- `requirements*.txt`（必须用安全 glob 或 find 检测）
 
 如果存在冲突，询问用户「覆盖」或「跳过」。
+
+检测已有项目文件时不得使用未保护的 shell glob，例如裸 `requirements*.txt`。应使用 `find . -maxdepth 1 -name 'requirements*.txt' -print`、zsh `(N)` null glob，或逐项检测固定文件后单独用 find 检测模式文件。检测命令失败不得继续当作"未检测到项目文件"；必须修正检测方式后重新执行。
 
 ### 检测 Git 仓库状态
 
@@ -163,6 +170,15 @@ uv init --no-workspace
 初始化后、`uv sync` 前，必须检查并补全 `pyproject.toml` 的 build-system 配置（src layout 需要）：
 - 若缺少 `[build-system]`，追加 hatchling 配置
 - 若缺少 `[tool.hatch.build.targets.wheel]`，追加 `packages = ["src/<project_name>"]`
+
+`pyproject.toml` 的 build-system 必须写为：
+```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+```
+
+不得写成 `hatchling.backends`。
 
 ```bash
 uv venv
@@ -248,6 +264,14 @@ docs/ Artifact 是 ark 实现跨会话记忆和状态追踪的核心，必须自
 - `decisions.md` → `templates/artifacts/decisions.template.md`
 - `validation.md` → `templates/artifacts/validation.template.md`
 - `handoff.md` → `templates/artifacts/handoff.template.md`
+
+## Mode A 输出下一步规则
+
+全新项目输出下一步时不得混入 Mode B 的 analyze 默认建议：
+- 项目类型为 `unknown` 或目标仍不清楚 → `/ark:ark-intake`
+- 已有明确产品 / 能力目标 → `/ark:ark-spec`
+- 已有明确技术目标且需要拆解 → `/ark:ark-plan`
+- 仅当用户明确要求分析已有代码，或当前目录已有实质代码时，才建议 `/ark:ark-analyze`
 
 ## 模式 B 执行流程：已有项目
 
@@ -383,6 +407,14 @@ Mode B 的注释风格处理遵循 Inspect & Respect：
 - `pyrightconfig.json`（基于探测变量）
 - `.claude/settings.local.json`（本地配置，含 ruff format hook + permissions；hook 命令引用 `.claude/ruff-hook.py`）
 - `pyproject.toml` 中追加 `[tool.ruff]` 配置（如不存在）
+
+每个质量工具配置写入后必须复查文件存在性和关键内容：
+- `.claude/ruff-hook.py`
+- `.claude/settings.local.json`
+- `pyrightconfig.json`
+- `pyproject.toml` 中 `[tool.ruff]`
+
+若任一写入失败，不得在最终摘要中写"已创建"；必须写"失败（原因）/ 待手动处理"，并列出恢复命令或文件路径。
 
 `.claude/` 默认保持本地可用但不纳入 Git。初始化输出不得建议提交 `.claude/ruff-hook.py` 或 `.claude/settings.local.json`。
 PostToolUse hook 不执行 `ruff check --fix`；lint auto-fix 由 `/ark:ark-implement` 在批次完成等稳定点执行，避免编辑中间态被自动删除未使用导入。

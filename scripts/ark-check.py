@@ -126,6 +126,25 @@ def check_workflow_tokens(errors: list[str]) -> None:
         "skills/ark-handoff/SKILL.md": [
             "下一次必须继承的结论",
         ],
+        "skills/ark-init/SKILL.md": [
+            'build-backend = "hatchling.build"',
+            "不得写成 `hatchling.backends`",
+            "Mode A 不得静默使用 `unknown`",
+            "不得默认建议 `/ark:ark-analyze`",
+            "find . -maxdepth 1 -name 'requirements*.txt' -print",
+            "检测命令失败不得继续当作",
+            "每个质量工具配置写入后必须复查文件存在性",
+            ".claude/settings.local.json",
+            "质量工具配置 | 已创建 / 失败（原因）/ 待手动处理",
+        ],
+        "skills/ark-init/references/project-bootstrap-guidelines.md": [
+            'build-backend = "hatchling.build"',
+            "不得写成 `hatchling.backends`",
+            "Mode A 不得静默使用 `unknown`",
+            "Mode A 输出下一步规则",
+            "find . -maxdepth 1 -name 'requirements*.txt' -print",
+            "每个质量工具配置写入后必须复查文件存在性",
+        ],
         "rules/python-backend-conventions.md": [
             "fastchain-enhanced",
             "L0 无需补充",
@@ -150,6 +169,17 @@ def check_workflow_tokens(errors: list[str]) -> None:
         for token in tokens:
             if token not in text:
                 fail(errors, f"{rel} missing workflow token: {token}")
+
+    init_skill = read(ROOT / "skills" / "ark-init" / "SKILL.md")
+    init_reference = read(
+        ROOT / "skills" / "ark-init" / "references" / "project-bootstrap-guidelines.md"
+    )
+    for rel, text in (
+        ("skills/ark-init/SKILL.md", init_skill),
+        ("skills/ark-init/references/project-bootstrap-guidelines.md", init_reference),
+    ):
+        if "hatchling.backends" in text and "不得写成 `hatchling.backends`" not in text:
+            fail(errors, f"{rel} contains unsafe hatchling.backends reference")
 
 
 def main() -> int:
