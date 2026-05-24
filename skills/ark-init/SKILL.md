@@ -260,7 +260,7 @@ build-backend = "hatchling.build"
 对每个已存在的文件，询问用户：覆盖 / 跳过 / 中止。
 
 ### 第六步：创建 docs/ Artifact
-自动创建 7 个核心 Artifact，使用模板或空文件，不需要用户确认。
+自动创建 7 个核心 Artifact，使用模板或带版本头的 fallback，不需要用户确认。
 
 每个 Artifact 顶部必须包含版本头注释：
 ```
@@ -269,7 +269,7 @@ build-backend = "hatchling.build"
 <!-- last-updated: YYYY-MM-DD -->
 ```
 
-模板文件中已包含版本头，使用模板时无需额外添加。使用空文件或 fallback 时需手动写入版本头。
+模板文件中已包含版本头，使用模板时无需额外添加。使用 fallback 时必须手动写入版本头，不得生成纯空文件。
 
 模板映射：
 - `spec.md` → `templates/artifacts/spec.template.md`
@@ -306,7 +306,7 @@ build-backend = "hatchling.build"
 只创建不存在的文件；若文件存在但为空或仅含空行，视为可初始化对象。不触碰已有代码结构。
 
 **必须创建（如不存在）：**
-- `docs/` 目录及 7 个核心 Artifact（每个顶部含版本头注释）
+- `docs/` 目录及 7 个核心 Artifact（必须使用 artifact templates；模板不可用时使用带 `ark-artifact`、`schema-version`、`last-updated` 版本头的 fallback，不得生成纯空文件）
 - `CLAUDE.md`（基于扫描到的真实项目结构动态生成，不使用通用模板）
 - `MEMORY.md`（使用模板或 fallback，见 `references/fallback-templates.md`，不得自定义内容）
 
@@ -326,8 +326,9 @@ Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
 #### B-第三步：处理冲突
 对每个已存在的工作流文件（`CLAUDE.md`、`MEMORY.md`、`docs/` 下的文件）：若为空或仅含空行则直接初始化；若非空则询问处理方式。
 
-- `CLAUDE.md`：覆盖 / 追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 跳过
-- 其他工作流文件：覆盖 / 跳过
+- `CLAUDE.md`：追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 跳过 / 覆盖（高风险，必须二次确认）
+- `MEMORY.md`：跳过 / 覆盖（高风险，必须二次确认）
+- `docs/ark/*`：跳过 / 覆盖（高风险，可能丢失 Artifact 状态，必须二次确认）
 
 追加章节只用于补充 Mode B 扫描得到的注释/docstring 风格约定或 ARK 项目画像，不得重写用户已有内容。
 
@@ -339,8 +340,8 @@ Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
 
 摘要：
 1. **`pyrightconfig.json`** — 不创建，仅报告探测结果和配置建议
-2. **`.claude/ruff-hook.py`** — 若 `.claude/settings.local.json` 需要生成或合并 hooks，则先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；该 hook 只执行 `ruff format`；已存在且内容一致时跳过
-3. **`.claude/settings.local.json`** — 不存在时直接生成（hook 命令引用 `.claude/ruff-hook.py`）；已存在但缺少 `hooks.PostToolUse` 时，提供可选确认动作：将 ruff 文件级 hooks 合并追加到已有配置（不覆盖用户已有的 permissions 等字段，用户确认后才执行）
+2. **`.claude/ruff-hook.py`** — 仅在用户选择生成或合并本地辅助配置时创建；若 `.claude/settings.local.json` 需要生成或合并 hooks，则先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；该 hook 只执行 `ruff format`；已存在且内容一致时跳过
+3. **`.claude/settings.local.json`** — 不存在时不得直接生成，必须提供选项：生成本地辅助配置 / 只报告建议 / 跳过；已存在但缺少 `hooks.PostToolUse` 时，提供可选确认动作：将 ruff 文件级 hooks 合并追加到已有配置（不覆盖用户已有的 permissions 等字段，用户确认后才执行）
 4. **`pyproject.toml [tool.ruff]`** — 绝不自动追加，仅报告建议
 
 Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件，但现有 `.gitignore` 未忽略 `.claude/`，只在输出摘要中建议用户按需添加 `.claude/`；不得自动追加，也不得提示必须提交这些文件。
@@ -351,15 +352,16 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 
 检测项目是否已安装质量工具（ruff、pyright），若缺失则主动告知影响并提供安装选项。
 
-**检测方式：** 检查 `pyproject.toml` 的依赖（含 dev 依赖）是否包含 ruff 和 pyright。
+**检测方式：** 检查 `pyproject.toml` 的依赖（含 dev 依赖）是否包含 ruff 和 pyright；同时观察 `requirements*.txt`、`setup.cfg`、`tox.ini`、`noxfile.py`、`.pre-commit-config.yaml` 等既有工具链信号，避免只按 `pyproject.toml` 误判。
 
 **若检测到缺失：**
 1. 明确说明：后续 ARK 编码质量护栏（自动格式化、lint 修复、类型检查）会减弱
-2. 提供以下选项供用户选择：
+2. 只有确认当前项目是 uv / pyproject 管理的项目时，才提供会修改项目元数据的安装选项：
    - 安装 Ruff + Pyright（`uv add --dev ruff pyright`）
    - 仅安装 Ruff（`uv add --dev ruff`）
    - 跳过（后续可手动安装）
-3. 用户确认后才执行安装
+3. 若项目使用 requirements、setup.py/setup.cfg、tox、pre-commit 或无法确认包管理方式，只报告建议和可选命令，不得直接执行 `uv add --dev`
+4. 用户确认后才执行安装
 
 **输出表述：** 若安装成功，应明确写"Pyright 工具已安装（通过 PyPI 包 pyright 提供 pyright CLI）"，不得仅写版本号，避免与 npm 官方路径混淆。
 
@@ -414,7 +416,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | .gitignore | 使用模板 / 使用 fallback |
 | CLAUDE.md | 使用模板 / 使用 fallback |
 | MEMORY.md | 使用模板 / 使用 fallback |
-| docs/ Artifact | 使用模板 / 使用空文件 |
+| docs/ Artifact | 使用模板 / 使用带版本头的 fallback |
 | 质量工具安装 | 已安装 / 跳过（原因）|
 | 质量工具配置 | 已创建 / 失败（原因）/ 待手动处理 |
 | 项目画像 | 已写入 / 待确认 / unknown |
@@ -446,8 +448,9 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | 项目扫描 | 成功 / 失败（原因）|
 | CLAUDE.md | 基于 scan 生成 / 追加注释风格章节 / 跳过（已存在）|
 | MEMORY.md | 使用模板 / 跳过（已存在）|
-| docs/ Artifact | 使用模板 / 使用空文件 / 跳过（已存在）|
+| docs/ Artifact | 使用模板 / 使用带版本头的 fallback / 跳过（已存在）|
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|
+| 质量工具配置 | 仅报告建议 / 本地辅助已创建 / 跳过（用户选择）/ 失败（原因）|
 | 能力探测 | 已写入 / 用户未确认，仅报告 / 跳过（原因）|
 | 项目画像 | 已写入 / 用户未确认，仅报告 / 待后续 analyze |
 

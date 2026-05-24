@@ -421,9 +421,11 @@ backend/
 └── settings.local.json
 ```
 
-`.claude/` 是本地辅助配置目录，默认被 ARK `.gitignore` 模板忽略，不作为必须提交的项目状态。团队如需共享 Claude Code 配置，应显式讨论后再调整 `.gitignore`。
+`.claude/` 是本地辅助配置目录，默认被 ARK `.gitignore` 模板忽略，不作为必须提交的项目状态。Mode B 只有在用户确认后才会创建这些本地辅助文件。团队如需共享 Claude Code 配置，应显式讨论后再调整 `.gitignore`。
 
 如果 `.claude/settings.local.json` 已存在且缺少 ARK hook，ARK 只会在用户确认后合并缺失的 hook/permissions，不覆盖已有字段。
+
+Mode B 创建 Artifact 时必须使用 ARK 模板；模板不可用时，fallback Artifact 仍必须包含 `ark-artifact`、`schema-version`、`last-updated` 版本头，不生成纯空文件。
 
 ### Mode B 默认不会做什么
 
@@ -461,8 +463,10 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 |------|-------------|
 | `pyrightconfig.json` | 不自动创建，只报告建议 |
 | `pyproject.toml [tool.ruff]` | 不自动追加，只报告建议 |
-| ruff / pyright 依赖 | 缺失时提示影响，用户确认后才安装 |
-| `.claude/settings.local.json` | 本地辅助配置；不存在时可生成，存在时确认后合并缺失 hook，默认不提交 |
+| ruff / pyright 依赖 | 缺失时提示影响；只有确认项目由 uv / pyproject 管理时才提供 `uv add --dev` 安装选项 |
+| `.claude/settings.local.json` | 本地辅助配置；只有用户确认后才生成或合并缺失 hook，默认不提交 |
+
+Mode B 会同时检查 `requirements*.txt`、`setup.cfg`、`tox.ini`、`noxfile.py`、`.pre-commit-config.yaml` 等既有工具链信号，不会把 `uv add --dev` 强加给使用其他包管理方式的项目。
 
 ### Mode B 输出示例
 
@@ -484,6 +488,7 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | MEMORY.md | 使用模板 |
 | docs/ Artifact | 使用模板 |
 | 质量工具安装 | 已存在 / 跳过（用户选择） |
+| 质量工具配置 | 仅报告建议 / 本地辅助已创建 / 跳过（用户选择） |
 | 能力探测 | 用户未确认，仅报告 |
 | 项目画像 | 用户未确认，仅报告 |
 

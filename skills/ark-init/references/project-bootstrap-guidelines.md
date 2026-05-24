@@ -312,7 +312,7 @@ Mode B 的注释风格处理遵循 Inspect & Respect：
 ### 第三步：创建工作流文件
 
 只创建以下文件（如不存在）；若文件存在但为空或仅含空行，视为可初始化对象：
-- `docs/` 及 7 个空 Artifact
+- `docs/` 及 7 个核心 Artifact；必须使用 artifact templates，模板不可用时使用带 `ark-artifact`、`schema-version`、`last-updated` 版本头的 fallback，不得生成纯空文件
 - `CLAUDE.md`（基于扫描结果生成）
 - `MEMORY.md`
 
@@ -326,8 +326,9 @@ Mode B 的注释风格处理遵循 Inspect & Respect：
 
 对已存在的工作流文件，询问用户如何处理。
 
-- `CLAUDE.md`：覆盖 / 追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 跳过
-- 其他工作流文件：覆盖 / 跳过
+- `CLAUDE.md`：追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 跳过 / 覆盖（高风险，必须二次确认）
+- `MEMORY.md`：跳过 / 覆盖（高风险，必须二次确认）
+- `docs/ark/*`：跳过 / 覆盖（高风险，可能丢失 Artifact 状态，必须二次确认）
 
 追加章节只用于补充 Mode B 扫描得到的注释/docstring 风格约定或 ARK 项目画像，不得重写用户已有内容。
 
@@ -396,11 +397,12 @@ Mode B 的注释风格处理遵循 Inspect & Respect：
 
 ##### Mode B（已有项目）：检测 + 用户确认后安装
 
-1. 检查 `pyproject.toml` 依赖（含 dev 依赖）是否包含 ruff 和 pyright
+1. 检查 `pyproject.toml` 依赖（含 dev 依赖）是否包含 ruff 和 pyright；同时观察 `requirements*.txt`、`setup.cfg`、`tox.ini`、`noxfile.py`、`.pre-commit-config.yaml` 等既有工具链信号，避免只按 `pyproject.toml` 误判
 2. 若缺失，明确说明：后续 ARK 编码质量护栏（自动格式化、lint 修复、类型检查）会减弱
-3. 提供选项：安装 Ruff + Pyright / 仅安装 Ruff / 跳过
-4. **用户确认后才执行** `uv add --dev`
-5. 安装工具不等于自动注入配置——配置仍遵循阶段二策略
+3. 只有确认当前项目是 uv / pyproject 管理的项目时，才提供会修改项目元数据的安装选项：安装 Ruff + Pyright / 仅安装 Ruff / 跳过
+4. 若项目使用 requirements、setup.py/setup.cfg、tox、pre-commit 或无法确认包管理方式，只报告建议和可选命令，不得直接执行 `uv add --dev`
+5. **用户确认后才执行** `uv add --dev`
+6. 安装工具不等于自动注入配置——配置仍遵循阶段二策略
 
 **类型检查工具选择：** 当前默认安装 PyPI 包 `pyright`（Python wrapper，提供 `pyright` CLI 命令），团队如有其他偏好可替换。此为工具选型而非框架裁决，不写死为永久选择。输出中应明确表述为"通过 PyPI 包 pyright 安装"，不得仅写版本号，避免与 npm 官方路径混淆。
 
@@ -432,10 +434,10 @@ PostToolUse hook 不执行 `ruff check --fix`；lint auto-fix 由 `/ark:ark-impl
 | 类别 | 文件 | Mode B 策略 |
 |------|------|------------|
 | ARK 工作流文件 | CLAUDE.md、MEMORY.md、docs/* | 可创建（如不存在） |
-| 本地辅助配置 | .claude/ruff-hook.py、.claude/settings.local.json | 可创建（如不存在），默认不提交 |
+| 本地辅助配置 | .claude/ruff-hook.py、.claude/settings.local.json | 用户确认后可创建（如不存在），默认不提交 |
 | 项目质量配置 | pyrightconfig.json、pyproject.toml [tool.ruff] | 默认不创建，只报告建议 |
 
-对 ARK 工作流文件和本地辅助配置执行三段式：
+对 ARK 工作流文件执行三段式：
 
 **A. 文件不存在** → 直接生成
 
@@ -448,6 +450,8 @@ PostToolUse hook 不执行 `ruff check --fix`；lint auto-fix 由 `/ark:ark-impl
 - 发现潜在问题（缺少哪些核心字段）
 - 建议补充项
 
+对本地辅助配置（`.claude/ruff-hook.py`、`.claude/settings.local.json`），文件不存在时也不得直接生成；必须先让用户选择生成本地辅助配置 / 只报告建议 / 跳过。
+
 对项目质量配置（pyrightconfig.json、pyproject.toml [tool.ruff]），Mode B **不创建、不修改**，只报告检测结果和建议。
 
 具体检测规则：
@@ -455,8 +459,8 @@ PostToolUse hook 不执行 `ruff check --fix`；lint auto-fix 由 `/ark:ark-impl
 | 文件 | Mode B 行为 |
 |------|------------|
 | `pyrightconfig.json` | 不创建。检测是否存在及核心字段完整性，在摘要中报告探测结果和配置建议 |
-| `.claude/ruff-hook.py` | 若需要生成或合并 `.claude/settings.local.json` 的 hooks，先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；该 hook 只执行 `ruff format`；已存在且内容一致时跳过 |
-| `.claude/settings.json` / `.claude/settings.local.json` | 检测是否含 `hooks.PostToolUse`。若均不存在，生成 `.claude/settings.local.json`（hook 命令引用 `.claude/ruff-hook.py`）；若 `settings.local.json` 已存在但缺 hooks，提供可选确认动作：将 ruff 文件级 hooks 合并追加（不覆盖已有字段，用户确认后执行）|
+| `.claude/ruff-hook.py` | 仅在用户选择生成或合并本地辅助配置时创建；若需要生成或合并 `.claude/settings.local.json` 的 hooks，先将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到项目 `.claude/` 下；该 hook 只执行 `ruff format`；已存在且内容一致时跳过 |
+| `.claude/settings.json` / `.claude/settings.local.json` | 检测是否含 `hooks.PostToolUse`。若均不存在，提供选项：生成 `.claude/settings.local.json`（hook 命令引用 `.claude/ruff-hook.py`）/ 只报告建议 / 跳过；若 `settings.local.json` 已存在但缺 hooks，提供可选确认动作：将 ruff 文件级 hooks 合并追加（不覆盖已有字段，用户确认后执行）|
 | `pyproject.toml [tool.ruff]` | 不追加。检测是否存在，在摘要中报告"建议手动补充"并列出可参考字段 |
 
 Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件，但现有 `.gitignore` 未忽略 `.claude/`，只在输出摘要中建议用户按需添加 `.claude/`；不得自动追加，也不得提示必须提交这些文件。
