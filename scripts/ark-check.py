@@ -134,6 +134,9 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "find . -maxdepth 1 -name 'requirements*.txt' -print",
             "检测命令失败不得继续当作",
             "每个质量工具配置写入后必须复查文件存在性",
+            "必须使用 Claude Code 的交互式提问机制",
+            "不得只在普通回复中输出",
+            "模式选择不得通过普通文本问题完成",
             ".claude/settings.local.json",
             "质量工具配置 | 已创建 / 失败（原因）/ 待手动处理",
         ],
@@ -144,6 +147,8 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "Mode A 输出下一步规则",
             "find . -maxdepth 1 -name 'requirements*.txt' -print",
             "每个质量工具配置写入后必须复查文件存在性",
+            "必须使用 Claude Code 的交互式提问机制",
+            "不得只输出\"请选择初始化模式\"",
         ],
         "rules/python-backend-conventions.md": [
             "fastchain-enhanced",
