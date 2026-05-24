@@ -255,6 +255,11 @@ Medium/Large 任务可启用 batch sub-agent 模式缓解 context rot：
 - 某任务已完成且已有 validation.md 验证记录 → 可移入 Done（通常由 `/ark:ark-validate` 触发）
 - 出现新阻塞 → 加入 Blocked（附解除条件）
 
+日期要求：
+- 回写 `docs/ark/tasks.md` 时，只更新真实发生变化的任务状态、批次备注或阻塞信息
+- 如内容被修改，头部 `last-updated` 使用当前会话真实日期
+- 同一天多次 implement 不得递增日期，不得写入未来日期
+
 ### 建议更新 `docs/ark/decisions.md`
 - 做出了非平凡技术取舍或选用了新的实现路线
 

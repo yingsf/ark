@@ -92,6 +92,15 @@ sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_
 - 无版本头 → 标记 unknown，建议重新执行对应 Skill 或手动补充
 - 版本低于当前插件 → 提示格式差异，但不自动修改
 
+## `last-updated` 判断约束
+
+`last-updated` 只用于跨日期的粗粒度传播判断：
+
+- 若两个 Artifact 日期相同，不得仅凭日期判断谁更新
+- 若 `last-updated` 晚于当前会话真实日期，应标记为可疑元信息，并建议修正为真实日期
+- 不得把 `last-updated` 当作 revision、序号或同日排序字段
+- 同一天内的先后顺序必须依据 git history、文件 diff、内容一致性或显式变更记录判断
+
 ## 职责边界
 
 ark-sync 只判断状态一致性，职责严格限定为：

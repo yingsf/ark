@@ -67,6 +67,8 @@ def check_artifact_templates(errors: list[str]) -> None:
     for token in ("Ready for validation", "完成后可观察结果", "外部依据"):
         if token not in tasks:
             fail(errors, f"tasks.template.md missing {token}")
+    if "## Last updated" in tasks:
+        fail(errors, "tasks.template.md should use header last-updated only")
 
     spec = read(artifact_dir / "spec.template.md")
     if "核心命题与不变量" not in spec:

@@ -41,6 +41,15 @@
 
 `last-updated` 用于 `ark-sync` 和 `ark-next` 判断上游变更是否已经传播到下游。旧项目或旧模板缺少该字段时，可信度可标为 `unknown` 或 `stale`，但不得仅因版本头差异覆盖用户内容。
 
+### 日期语义
+
+- `schema-version` 表示 Artifact 结构版本，只有模板结构或解析协议变化时才升级
+- `last-updated` 表示该 Artifact 内容最后一次真实修改的日期
+- `last-updated` 不是 revision、序号或同日排序字段
+- 同一天多次修改同一 Artifact 时，`last-updated` 保持当天日期不变
+- 禁止根据旧日期递增，禁止写入未来日期
+- 若需要判断同一天内的先后顺序，应依据 git history、文件 diff、内容一致性或显式变更记录，而不是 `YYYY-MM-DD`
+
 ## 核心命题与不变量
 
 `核心命题与不变量` 是跨项目类型的总称：

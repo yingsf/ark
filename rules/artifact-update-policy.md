@@ -14,6 +14,21 @@
 
 ---
 
+## Artifact 日期更新协议
+
+当任一 Skill 修改核心 Artifact 内容时：
+
+- 必须将头部 `last-updated` 设置为当前会话真实日期
+- 若当前头部日期已经是当天日期，不再改变
+- 不得把 `last-updated` 当作版本号递增
+- 不得为了表示多次更新而写入明天或未来日期
+- 只读取、检查、建议但未修改 Artifact 内容时，不更新 `last-updated`
+- `schema-version` 不随内容更新变化，只有 Artifact 模板结构升级时才修改
+
+`last-updated` 只提供跨日期的粗粒度 freshness 信号。同一天内的先后顺序应依据 git history、文件 diff、内容一致性或显式变更记录判断。
+
+---
+
 ## 各 Artifact 的回写条件
 
 ### `docs/ark/plan.md`

@@ -63,6 +63,3 @@
 ## Blocked
 
 <!-- 阻塞任务。阻塞原因和解除条件为必填项。-->
-
-## Last updated
-YYYY-MM-DD

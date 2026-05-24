@@ -272,6 +272,8 @@ my-api/
 
 `ark-sync` 会使用这些版本头判断旧项目 Artifact 是否为 `unknown`，但缺少版本头不会阻塞工作流。
 
+其中 `schema-version` 表示 Artifact 结构版本；`last-updated` 表示该 Artifact 内容最后一次真实修改日期，不是 revision 或同日排序字段。同一天多次更新同一 Artifact 时应保持当天日期，不应递增为未来日期。
+
 ### Artifact 协议要点
 
 - `spec.md` 记录「核心命题与不变量」：不同项目可对应产品精髓、业务闭环、公开 API、命令契约、数据/AI 评估闭环或 Claude 插件宿主约束。
