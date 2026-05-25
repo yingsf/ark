@@ -293,6 +293,8 @@ uv run pyright
 - 公共类、公共函数、关键方法使用中文 Google 风格 docstring
 - L2/L3 对象（核心 service / manager / provider / adapter、资源生命周期、外部依赖封装、启动链路、数据导入链路）使用增强 docstring，说明职责、设计原因、封装边界、生命周期和关键 Attributes
 - 简单私有 helper、薄包装、简单 getter/setter 不强制补 docstring
+- 不主动新增顶部模块级 docstring
+- 不使用赋值语句后的三引号字符串说明常量、变量、集合或配置项；必要说明写在定义上方的中文块注释
 - 复杂逻辑、边界条件、降级策略、资源生命周期、并发控制应补充中文注释
 - 注释解释原因、约束和风险，避免重复代码表面含义
 - 中文 docstring 和中文注释的描述句不使用句末中文终止标点（避免 `。`、`！`、`？`、`；`）
