@@ -56,6 +56,7 @@ sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_
   - plan/tasks 已大量推进，但项目画像中的真实入口、真实依赖、真实数据源或公开契约仍未接入
   - spec/design/plan/tasks 对核心命题与不变量的承接不完整或逐层弱化
   - tasks.md 存在 Ready for validation 项但 validation.md 尚未记录对应验证结论
+  - 代码现实已经越过 tasks 依赖顺序，但尚未造成明确相反状态
 
 **conflicting**：
   - plan.md 与 tasks.md 步骤/任务数不匹配
@@ -67,6 +68,8 @@ sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_
   - 扩展文档正文与核心 Artifact 或代码现实明显相反
   - validation 把 mock/fake/in-memory/合成数据证据描述成真实验证通过
   - Done 项缺少 validation.md 记录引用，或 validation 记录与 Done 结论相反
+  - 同一个 task ID 跨状态重复出现
+  - 代码现实明显跳过未完成依赖并实现后续 task，导致 tasks 依赖顺序与实际执行相反
 
 **unknown**：
   - Artifact 无版本头（旧项目）
@@ -197,7 +200,7 @@ ark-sync **不做**：
 
 **允许直接修正**（仅限状态字段更新，不改变语义内容）：
 - `plan.md` 的当前状态字段（Status / Current phase / Last updated）
-- `tasks.md` 的单条状态迁移（如 Todo → Doing、Doing → Ready for validation、Ready for validation → Done）；其中 Ready for validation → Done 仅在已有对应验证记录或验证已明确完成时允许直接修正
+- `tasks.md` 的单条状态迁移（如 Todo → Doing、Doing → Ready for validation、Ready for validation → Done）；其中 Ready for validation → Done 仅在已有对应验证记录或验证已明确完成时允许直接修正；状态迁移必须保持同一个 task ID 不跨状态重复出现
 - `handoff.md` 的过期标注或最近阶段描述
 
 **不允许直接修正**（只能建议更新）：

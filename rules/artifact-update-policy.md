@@ -145,6 +145,7 @@
 - 原计划与现实偏差明显 → 更新 `docs/ark/plan.md`
 - 某项任务开始 / 实现完成待验证 / 阻塞 → 更新 `docs/ark/tasks.md`
 - 实现完成但未由 `/ark:ark-validate` 记录验证证据 → 将任务置为 `Ready for validation`，不得置为 `Done`
+- 每轮 implement 必须先锁定本轮唯一执行目标；未指定 task、batch 或阶段范围时，不得连续执行多个 Todo
 - 出现关键技术取舍 → 建议更新 `docs/ark/decisions.md`（不强制直接写入）
 - 本次实现改变需求范围、验收标准、对外能力或非目标边界 → 建议 `/ark:ark-spec`，不直接回写 `docs/ark/spec.md`
 - 本次实现改变模块边界、接口契约、数据流、运行时机制、资源生命周期、并发/降级策略 → 建议 `/ark:ark-design`，不直接回写 `docs/ark/design.md`
@@ -170,6 +171,12 @@
 - Ready for validation → Done（验证已完成且 `validation.md` 有记录；通常由 `/ark:ark-validate` 触发）
 - Doing → Blocked（遇到阻塞）
 - 新增一个必须先完成的前置任务
+
+状态迁移原子性：
+- 状态迁移必须是移动而不是复制
+- 同一个 task ID 不得跨状态重复出现
+- 回写后必须自检 task ID 唯一性；若发现重复或无法安全迁移，应停止并建议 `/ark:ark-sync`
+- 未纳入本轮唯一执行目标或当前批次边界的 task 不得被顺手更新状态
 
 不应触发：
 - 仅仅阅读了一个文件

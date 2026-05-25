@@ -101,6 +101,9 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "前序结论吸收",
             "Ready for validation",
             "Checkpoint 建议",
+            "本轮唯一执行目标",
+            "不得连续执行多个 Todo",
+            "完成当前目标后停止",
             "fastchain-enhanced",
             "注释详细度分级",
             "不主动新增顶部模块级 docstring",
@@ -122,10 +125,14 @@ def check_workflow_tokens(errors: list[str]) -> None:
         "skills/ark-sync/SKILL.md": [
             "变更传播判断",
             "核心命题与不变量",
+            "同一个 task ID 跨状态重复出现",
+            "tasks 依赖顺序",
         ],
         "skills/ark-next/SKILL.md": [
             "当前最可信",
             "用户需提供的信息",
+            "第一个可执行 Todo",
+            "本轮唯一执行目标",
         ],
         "skills/ark-handoff/SKILL.md": [
             "下一次必须继承的结论",
@@ -170,6 +177,11 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "变量后置三引号",
             "中文标点规则",
             "解释性尾随注释",
+        ],
+        "rules/artifact-update-policy.md": [
+            "本轮唯一执行目标",
+            "不得连续执行多个 Todo",
+            "同一个 task ID 不得跨状态重复出现",
         ],
         "templates/project/CLAUDE.md.template": [
             "注释详细度：fastchain-enhanced",

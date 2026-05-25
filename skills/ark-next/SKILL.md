@@ -59,7 +59,8 @@ version: "1.0"
 4. **判验证闭环** — Ready for validation 项缺验证记录、Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
 5. **判规格/设计/扩展文档更新** — 已明确是需求边界、验收标准、能力承诺变化 → `/ark:ark-spec`；已明确是模块边界、接口契约、数据流或运行机制变化 → `/ark:ark-design`；已明确是专题方案、契约、集成或数据源元信息变化 → `/ark:ark-solution`
 6. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
-7. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design`、`/ark:ark-solution` 或 `/ark:ark-intake`
+7. **判下一个可执行 Todo** — 无 Doing 且存在依赖已满足、未阻塞的 Todo → 推荐 `/ark:ark-implement`，并明确应从第一个可执行 Todo 开始，锁定本轮唯一执行目标
+8. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design`、`/ark:ark-solution` 或 `/ark:ark-intake`
 
 ## 推荐策略
 
@@ -72,6 +73,7 @@ version: "1.0"
 | 真实基础设施、数据源或公开契约长期未进入闭环 | `/ark:ark-sync` 或 `/ark:ark-plan` |
 | 功能已实现但无验证记录 / Ready for validation 待验证 | `/ark:ark-validate` |
 | 目标清晰、Doing 明确、无阻塞 | `/ark:ark-implement` |
+| 无 Doing，但存在可执行 Todo | `/ark:ark-implement`（从第一个可执行 Todo 开始，先锁定本轮唯一执行目标） |
 | 当前阶段准备暂停 | `/ark:ark-handoff` |
 | 需要先理解代码库再推进 | `/ark:ark-analyze` |
 | 有新需求但不够清晰 | `/ark:ark-intake` |
