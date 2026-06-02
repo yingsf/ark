@@ -15,7 +15,7 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         version = plugin["version"]
-        self.assertEqual(version, "1.0.9")
+        self.assertEqual(version, "1.0.10")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
         self.assertIn(f"version-{version}-blue.svg", (ROOT / "README.md").read_text())
@@ -77,6 +77,12 @@ class ArkAssetTests(unittest.TestCase):
     def test_execution_efficiency_contract_assets_exist(self) -> None:
         tasks_skill = (ROOT / "skills/ark-tasks/SKILL.md").read_text()
         implement_skill = (ROOT / "skills/ark-implement/SKILL.md").read_text()
+        comment_reference = (
+            ROOT / "skills/ark-implement/references/comment-docstring-guidelines.md"
+        ).read_text()
+        batch_reference = (
+            ROOT / "skills/ark-implement/references/batch-subagent-guidelines.md"
+        ).read_text()
         validate_skill = (ROOT / "skills/ark-validate/SKILL.md").read_text()
         tasks_template = (ROOT / "templates/artifacts/tasks.template.md").read_text()
         validation_template = (
@@ -103,6 +109,23 @@ class ArkAssetTests(unittest.TestCase):
             "条件输出",
         ):
             self.assertIn(token, implement_skill)
+        self.assertNotIn("功能视角", implement_skill)
+
+        for token in (
+            "fastchain-enhanced",
+            "L0 无需补充",
+            "变量后置三引号",
+            "句末中文终止标点",
+        ):
+            self.assertIn(token, comment_reference)
+
+        for token in (
+            "显式功能 Batch",
+            "统一验证计划",
+            "write set",
+            "Checkpoint 建议",
+        ):
+            self.assertIn(token, batch_reference)
 
         for token in (
             "验证覆盖范围",
@@ -116,6 +139,8 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("可与哪些任务合并验证", tasks_template)
         self.assertIn("## 验证覆盖范围", validation_template)
         self.assertIn("覆盖原因", validation_template)
+        self.assertIn("阶段推进路径", validation_template)
+        self.assertNotIn("阶段表", validation_template)
 
     def test_planning_granularity_contract_assets_exist(self) -> None:
         spec_skill = (ROOT / "skills/ark-spec/SKILL.md").read_text()
@@ -154,6 +179,20 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("## 阶段推进路径", plan_template)
         self.assertIn("建议 task 边界", plan_template)
         self.assertIn("不建议拆分为", plan_template)
+
+    def test_contract_fixtures_exist(self) -> None:
+        fixture_dir = ROOT / "tests/fixtures/contracts"
+        for name in (
+            "plan-granularity",
+            "implement-report",
+            "validation-coverage",
+        ):
+            good = fixture_dir / f"{name}.good.md"
+            bad = fixture_dir / f"{name}.bad.md"
+            self.assertTrue(good.exists(), f"missing {good}")
+            self.assertTrue(bad.exists(), f"missing {bad}")
+            self.assertTrue(good.read_text().strip())
+            self.assertTrue(bad.read_text().strip())
 
     def test_repository_checks_pass(self) -> None:
         result = subprocess.run(

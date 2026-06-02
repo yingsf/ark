@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.10] - 2026-06-02
+
+### Changed
+
+- Removed stale `ark-implement` report terminology and aligned all default output language around the `功能结果` report section.
+- Split detailed `ark-implement` comment/docstring and batch/sub-agent guidance into references to reduce default Skill prompt density.
+- Added contract fixtures and checks for planning granularity, implement reports, and validation coverage semantics.
+
 ## [1.0.9] - 2026-06-02
 
 ### Changed

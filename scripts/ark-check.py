@@ -97,6 +97,8 @@ def check_artifact_templates(errors: list[str]) -> None:
     for token in ("## 验证覆盖范围", "覆盖任务", "覆盖原因", "未覆盖任务"):
         if token not in validation:
             fail(errors, f"validation.template.md missing {token}")
+    if "阶段表" in validation:
+        fail(errors, "validation.template.md should reference 阶段推进路径, not 阶段表")
 
     spec = read(artifact_dir / "spec.template.md")
     if "核心命题与不变量" not in spec:
@@ -433,6 +435,23 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
             "条件输出",
             "仅在已启用、失败、降级或影响可信度时输出",
         ),
+        "skills/ark-implement/references/comment-docstring-guidelines.md": (
+            "fastchain-enhanced",
+            "L0 无需补充",
+            "L2 fastchain-enhanced",
+            "不主动新增顶部模块级 docstring",
+            "变量后置三引号",
+            "句末中文终止标点",
+            "解释性尾随注释",
+        ),
+        "skills/ark-implement/references/batch-subagent-guidelines.md": (
+            "显式功能 Batch",
+            "统一验证计划",
+            "batch write set",
+            "write set",
+            "Checkpoint 建议",
+            "Sub-agent 状态",
+        ),
         "skills/ark-validate/SKILL.md": (
             "验证覆盖范围",
             "覆盖任务",
@@ -473,6 +492,7 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
         "README.md": (
             "从 1.0.8 起",
             "从 1.0.9 起",
+            "从 1.0.10 起",
             "功能交付单元或可验证技术闭环",
             "功能结果",
             "用户验收方式",
@@ -485,6 +505,96 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
         for token in tokens:
             if token not in text:
                 fail(errors, f"{rel} missing execution efficiency token: {token}")
+
+    forbidden = {
+        "skills/ark-implement/SKILL.md": ("功能视角",),
+        "templates/artifacts/validation.template.md": ("阶段表",),
+        "templates/artifacts/plan.template.md": ("阶段表",),
+        "skills/ark-plan/SKILL.md": ("阶段表",),
+        "rules/task-sizing-rules.md": ("阶段表",),
+    }
+    for rel, tokens in forbidden.items():
+        text = read(ROOT / rel)
+        for token in tokens:
+            if token in text:
+                fail(errors, f"{rel} contains stale contract token: {token}")
+
+
+def plan_granularity_errors(text: str) -> list[str]:
+    errors: list[str] = []
+    for token in (
+        "阶段推进路径",
+        "交付单元 / 技术闭环",
+        "建议 task 边界",
+        "不建议拆分为",
+    ):
+        if token not in text:
+            errors.append(f"missing {token}")
+    if "阶段表" in text:
+        errors.append("uses stale 阶段表")
+    for pattern in (
+        r"创建\s+\S+\.py",
+        r"实现\s+\S+\s*函数",
+        r"新增\s+\S+\s*配置项",
+    ):
+        if re.search(pattern, text):
+            errors.append(f"contains file/function-level split: {pattern}")
+    return errors
+
+
+def implement_report_errors(text: str) -> list[str]:
+    errors: list[str] = []
+    for token in (
+        "### 1. 功能结果",
+        "当前完成状态",
+        "任务状态建议",
+        "用户验收方式",
+        "### 3. 验证状态",
+        "### 4. 风险与回写",
+    ):
+        if token not in text:
+            errors.append(f"missing {token}")
+    for token in ("功能视角", "### Sub-agent 状态", "模块级 docstring / 变量后置三引号检查"):
+        if token in text:
+            errors.append(f"contains default-report noise or stale token: {token}")
+    return errors
+
+
+def validation_coverage_errors(text: str) -> list[str]:
+    errors: list[str] = []
+    for token in ("验证覆盖范围", "覆盖任务", "覆盖原因", "未覆盖任务", "不覆盖原因"):
+        if token not in text:
+            errors.append(f"missing {token}")
+    if "全部通过" in text and "覆盖任务" not in text:
+        errors.append("uses broad validation without coverage mapping")
+    return errors
+
+
+def check_contract_fixtures(errors: list[str]) -> None:
+    fixture_dir = ROOT / "tests" / "fixtures" / "contracts"
+    checks = {
+        "plan-granularity": plan_granularity_errors,
+        "implement-report": implement_report_errors,
+        "validation-coverage": validation_coverage_errors,
+    }
+
+    for name, checker in checks.items():
+        good = fixture_dir / f"{name}.good.md"
+        bad = fixture_dir / f"{name}.bad.md"
+        if not good.exists():
+            fail(errors, f"missing good contract fixture: {good.relative_to(ROOT)}")
+            continue
+        if not bad.exists():
+            fail(errors, f"missing bad contract fixture: {bad.relative_to(ROOT)}")
+            continue
+
+        good_errors = checker(read(good))
+        if good_errors:
+            fail(errors, f"{good.relative_to(ROOT)} should pass contract check: {good_errors}")
+
+        bad_errors = checker(read(bad))
+        if not bad_errors:
+            fail(errors, f"{bad.relative_to(ROOT)} should fail contract check")
 
 
 def check_release_and_ci_assets(errors: list[str]) -> None:
@@ -552,11 +662,25 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "本轮唯一执行目标",
             "不得连续执行多个 Todo",
             "完成当前目标后停止",
+            "功能结果",
+            "用户验收方式",
+        ],
+        "skills/ark-implement/references/comment-docstring-guidelines.md": [
             "fastchain-enhanced",
-            "注释详细度分级",
+            "L0 无需补充",
+            "L2 fastchain-enhanced",
             "不主动新增顶部模块级 docstring",
             "变量后置三引号",
             "句末中文终止标点",
+            "解释性尾随注释",
+        ],
+        "skills/ark-implement/references/batch-subagent-guidelines.md": [
+            "显式功能 Batch",
+            "统一验证计划",
+            "batch write set",
+            "write set",
+            "Checkpoint 建议",
+            "Sub-agent 状态",
         ],
         "skills/ark-validate/SKILL.md": [
             "Ready for validation → Done",
@@ -690,6 +814,7 @@ def main() -> int:
     check_subagent_and_validation_contracts(errors)
     check_stage_contracts(errors)
     check_execution_efficiency_contracts(errors)
+    check_contract_fixtures(errors)
     check_release_and_ci_assets(errors)
     check_no_local_environment_binding(errors)
     check_workflow_tokens(errors)

@@ -28,7 +28,7 @@
 ## 对应任务 / 里程碑
 <!-- 建立与 tasks.md 和 plan.md 的回指，形成验证闭环 -->
 - 对应任务：T1, T2, ...
-- 对应阶段：阶段 {n}「{阶段名}」（引用 plan.md 阶段表中的具体阶段）
+- 对应阶段：阶段 {n}「{阶段名}」（引用 plan.md 阶段推进路径中的具体阶段）
 - tasks 状态建议：验证通过后可从 Ready for validation 迁移到 Done；验证失败时保持 Ready for validation 或转 Blocked，并记录原因。
 
 ## 已执行验证
