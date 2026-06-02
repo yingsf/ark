@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.7] - 2026-06-02
+
+### Added
+
+- Added `ark-stage` for multi-MVP stage governance, including stage status audit, stage close/open/transition modes, archive preview, carryover gates, and current Artifact rebuilding rules.
+- Added stage templates for `docs/ark/stages.md` and `docs/ark/archive/<stage-id>/stage-summary.md`.
+- Added repository checks and smoke coverage for the `ark-stage` contract and stage templates.
+
+### Changed
+
+- Updated README routing, Skill overview, and release metadata for ARK 1.0.7.
+- Clarified that `decisions.md` is project-level long-term memory during stage transitions: long-lived decisions are retained, stage-only decisions are archived, uncertain decisions default to retained, and replaced decisions are marked as `superseded`.
+
 ## [1.0.6] - 2026-06-02
 
 ### Fixed

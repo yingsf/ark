@@ -1,6 +1,6 @@
 # Artifact Placeholder Policy
 
-本文件定义 ARK 如何识别初始模板、占位内容和实质性内容，供 `ark-analyze`、`ark-spec`、`ark-design`、`ark-sync`、`ark-next` 和自检脚本共同使用。
+本文件定义 ARK 如何识别初始模板、占位内容和实质性内容，供 `ark-analyze`、`ark-spec`、`ark-design`、`ark-sync`、`ark-next`、`ark-stage` 和自检脚本共同使用。
 
 ## 目标
 
@@ -34,6 +34,7 @@ Artifact 满足任一条件时，才可视为有实质性内容：
 - `ark-spec` 和 `ark-design` 无输入时，必须先按本规则判断现有内容是否实质性存在
 - `ark-sync` 判断可信度时，必须区分模板占位、旧内容和真实状态
 - `ark-next` 推荐下一步时，不得把模板中的状态选项、示例路径或空状态当作项目事实
+- `ark-stage` 审计阶段状态、重建当前 Artifact 或生成阶段摘要时，不得把阶段模板中的空字段、状态选项或 Carryover Gates 表头当作真实阶段结论
 - `ark-check.py` 应检查高风险模板占位是否仍以正文形式出现在 Artifact 模板中
 
 ## 输出要求

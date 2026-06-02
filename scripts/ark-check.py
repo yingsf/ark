@@ -23,6 +23,10 @@ ARTIFACTS = {
     "validation": "validation.template.md",
     "handoff": "handoff.template.md",
 }
+STAGE_TEMPLATES = {
+    "stages": "stages.template.md",
+    "stage-summary": "stage-summary.template.md",
+}
 
 
 def read(path: Path) -> str:
@@ -219,6 +223,7 @@ def check_placeholder_policy(errors: list[str]) -> None:
         "skills/ark-design/SKILL.md",
         "skills/ark-sync/SKILL.md",
         "skills/ark-next/SKILL.md",
+        "skills/ark-stage/SKILL.md",
         "templates/project/MEMORY.md.template",
         "skills/ark-init/references/fallback-templates.md",
     )
@@ -269,6 +274,95 @@ def check_subagent_and_validation_contracts(errors: list[str]) -> None:
         fail(errors, "ark-next should be read-only and recommend sync/handoff for writes")
     if "按对应 ARK Skill 的可写范围更新 Artifact" not in claude_template:
         fail(errors, "CLAUDE.md.template should scope Artifact updates by Skill write range")
+
+
+def check_stage_contracts(errors: list[str]) -> None:
+    skill_path = ROOT / "skills" / "ark-stage" / "SKILL.md"
+    if not skill_path.exists():
+        fail(errors, "missing skills/ark-stage/SKILL.md")
+        return
+
+    stage_skill = read(skill_path)
+    required_skill_tokens = (
+        "stage-status",
+        "stage-close",
+        "stage-open",
+        "stage-transition",
+        "preview",
+        "用户确认",
+        "closed-with-risk",
+        "Carryover Gates",
+        "docs/ark/archive/<stage-id>/",
+        "docs/ark/stages.md",
+        "不得静默写成 `closed`",
+        "禁止写",
+        "源代码",
+        "真实数据内容",
+        "项目级长期记忆",
+        "当前仍有效决策索引",
+        "不得生成空的 `decisions.md`",
+        "不确定时默认保留",
+        "`stage-close` 只归档",
+        "superseded",
+        "${CLAUDE_PLUGIN_ROOT}/templates/stage/stage-summary.template.md",
+        "${CLAUDE_PLUGIN_ROOT}/templates/stage/stages.template.md",
+    )
+    for token in required_skill_tokens:
+        if token not in stage_skill:
+            fail(errors, f"ark-stage missing stage contract token: {token}")
+
+    stage_dir = ROOT / "templates" / "stage"
+    for name, filename in STAGE_TEMPLATES.items():
+        path = stage_dir / filename
+        if not path.exists():
+            fail(errors, f"missing stage template: templates/stage/{filename}")
+            continue
+        text = read(path)
+        if not text.strip():
+            fail(errors, f"templates/stage/{filename} is empty")
+        if name == "stages":
+            for token in (
+                "<!-- ark-artifact: stages -->",
+                "<!-- schema-version: 1.0 -->",
+                "<!-- last-updated: YYYY-MM-DD -->",
+                "## Current Stage",
+                "## Stage History",
+                "## Carryover Gates",
+                "## Long-Lived Inheritance",
+            ):
+                if token not in text:
+                    fail(errors, f"stages.template.md missing token: {token}")
+        if name == "stage-summary":
+            for token in (
+                "<!-- ark-stage-summary: <stage-id> -->",
+                "<!-- schema-version: 1.0 -->",
+                "<!-- generated-at: YYYY-MM-DD -->",
+                "## 1. 阶段结论",
+                "## 4. 验证摘要",
+                "## 5. 可继承结论",
+                "## 6. 不应继承的内容",
+                "继续保留到当前 `decisions.md`",
+                "标记为 `superseded` / 已替代",
+                "不确定但默认保留",
+            ):
+                if token not in text:
+                    fail(errors, f"stage-summary.template.md missing token: {token}")
+
+    readme = read(ROOT / "README.md")
+    for token in (
+        "22 个专责 Skill",
+        "/ark:ark-stage",
+        "closed-with-risk",
+        "Carryover Gates",
+        "项目级长期记忆",
+        "superseded",
+    ):
+        if token not in readme:
+            fail(errors, f"README.md missing ark-stage token: {token}")
+
+    ark_rule = read(ROOT / "rules" / "ark.md")
+    if "ark-stage" not in ark_rule or "阶段收口" not in ark_rule:
+        fail(errors, "rules/ark.md missing ark-stage routing")
 
 
 def check_release_and_ci_assets(errors: list[str]) -> None:
@@ -365,9 +459,23 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "用户需提供的信息",
             "第一个可执行 Todo",
             "本轮唯一执行目标",
+            "Carryover Gates",
         ],
         "skills/ark-handoff/SKILL.md": [
             "下一次必须继承的结论",
+        ],
+        "skills/ark-stage/SKILL.md": [
+            "stage-status",
+            "stage-close",
+            "stage-open",
+            "stage-transition",
+            "closed-with-risk",
+            "Carryover Gates",
+            "docs/ark/archive/<stage-id>/",
+            "stage-summary.md",
+            "stages.md",
+            "preview",
+            "用户确认",
         ],
         "skills/ark-init/SKILL.md": [
             CANONICAL_UV_INIT,
@@ -416,6 +524,7 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "本轮唯一执行目标",
             "不得连续执行多个 Todo",
             "同一个 task ID 不得跨状态重复出现",
+            "Carryover Gates",
         ],
         "templates/project/CLAUDE.md.template": [
             "注释详细度：fastchain-enhanced",
@@ -436,6 +545,7 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "非实质性内容",
             "实质性内容判定",
             "docs/solution/example.md",
+            "ark-stage",
         ],
     }
 
@@ -456,6 +566,7 @@ def main() -> int:
     check_init_contracts(errors)
     check_placeholder_policy(errors)
     check_subagent_and_validation_contracts(errors)
+    check_stage_contracts(errors)
     check_release_and_ci_assets(errors)
     check_no_local_environment_binding(errors)
     check_workflow_tokens(errors)

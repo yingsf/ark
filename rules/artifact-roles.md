@@ -12,6 +12,8 @@
 | `docs/ark/validation.md` | 验证了什么，证据是什么 | `/ark:ark-validate` | 记录「准备验证什么」（那是 plan 的职责）|
 | `docs/ark/handoff.md` | 下次从哪里继续 | `/ark:ark-handoff` | 代替 plan 作为主执行文档、代替 tasks 管理状态 |
 
+`docs/ark/stages.md` 是可选阶段索引，仅由 `/ark:ark-stage` 按需创建和维护；它不属于初始化默认 7 个核心 Artifact。阶段历史详情保存在 `docs/ark/archive/<stage-id>/`，当前执行依据仍是当前 7 个核心 Artifact。
+
 扩展文档（如 `docs/solution/*`、`docs/design/*`、`docs/contracts/*`、`docs/data-sources/*`）不属于核心 Artifact。它们由 `/ark:ark-solution` 按需创建和维护，`docs/ark/design.md` 只保留摘要和索引，不复制正文。
 
 ## 核心约束
@@ -71,9 +73,11 @@
 
 - **design.md**：记录方案如何工作，以及局部技术权衡
 - **扩展文档**：记录某个专题的详细方案、模块级设计、接口契约或数据源元信息；由 design.md 建索引
-- **decisions.md**：只记录满足以下全部条件的选择——不可逆或高回退成本、影响长期维护方向、未来可能被团队质疑或推翻
+- **decisions.md**：项目级长期记忆和当前仍有效决策索引，只记录满足以下全部条件的选择——不可逆或高回退成本、影响长期维护方向、未来可能被团队质疑或推翻
 
 一般性技术权衡留在 design.md，不重复进 decisions.md。触发 ark-decide 时需判断：如果该选择在 3 个月内不太可能被重新审视，留 design.md 即可。
+
+阶段切换时，`decisions.md` 不随阶段结束清空。`ark-stage` 应保留仍有效的项目级长期决策，不确定时默认保留；已被替代的长期决策标记为 `superseded` / 已替代，阶段性决策只在明确不再约束当前阶段时留在 archive。
 
 ## Artifact 可信度
 
@@ -101,6 +105,7 @@
 - ark-next：检查 handoff.md + tasks.md + plan.md + validation.md 可信度；若 spec.md / design.md 或扩展文档明显 stale/conflicting，应优先推荐 ark-sync
 - ark-sync：输出完整 Artifact 可信度矩阵、扩展文档可信度摘要和上游变更传播判断；对 spec/design/validation 只建议对应 Skill，不直接捏造正文或验证事实
 - ark-solution：维护扩展文档正文；不直接回写 `docs/ark/*`
+- ark-stage：阶段级收口、归档、继承和新阶段初始化；写入前必须 preview 并等待确认，不得把 blocked/conflicting 阶段静默写成 closed
 - 非 fresh 时推荐 ark-sync
 
 > 完整的回写条件与禁止性约束见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-update-policy.md`

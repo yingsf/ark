@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.7-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -43,7 +43,7 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 ## 核心能力
 
-- **21 个专责 Skill**：入口、初始化、澄清、分析、规划、扩展方案、实施、验证、恢复和文档各有明确边界。
+- **22 个专责 Skill**：入口、初始化、澄清、分析、规划、扩展方案、实施、验证、恢复、阶段治理和文档各有明确边界。
 - **自动路由倾向**：用户直接描述任务时，规则会优先引导 Claude 选择对应 ARK Skill；这是倾向，不是运行时强保证。
 - **显式智能入口**：`/ark:ark` 会读取当前 Artifact 状态，判断阶段并推荐下一步。
 - **Sub-agent 支持**：analyze/validate 可用只读或证据收集 agent，implement 可用 batch worker，并通过 write set 审计防止越界写入。
@@ -52,6 +52,7 @@ ARK 的处理方式是把关键状态落到项目文件中：
 - **扩展文档承载层**：专题方案、详细设计、契约、集成和数据源元信息由 `ark-solution` 写入项目自有文档目录，保持 `docs/ark/` 简洁。
 - **能力降级策略**：Agent tool、git、uv、pytest、ruff、pyright 不可用时，不中断工作流，但会在输出中说明降级影响。
 - **Mode A / Mode B 初始化**：既能创建全新 Python 项目，也能以 Inspect & Respect 方式接入已有项目。
+- **阶段治理**：`ark-stage` 支持多 MVP / 多阶段项目的阶段状态裁决、归档、继承提炼、carryover gate 和新阶段初始化。
 - **fastchain-enhanced 中文注释规范**：implement 会按 L0-L3 分级为公共接口、关键方法、资源封装和核心链路补充服务长期维护的中文 docstring / 注释；Mode B 会先尊重既有项目风格。
 - **验证硬边界**：`ark-validate` 只记录验证证据，不修改源码，不用 mock 结果冒充真实通过。
 
@@ -552,6 +553,24 @@ ark-next          # 读取 handoff.md / tasks.md / plan.md，裁决下一步
 ark-handoff       # 需要收口或中断时，主动记录恢复点
 ```
 
+### 阶段治理 / 多 MVP 切换
+
+```text
+“收口 S1，准备进入 S2”
+  ↓
+ark-stage         # 先审计当前阶段状态，检查 blocked / conflicting / stale
+  ↓
+preview           # 展示归档、新阶段重建、carryover gates 和风险确认项
+  ↓
+用户确认后写入
+```
+
+`ark-stage` 用于多 MVP 或大项目阶段切换。它会把当前 7 个核心 Artifact 原样归档到 `docs/ark/archive/<stage-id>/`，生成 `stage-summary.md`，维护 `docs/ark/stages.md`，并在开启新阶段时提炼长期不变量、设计约束、长期决策、验证基线和未覆盖风险。
+
+其中 `docs/ark/decisions.md` 按项目级长期记忆处理：阶段收口只归档历史快照，开启新阶段时继续保留仍有效的长期决策；阶段性决策只在明确不再约束新阶段时留在 archive，不确定时默认保留，已被替代的长期决策标记为 `superseded` / 已替代。
+
+除只读的 `stage-status` 外，`stage-close`、`stage-open` 和 `stage-transition` 都必须先输出 preview 并等待确认。若存在 Blocked、Ready for validation、Done 缺 validation、handoff 与 tasks 冲突，或 plan 当前状态过期，`ark-stage` 不得静默写成 `closed`；用户确认带风险进入下一阶段时，状态写为 `closed-with-risk`，并把未闭合项写入 Carryover Gates。
+
 如果你怀疑文档已经过期，可以直接说：
 
 ```text
@@ -612,6 +631,7 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 重构、优化结构 | `ark-refactor` |
 | 文档、README、说明 | `ark-docs` |
 | 体检、状态、同步 | `ark-sync` |
+| 阶段收口、归档、进入下一 MVP | `ark-stage` |
 | 分析项目、接手 | `ark-analyze` |
 | 初始化、新项目 | `ark-init` |
 
@@ -659,6 +679,7 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 恢复 | `/ark:ark-handoff` | 写入恢复点 |
 | 恢复 | `/ark:ark-next` | 根据 Artifact 裁决下一步 |
 | 恢复 | `/ark:ark-sync` | 检查并同步 Artifact、扩展文档与文件现实，标记过期或冲突 |
+| 阶段 | `/ark:ark-stage` | 审计阶段状态，归档阶段 Artifact，维护 stages.md，提炼继承项并初始化新阶段 |
 | 文档 | `/ark:ark-docs` | 更新 README 或其他项目说明 |
 
 ---

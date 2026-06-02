@@ -85,6 +85,7 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 | 重构、优化结构 | ark-refactor |
 | 文档、README、说明 | ark-docs |
 | 体检、状态、同步 | ark-sync |
+| 阶段收口、归档、进入下一 MVP、阶段切换 | ark-stage |
 | 分析项目、接手 | ark-analyze |
 | 初始化、新项目 | ark-init |
 

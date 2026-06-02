@@ -24,7 +24,7 @@ version: "1.0"
 
 ## 输入
 - 当前仓库状态、`docs/ark/handoff.md`、`docs/ark/tasks.md`、`docs/ark/plan.md`、`docs/ark/validation.md`
-- 项目画像、`docs/ark/spec.md`、`docs/ark/design.md`、扩展文档索引（如存在）
+- 项目画像、`docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/stages.md`（如存在）、扩展文档索引（如存在）
 
 ## 输出
 - 当前阶段判断、当前最重要的未完成项、当前阻塞项、推荐下一步动作与 Skill
@@ -39,10 +39,11 @@ version: "1.0"
 3. 再读取 `plan`，判断当前所在阶段。
 4. 再读取 `validation`，检查是否存在未验证实现。
 5. 再读取 `spec` 和 `design`，了解项目已确认的规格与架构。
-6. 检查扩展文档索引、项目真实性锚点状态、核心命题与不变量承接状态。
-7. 判断当前最可信和最不可信的 Artifact；若上游变更未传播或 Done 缺验证记录，优先推荐 `/ark:ark-sync` 或 `/ark:ark-validate`。
-8. 依据裁决优先级序列判断下一步。
-9. 给出最小但清晰的下一步建议，并说明是否需要用户提供真实配置、样例数据、凭据或外部依据。
+6. 若存在 `docs/ark/stages.md`，读取 Current Stage、Stage History 和 Carryover Gates；未完成 gate 应作为下一步裁决的高优先级约束。
+7. 检查扩展文档索引、项目真实性锚点状态、核心命题与不变量承接状态。
+8. 判断当前最可信和最不可信的 Artifact；若上游变更未传播、Done 缺验证记录或 carryover gate 无证据闭合，优先推荐 `/ark:ark-sync`、`/ark:ark-validate` 或 `/ark:ark-stage`。
+9. 依据裁决优先级序列判断下一步。
+10. 给出最小但清晰的下一步建议，并说明是否需要用户提供真实配置、样例数据、凭据或外部依据。
 
 模板占位与实质性内容判定必须遵循 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md`。不得把模板中的状态选项、示例路径、`YYYY-MM-DD` 或 `待填写` 当作真实项目状态。
 
@@ -56,19 +57,22 @@ version: "1.0"
 推荐策略表前，必须按以下顺序逐项裁决：
 
 1. **判状态可信性** — Artifact 之间存在明显冲突（如 handoff 与 tasks 阶段判断相反、spec/design 与 plan/tasks 或文件现实明显冲突）→ 优先 `/ark:ark-sync`
-2. **判核心命题承接** — spec/design/plan/tasks 对核心命题与不变量承接断裂或弱化 → 优先 `/ark:ark-sync`，再按原因推荐 `/ark:ark-spec`、`/ark:ark-design` 或 `/ark:ark-plan`
-3. **判真实性锚点** — tasks 已推进较多但真实入口、真实依赖、真实数据源或公开契约仍无闭环，或 validation 把替身当真实通过 → 优先 `/ark:ark-sync`；若原因已明确是计划缺口 → `/ark:ark-plan`
-4. **判验证闭环** — Ready for validation 项缺验证记录、Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
-5. **判规格/设计/扩展文档更新** — 已明确是需求边界、验收标准、能力承诺变化 → `/ark:ark-spec`；已明确是模块边界、接口契约、数据流或运行机制变化 → `/ark:ark-design`；已明确是专题方案、契约、集成或数据源元信息变化 → `/ark:ark-solution`
-6. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
-7. **判下一个可执行 Todo** — 无 Doing 且存在依赖已满足、未阻塞的 Todo → 推荐 `/ark:ark-implement`，并明确应从第一个可执行 Todo 开始，锁定本轮唯一执行目标
-8. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design`、`/ark:ark-solution` 或 `/ark:ark-intake`
+2. **判阶段门禁** — `stages.md` 中存在未闭合 Carryover Gates，且当前目标会进入该 gate 约束范围 → 优先推荐 `/ark:ark-stage` 审计阶段门禁，或按 gate 证据推荐 `/ark:ark-validate` / `/ark:ark-implement`
+3. **判核心命题承接** — spec/design/plan/tasks 对核心命题与不变量承接断裂或弱化 → 优先 `/ark:ark-sync`，再按原因推荐 `/ark:ark-spec`、`/ark:ark-design` 或 `/ark:ark-plan`
+4. **判真实性锚点** — tasks 已推进较多但真实入口、真实依赖、真实数据源或公开契约仍无闭环，或 validation 把替身当真实通过 → 优先 `/ark:ark-sync`；若原因已明确是计划缺口 → `/ark:ark-plan`
+5. **判验证闭环** — Ready for validation 项缺验证记录、Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
+6. **判规格/设计/扩展文档更新** — 已明确是需求边界、验收标准、能力承诺变化 → `/ark:ark-spec`；已明确是模块边界、接口契约、数据流或运行机制变化 → `/ark:ark-design`；已明确是专题方案、契约、集成或数据源元信息变化 → `/ark:ark-solution`
+7. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
+8. **判下一个可执行 Todo** — 无 Doing 且存在依赖已满足、未阻塞的 Todo → 推荐 `/ark:ark-implement`，并明确应从第一个可执行 Todo 开始，锁定本轮唯一执行目标
+9. **回退到规划层** — 以上均不满足 → 根据具体缺失选择 `/ark:ark-plan`、`/ark:ark-spec`、`/ark:ark-design`、`/ark:ark-solution`、`/ark:ark-stage` 或 `/ark:ark-intake`
 
 ## 推荐策略
 
 | 情况 | 推荐 Skill |
 |------|------------|
 | handoff 与 tasks 状态矛盾 | `/ark:ark-sync` |
+| 阶段收口、归档或进入下一 MVP | `/ark:ark-stage` |
+| Carryover Gates 未闭合且影响当前目标 | `/ark:ark-stage` 或按 gate 推荐 validate/implement |
 | spec/design 与 plan/tasks 或文件现实明显冲突 | `/ark:ark-sync` |
 | 核心命题与不变量在 design/plan/tasks 中弱化或遗漏 | `/ark:ark-sync`，再按原因推荐 spec/design/plan |
 | 扩展文档或 design 索引与文件现实冲突 | `/ark:ark-sync` 或 `/ark:ark-solution` |

@@ -26,6 +26,7 @@ ARTIFACTS = {
     "validation": "validation.template.md",
     "handoff": "handoff.template.md",
 }
+STAGE_TEMPLATES = ("stages.template.md", "stage-summary.template.md")
 
 
 def read(path: Path) -> str:
@@ -81,6 +82,38 @@ def smoke_mode_b_boundaries(errors: list[str]) -> None:
     for token in required:
         if token not in init_skill:
             fail(errors, f"ark-init missing Mode B safety token: {token}")
+
+
+def smoke_stage_templates(errors: list[str]) -> None:
+    stage_dir = ROOT / "templates" / "stage"
+    for filename in STAGE_TEMPLATES:
+        path = stage_dir / filename
+        if not path.exists():
+            fail(errors, f"missing stage template: {filename}")
+            continue
+        text = read(path)
+        if not text.strip():
+            fail(errors, f"{filename} is empty")
+
+    stages = read(stage_dir / "stages.template.md")
+    for token in (
+        "<!-- ark-artifact: stages -->",
+        "## Current Stage",
+        "## Stage History",
+        "## Carryover Gates",
+    ):
+        if token not in stages:
+            fail(errors, f"stages.template.md missing {token}")
+
+    summary = read(stage_dir / "stage-summary.template.md")
+    for token in (
+        "<!-- ark-stage-summary: <stage-id> -->",
+        "## 1. 阶段结论",
+        "## 5. 可继承结论",
+        "## 6. 不应继承的内容",
+    ):
+        if token not in summary:
+            fail(errors, f"stage-summary.template.md missing {token}")
 
 
 def smoke_init_contract(errors: list[str]) -> None:
@@ -161,6 +194,7 @@ def main() -> int:
     smoke_manifest(errors)
     smoke_artifact_templates(errors)
     smoke_mode_b_boundaries(errors)
+    smoke_stage_templates(errors)
     smoke_init_contract(errors)
     smoke_optional_uv_bare(errors)
     if errors:

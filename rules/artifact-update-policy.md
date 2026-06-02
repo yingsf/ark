@@ -62,10 +62,13 @@
 
 主更新者：`/ark:ark-decide`
 
+`decisions.md` 是项目级长期记忆和当前仍有效决策索引，不是阶段局部任务记录。阶段切换时不得把它当作普通阶段文档清空。
+
 以下 Skill 在满足条件时可建议更新（不直接回写，建议用户确认）：
 - `/ark:ark-implement`：出现关键技术取舍
 - `/ark:ark-debug`：修复路径引入重要取舍
 - `/ark:ark-refactor`：重构引入不可逆的结构性选择
+- `/ark:ark-stage`：阶段切换时分类长期决策、阶段性决策和已替代决策；不确定时默认保留
 
 ---
 
@@ -86,6 +89,25 @@
 - `/ark:ark-next`：handoff 是推荐下一步的主要信息来源，若过期应标注
 
 **不应用于**：代替 plan 作为主执行文档 · 代替 tasks 管理状态
+
+---
+
+### `docs/ark/stages.md` 与 `docs/ark/archive/<stage-id>/`
+
+主更新者：`/ark:ark-stage`
+
+`docs/ark/stages.md` 是阶段索引，不属于初始化默认 7 个核心 Artifact。`docs/ark/archive/<stage-id>/` 保存阶段归档，不作为当前执行依据。
+
+`/ark:ark-stage` 在以下模式中可写：
+- `stage-close`：归档当前 7 个 Artifact，生成 `stage-summary.md`，更新 `stages.md`
+- `stage-open`：重建当前 7 个 Artifact，更新 `stages.md`
+- `stage-transition`：执行 close + open 的组合写入
+
+除只读 `stage-status` 外，`ark-stage` 必须先输出 preview 并等待用户确认。存在 Blocked、Ready for validation、Done 缺 validation、handoff 与 tasks 冲突、plan 当前状态过期时，不得静默写成 `closed`；用户确认带风险进入下一阶段时，状态写为 `closed-with-risk`，并写入 Carryover Gates。
+
+`ark-stage` 对 `decisions.md` 的处理必须遵循项目级长期记忆规则：`stage-close` 只归档历史快照；`stage-open` / `stage-transition` 不得生成空的 `decisions.md`；仍有效的长期决策继续保留；已被替代的长期决策标记为 `superseded` / 已替代；阶段性决策仅在明确不再约束新阶段时才只保留在 archive。
+
+`ark-stage` 禁止写源代码、测试代码、项目配置、`.data/`、真实数据内容、密钥或连接串。
 
 ---
 
@@ -220,6 +242,14 @@
 - design.md 的模块结构、接口边界、数据流、关键运行机制与代码现实不一致
 - design.md 的扩展文档索引与项目实际扩展文档不一致
 - 扩展文档正文与核心 Artifact 或代码现实不一致
+
+### `/ark:ark-stage`
+- 阶段收口 / 归档 / 开启新阶段前必须先审计 7 个核心 Artifact、`stages.md`（如存在）和 archive（如需要）
+- `stage-status` 只读，不回写任何文件
+- `stage-close` / `stage-open` / `stage-transition` 必须先 preview 并等待用户确认
+- 归档时原样复制当前 7 个核心 Artifact 到 `docs/ark/archive/<stage-id>/`，并生成 `stage-summary.md`
+- 开启新阶段时重建当前 7 个 Artifact，但不得把旧阶段 validation 原样继承为新阶段已通过；只能继承为验证基线、历史证据、可复用检查项、未覆盖风险或下一阶段门禁
+- 未闭合项如需带入下一阶段，必须写入 Carryover Gates，不得静默删除
 
 ### `/ark:ark-analyze`
 - 首次分析已有代码库 → 预填充 `docs/ark/spec.md`（当前系统在做什么）
