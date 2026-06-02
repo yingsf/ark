@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.7-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -291,6 +291,10 @@ ark-intake → ark-spec → ark-design → ark-solution（按需）→ ark-plan
 ```
 
 `ark-solution` 只在需要专题详细方案、接口契约、集成说明或数据源元信息时介入；简单功能可以跳过。
+
+从 1.0.8 起，`ark-tasks` 默认按功能交付单元或可验证技术闭环拆分任务，不按文件、函数、类或配置项拆分。低层实现步骤会放入任务的实施要点；多个同闭环任务可以作为明确 batch 执行，并用同一条 validation 记录覆盖。
+
+`ark-implement` 的报告会先输出功能视角：本次新增或改变了什么能力、用户或调用方如何触发、能观察到什么结果、当前不包含什么和仍有哪些限制。然后才说明文件级修改。
 
 若初始化时项目类型选择为 `unknown` 或目标仍不清楚，推荐先执行 `/ark:ark-intake`。只有在目录中已有实质代码、或你明确希望分析已有代码时，Mode A 才建议 `/ark:ark-analyze`。
 
@@ -668,14 +672,14 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 规划 | `/ark:ark-design` | 写技术设计 |
 | 规划 | `/ark:ark-solution` | 写专题方案、详细设计、接口契约、集成或数据源元信息 |
 | 规划 | `/ark:ark-plan` | 写阶段计划 |
-| 规划 | `/ark:ark-tasks` | 拆分任务和状态 |
+| 规划 | `/ark:ark-tasks` | 按功能交付单元或技术闭环拆分任务和状态 |
 | 决策 | `/ark:ark-decide` | 记录重要工程决策 |
-| 实施 | `/ark:ark-implement` | 最小可行实现，支持 batch 和 checkpoint；检查真实性锚点并识别 spec/design/extension 漂移 |
+| 实施 | `/ark:ark-implement` | 最小可行实现，输出功能视角，支持 batch 和 checkpoint；检查真实性锚点并识别 spec/design/extension 漂移 |
 | 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案；识别修复暴露的需求/设计/扩展文档漂移 |
 | 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构；识别设计现实和扩展文档变化 |
 | 审查 | `/ark:ark-review` | 评审代码变更和风险 |
 | 验证 | `/ark:ark-test` | 创建和组织测试 |
-| 验证 | `/ark:ark-validate` | 记录验证证据，只验证不修复 |
+| 验证 | `/ark:ark-validate` | 记录验证证据，只验证不修复；同闭环任务可共享验证记录 |
 | 恢复 | `/ark:ark-handoff` | 写入恢复点 |
 | 恢复 | `/ark:ark-next` | 根据 Artifact 裁决下一步 |
 | 恢复 | `/ark:ark-sync` | 检查并同步 Artifact、扩展文档与文件现实，标记过期或冲突 |

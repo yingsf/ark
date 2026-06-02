@@ -78,11 +78,25 @@ def check_artifact_templates(errors: list[str]) -> None:
             fail(errors, f"{filename} missing last-updated placeholder")
 
     tasks = read(artifact_dir / "tasks.template.md")
-    for token in ("Ready for validation", "完成后可观察结果", "外部依据"):
+    for token in (
+        "Ready for validation",
+        "完成后可观察结果",
+        "外部依据",
+        "功能/技术闭环",
+        "实施要点",
+        "建议验证方式",
+        "可与哪些任务合并验证",
+        "3-8 个任务",
+    ):
         if token not in tasks:
             fail(errors, f"tasks.template.md missing {token}")
     if "## Last updated" in tasks:
         fail(errors, "tasks.template.md should use header last-updated only")
+
+    validation = read(artifact_dir / "validation.template.md")
+    for token in ("## 验证覆盖范围", "覆盖任务", "覆盖原因", "未覆盖任务"):
+        if token not in validation:
+            fail(errors, f"validation.template.md missing {token}")
 
     spec = read(artifact_dir / "spec.template.md")
     if "核心命题与不变量" not in spec:
@@ -198,6 +212,11 @@ def check_init_contracts(errors: list[str]) -> None:
         'packages = ["src/<package_name>"]',
         'known-first-party = ["<package_name>"]',
         "包名为 `<package_name>`",
+        "功能/技术闭环",
+        "实施要点",
+        "可与哪些任务合并验证",
+        "验证覆盖范围",
+        "覆盖原因",
     ):
         if token not in fallback:
             fail(errors, f"fallback-templates.md missing naming token: {token}")
@@ -363,6 +382,67 @@ def check_stage_contracts(errors: list[str]) -> None:
     ark_rule = read(ROOT / "rules" / "ark.md")
     if "ark-stage" not in ark_rule or "阶段收口" not in ark_rule:
         fail(errors, "rules/ark.md missing ark-stage routing")
+
+
+def check_execution_efficiency_contracts(errors: list[str]) -> None:
+    checks = {
+        "skills/ark-tasks/SKILL.md": (
+            "功能交付单元",
+            "可验证技术闭环",
+            "实施要点",
+            "默认只展开当前可执行窗口的 3-8 个任务",
+            "低层步骤应写入任务的「实施要点」",
+            "多个 Done 任务可以引用同一条记录",
+        ),
+        "skills/ark-implement/SKILL.md": (
+            "显式功能 Batch 例外",
+            "功能视角",
+            "本次新增 / 改变的能力",
+            "用户或调用方如何触发",
+            "统一验证计划",
+            "输出中必须包含功能视角",
+        ),
+        "skills/ark-validate/SKILL.md": (
+            "验证覆盖范围",
+            "覆盖任务",
+            "覆盖原因",
+            "同一功能闭环",
+            "不得用一条宽泛验证记录覆盖无关任务",
+        ),
+        "rules/task-sizing-rules.md": (
+            "任务粒度原则",
+            "功能交付单元",
+            "可验证技术闭环",
+            "验证可以聚合",
+        ),
+        "rules/task-sizing-summary.md": (
+            "Task 粒度",
+            "当前执行窗口建议 3-8 个 task",
+            "明确覆盖范围",
+        ),
+        "rules/artifact-update-policy.md": (
+            "验证可聚合但不能泛化",
+            "功能交付单元或可验证技术闭环",
+            "覆盖任务、覆盖原因和未覆盖任务",
+        ),
+        "rules/artifact-roles.md": (
+            "任务粒度服务闭环",
+            "验证可聚合",
+            "罗列文件/函数级实现步骤",
+        ),
+        "README.md": (
+            "从 1.0.8 起",
+            "功能交付单元或可验证技术闭环",
+            "功能视角",
+            "同闭环任务可以作为明确 batch",
+        ),
+    }
+
+    for rel, tokens in checks.items():
+        text = read(ROOT / rel)
+        for token in tokens:
+            if token not in text:
+                fail(errors, f"{rel} missing execution efficiency token: {token}")
 
 
 def check_release_and_ci_assets(errors: list[str]) -> None:
@@ -567,6 +647,7 @@ def main() -> int:
     check_placeholder_policy(errors)
     check_subagent_and_validation_contracts(errors)
     check_stage_contracts(errors)
+    check_execution_efficiency_contracts(errors)
     check_release_and_ci_assets(errors)
     check_no_local_environment_binding(errors)
     check_workflow_tokens(errors)

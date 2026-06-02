@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.8] - 2026-06-02
+
+### Changed
+
+- Refined task sizing so `ark-tasks` defaults to functional delivery units or verifiable technical loops instead of file/function-level implementation steps.
+- Added explicit batch implementation and validation coverage rules so related tasks can share one evidence record without weakening Done semantics.
+- Added a mandatory functional-view section to `ark-implement` reports so implementation output explains user-visible capability changes before file-level diffs.
+
 ## [1.0.7] - 2026-06-02
 
 ### Added

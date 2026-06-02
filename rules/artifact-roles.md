@@ -7,7 +7,7 @@
 | `docs/ark/spec.md` | 要做什么 | `/ark:ark-spec`（可由 `/ark:ark-analyze` 预填充）| 记录实施步骤、任务状态、测试结果 |
 | `docs/ark/design.md` | 准备怎么做 | `/ark:ark-design`（可由 `/ark:ark-analyze` 预填充）| 记录执行进度、细碎任务清单、最终验证结果 |
 | `docs/ark/plan.md` | 将如何分阶段推进 | `/ark:ark-plan`（也可由 implement、debug、sync 回写）| 代替 tasks 管理细粒度状态、代替 handoff 做恢复摘要 |
-| `docs/ark/tasks.md` | 当前有哪些任务，分别处于什么状态 | `/ark:ark-tasks`（也可由 implement、debug、sync 小幅更新）| 代替 spec 定义需求、代替 plan 定义阶段策略 |
+| `docs/ark/tasks.md` | 当前有哪些功能交付单元或技术闭环，分别处于什么状态 | `/ark:ark-tasks`（也可由 implement、debug、sync 小幅更新）| 代替 spec 定义需求、代替 plan 定义阶段策略、罗列文件/函数级实现步骤 |
 | `docs/ark/decisions.md` | 关键选择是什么，为什么这么选 | `/ark:ark-decide` | 记录执行进度、记录验证结果 |
 | `docs/ark/validation.md` | 验证了什么，证据是什么 | `/ark:ark-validate` | 记录「准备验证什么」（那是 plan 的职责）|
 | `docs/ark/handoff.md` | 下次从哪里继续 | `/ark:ark-handoff` | 代替 plan 作为主执行文档、代替 tasks 管理状态 |
@@ -22,6 +22,8 @@
 - **冲突必须先显式化**：发现文档与代码现实不符时，必须先指出冲突，再修正，不得直接跳过
 - **没有验证记录，不宣称完成**：中大型任务如无 `docs/ark/validation.md` 记录，不得写出「已完成且无风险」的结论
 - **Done 必须有证据**：`tasks.md` 中 `Done` 任务必须指向 `validation.md` 中的真实验证记录；实现完成但尚未验证的任务应进入 `Ready for validation`
+- **任务粒度服务闭环**：`tasks.md` 默认按功能交付单元或可验证技术闭环拆分；低层文件、函数、配置和测试步骤应写入实施要点，不默认单独编号
+- **验证可聚合**：多个同闭环 `Done` 任务可引用同一条 `validation.md` 记录，但该记录必须明确覆盖任务、覆盖原因和未覆盖任务
 - **核心命题不可丢失**：spec 中确认的核心命题与不变量必须被 design、plan、关键 tasks 承接；若后续 Artifact 弱化或遗漏，应标记 stale 并建议同步
 - **过期文档必须说明**：如果 Artifact 长期未维护，必须明确标注其陈旧状态，不得假装有效
 

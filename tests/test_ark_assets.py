@@ -15,7 +15,7 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         version = plugin["version"]
-        self.assertEqual(version, "1.0.7")
+        self.assertEqual(version, "1.0.8")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
         self.assertIn(f"version-{version}-blue.svg", (ROOT / "README.md").read_text())
@@ -73,6 +73,45 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("## 5. 可继承结论", summary_template)
         self.assertIn("继续保留到当前 `decisions.md`", summary_template)
         self.assertIn("标记为 `superseded` / 已替代", summary_template)
+
+    def test_execution_efficiency_contract_assets_exist(self) -> None:
+        tasks_skill = (ROOT / "skills/ark-tasks/SKILL.md").read_text()
+        implement_skill = (ROOT / "skills/ark-implement/SKILL.md").read_text()
+        validate_skill = (ROOT / "skills/ark-validate/SKILL.md").read_text()
+        tasks_template = (ROOT / "templates/artifacts/tasks.template.md").read_text()
+        validation_template = (
+            ROOT / "templates/artifacts/validation.template.md"
+        ).read_text()
+
+        for token in (
+            "功能交付单元",
+            "可验证技术闭环",
+            "实施要点",
+            "默认只展开当前可执行窗口的 3-8 个任务",
+        ):
+            self.assertIn(token, tasks_skill)
+
+        for token in (
+            "显式功能 Batch 例外",
+            "功能视角",
+            "本次新增 / 改变的能力",
+            "用户或调用方如何触发",
+            "统一验证计划",
+        ):
+            self.assertIn(token, implement_skill)
+
+        for token in (
+            "验证覆盖范围",
+            "覆盖任务",
+            "覆盖原因",
+            "不得用一条宽泛验证记录覆盖无关任务",
+        ):
+            self.assertIn(token, validate_skill)
+
+        self.assertIn("功能/技术闭环", tasks_template)
+        self.assertIn("可与哪些任务合并验证", tasks_template)
+        self.assertIn("## 验证覆盖范围", validation_template)
+        self.assertIn("覆盖原因", validation_template)
 
     def test_repository_checks_pass(self) -> None:
         result = subprocess.run(

@@ -33,6 +33,7 @@ validate 的职责是验证实现是否满足目标，将验证状态如实记�
 - **可以**：运行测试、启动服务、观察行为、执行命令、读取代码
 - **不可以**：修改任何源代码文件，无论改动多小
 - **仅允许的非 validation 回写**：将对应任务从 Ready for validation 迁移到 Done / Blocked，并写入 validation 记录引用或失败原因
+- 一条验证记录可以覆盖多个 Ready for validation 任务，但这些任务必须属于同一功能闭环、同一 batch、同一真实入口或同一公开契约，并在 validation.md 中明确覆盖范围和覆盖原因
 - 发现验证失败时，**只记录失败事实**（失败项、错误信息、复现条件），不得直接修复
 - 即使是一行代码的问题（如缺少 import、拼写错误），也必须交给 `/ark:ark-debug` 处理
 - 输出中必须推荐 `/ark:ark-debug` 作为修复入口
@@ -140,7 +141,7 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 9. 评估验证强度：弱（主要依赖手工或替身）/ 中（有自动化但真实锚点覆盖不全）/ 强（自动化覆盖主要路径 + 真实锚点或最小真实闭环）。
 10. **如果发现验证失败**：记录失败项、错误信息、复现条件，不得修复代码，在输出中推荐 `/ark:ark-debug`。
 11. 写入 `docs/ark/validation.md`。
-12. 若验证通过且能对应到 `tasks.md` 中的 Ready for validation 项，可将该任务迁移到 Done，并写入 validation 记录引用；若验证失败，保持 Ready for validation 或转 Blocked，并记录失败事实和建议 `/ark:ark-debug`。
+12. 若验证通过且能对应到 `tasks.md` 中的 Ready for validation 项，可将对应任务迁移到 Done，并写入 validation 记录引用；多个任务共享同一验证记录时，必须确认它们同属一个功能闭环、同一 batch、同一真实入口或同一公开契约。若验证失败，保持 Ready for validation 或转 Blocked，并记录失败事实和建议 `/ark:ark-debug`。
 
 ## 验证要求
 - 严格区分事实、建议与限制
@@ -154,7 +155,8 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 - 不得把 mock/fake/in-memory/合成数据验证写成真实依赖、真实数据或最小真实闭环通过
 - 数据相关验证不得写入敏感原文、密钥、连接串或大体量数据内容
 - Ready for validation → Done 迁移必须有真实验证记录支撑；不得仅凭实现完成或计划验证将任务标记为 Done
-- Done 任务必须引用 `validation.md` 中的具体记录；验证失败时不得写成 Done
+- Done 任务必须引用 `validation.md` 中的具体记录；多个 Done 任务可引用同一条记录，但该记录必须列出覆盖任务、覆盖原因和未覆盖任务；验证失败时不得写成 Done
+- 不得用一条宽泛验证记录覆盖无关任务；覆盖多个任务时，必须说明同一功能闭环、同一 batch、同一真实入口或同一公开契约的依据
 
 ## 停止条件
 - 当前验证状态已可读、可信、可追踪
@@ -166,6 +168,11 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 写入 `docs/ark/validation.md`：
 
 ### 1. 验证对象
+### 1.5 验证覆盖范围
+- 覆盖任务：
+- 覆盖原因：同一功能闭环 / 同一 batch / 同一真实入口 / 同一公开契约
+- 未覆盖任务：
+- 不覆盖原因：
 ### 2. 已执行验证（附执行命令与输出摘要）
 每项验证必须说明：
 - 保真度：L0 / L1 / L2 / L3 / L4 / L5
@@ -184,7 +191,7 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 
 - 若验证强度不足且可补充测试 → `/ark:ark-test` 后再 `/ark:ark-validate`
 - 若发现需要修复的问题 → `/ark:ark-debug`
-- 若验证已闭环 → 将对应 Ready for validation 任务标记为 Done，并补充 `validation.md` 记录引用；如当前 Skill 未执行状态迁移，建议 `/ark:ark-tasks` 或 `/ark:ark-sync` 补齐
+- 若验证已闭环 → 将对应 Ready for validation 任务标记为 Done，并补充 `validation.md` 记录引用；多个任务共享同一记录时，确保 validation.md 明确覆盖任务和覆盖原因；如当前 Skill 未执行状态迁移，建议 `/ark:ark-tasks` 或 `/ark:ark-sync` 补齐
 
 ### 7.5 Checkpoint 建议
 - 建议 checkpoint commit：是 / 否
