@@ -1,0 +1,24 @@
+name: ark-check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate plugin JSON
+        run: |
+          python -m json.tool .claude-plugin/plugin.json
+          python -m json.tool .claude-plugin/marketplace.json
+      - name: Run ARK repository checks
+        run: python scripts/ark-check.py
+      - name: Run ARK smoke checks
+        run: python scripts/ark-smoke.py
+      - name: Run unit tests
+        run: python -m unittest discover -s tests

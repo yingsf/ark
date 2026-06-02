@@ -26,7 +26,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["<project_name>"]
+known-first-party = ["<package_name>"]
 
 [tool.ruff.format]
 quote-style = "double"

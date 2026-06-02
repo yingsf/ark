@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-<project_name> 是一个 Python 项目，使用 src layout，包名为 `<project_name>`。
+<project_name> 是一个 Python 项目，使用 src layout，包名为 `<package_name>`。
 
 本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
 
@@ -40,7 +40,7 @@ uv run pyright
 
 - 新增公开函数必须有类型注解和测试
 - 开始任务前阅读 `docs/ark/tasks.md`
-- 完成 `/ark` 命令后更新对应 Artifact
+- 按对应 ARK Skill 的可写范围更新 Artifact；只读、说明或分流类 Skill 不落盘
 - 提交前运行 `uv run pytest`
 
 ## Artifact Workflow

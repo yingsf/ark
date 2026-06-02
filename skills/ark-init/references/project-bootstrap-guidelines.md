@@ -58,18 +58,27 @@ Mode A 的项目类型选择和最终参数确认也必须使用交互式提问�
 - 如果 uv 可用，使用 uv 工作流
 - 如果 uv 不可用，使用手动 fallback 工作流
 
-## 项目名标准化规则
+## 命名与占位符规则
 
-项目名必须经过 Python 标识符合法性处理：
+Mode A 必须区分三个名字：
+
+- `<distribution_name>`：发布包名，用于 `pyproject.toml` 的 `[project].name` 和 `uv init --name`；允许 `my-api`
+- `<package_name>`：Python import 包名，用于 `src/<package_name>/`、hatch packages 和 ruff first-party 配置；必须是合法 Python 标识符，如 `my_api`
+- `<project_name>`：面向用户展示的项目名；不得代替 `<package_name>` 写入 Python 包路径
+
+package name 必须经过 Python 标识符合法性处理：
 
 1. 连字符 `-` 替换为下划线 `_`
 2. 移除空格及其他特殊字符
 3. 如果以数字开头，添加前缀 `_`
 4. 全部转为小写
 
-标准化后的项目名用于：
-- `src/<project_name>/` 目录名
-- `pyproject.toml` 中的 `name` 字段
+标准化后的 package name 用于：
+- `src/<package_name>/` 目录名
+- `packages = ["src/<package_name>"]`
+- ruff `known-first-party`
+
+distribution name 用于 `pyproject.toml` 的 `name` 字段。
 
 ## 目标目录结构
 
@@ -169,13 +178,15 @@ git rev-parse --is-inside-work-tree
 ## uv 可用路径
 
 ```bash
-uv init --no-workspace
-说明：在 target directory 中原地初始化，不得额外嵌套一层目录
+uv init --bare --name <distribution_name> --python <version> --build-backend hatch --no-workspace --vcs none --no-readme --no-pin-python
+说明：在 target directory 中原地初始化，不得传入 PATH，不得额外嵌套一层目录；必须使用 --bare，避免 uv 生成示例代码、console script 或 sample function
 ```
 
 初始化后、`uv sync` 前，必须检查并补全 `pyproject.toml` 的 build-system 配置（src layout 需要）：
+- 不得包含 `[project.scripts]`
+- 不得出现 uv sample function、`main()`、`hello()` 或 `Hello from ...`
 - 若缺少 `[build-system]`，追加 hatchling 配置
-- 若缺少 `[tool.hatch.build.targets.wheel]`，追加 `packages = ["src/<project_name>"]`
+- 若缺少 `[tool.hatch.build.targets.wheel]`，追加 `packages = ["src/<package_name>"]`
 
 `pyproject.toml` 的 build-system 必须写为：
 ```toml
@@ -196,12 +207,12 @@ uv add pytest --dev  # 如启用测试
 ## uv 不可用路径（手动 fallback）
 
 1. 创建 `pyproject.toml`（最小版本，使用 hatchling）
-2. 创建 `src/<project_name>/__init__.py`
+2. 创建 `src/<package_name>/__init__.py`
 3. 在摘要中标记需要手动完成的操作
 
 ## 文件创建顺序
 
-1. 调整 `src/<project_name>/` 结构
+1. 调整 `src/<package_name>/` 结构
 2. 确保 `tests/` 结构正确
 3. 创建 `.gitignore`（必须在 uv init 之后）
 4. 创建 `README.md`
@@ -260,7 +271,7 @@ docs/ Artifact 是 ark 实现跨会话记忆和状态追踪的核心，必须自
 - `docs/ark/validation.md`
 - `docs/ark/handoff.md`
 
-模板文件存在时使用模板，不存在时创建空文件。
+模板文件存在时使用模板，不存在时使用 `fallback-templates.md` 中带版本头的最小 fallback 内容，不得生成纯空文件。
 
 模板映射：
 - `spec.md` → `templates/artifacts/spec.template.md`

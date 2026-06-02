@@ -272,11 +272,13 @@ Sub-agent 状态：已启用（N 个 reader）
 
 ### 预填充 `docs/ark/spec.md`
 - 仅在 spec.md 为空或为初始模板时预填充
+- 初始模板判定必须遵循 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md`
 - 预填充内容基于工作文档中的已验证事实，不是凭空编写
 - 必须标注来源
 
 ### 预填充 `docs/ark/design.md`
 - 仅在 design.md 为空或为初始模板时预填充
+- 初始模板判定必须遵循 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md`
 - 基于工作文档中的已验证事实
 - 必须标注来源
 

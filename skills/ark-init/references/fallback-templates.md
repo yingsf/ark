@@ -8,7 +8,7 @@
 
 ```toml
 [project]
-name = "<project_name>"
+name = "<distribution_name>"
 version = "0.1.0"
 description = ""
 requires-python = ">= <python_version>"
@@ -19,7 +19,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/<project_name>"]
+packages = ["src/<package_name>"]
 
 [dependency-groups]
 dev = [
@@ -46,7 +46,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RUF"]
 ignore = ["E501", "RUF001", "RUF002", "RUF003"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["<project_name>"]
+known-first-party = ["<package_name>"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -226,7 +226,7 @@ All notable changes to this project will be documented in this file.
 
 ## Project Overview
 
-<project_name> 是一个 Python 项目，使用 src layout，包名为 `<project_name>`。
+<project_name> 是一个 Python 项目，使用 src layout，包名为 `<package_name>`。
 本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
 
 ## ARK 项目画像
@@ -282,7 +282,7 @@ uv run pyright
 ## Working Pattern
 
 1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
-2. 改动完成后更新对应 Artifact（tasks / validation / decisions）
+2. 按对应 ARK Skill 的可写范围更新 Artifact；只读、说明或分流类 Skill 不落盘
 3. 对涉及真实依赖、真实数据或公开契约的任务，优先建立最小真实闭环
 4. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
 
@@ -327,6 +327,7 @@ uv run pyright
 - `${CLAUDE_PLUGIN_ROOT}/rules/capability-policy.md` - 能力降级策略
 - `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md` - 项目画像、真实性锚点与验证保真度
 - `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md` - 扩展文档承载规则
+- `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md` - Artifact 模板占位与实质性内容判定
 - `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md` - Sub-agent 写权限隔离
 - `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md` - 任务规模快速判断
 
@@ -352,4 +353,219 @@ uv run pyright
 ## docs/ Artifact 初始内容
 
 所有 7 个 Artifact（spec.md、design.md、plan.md、tasks.md、decisions.md、validation.md、handoff.md）
-在模板文件不存在时创建为空文件。若模板文件存在，使用 `${CLAUDE_PLUGIN_ROOT}/templates/artifacts/` 下对应模板。
+在模板文件存在时，使用 `${CLAUDE_PLUGIN_ROOT}/templates/artifacts/` 下对应模板。
+
+模板文件不存在时，必须使用以下最小 fallback 内容。fallback Artifact 不得为空，且必须保留 `ark-artifact`、`schema-version`、`last-updated` 版本头。
+
+### spec.md
+
+```markdown
+<!-- ark-artifact: spec -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Spec
+
+## 背景
+<!-- 待填写 -->
+
+## 核心命题与不变量
+<!-- 待填写 -->
+
+## 目标
+<!-- 待填写 -->
+
+## 范围
+<!-- 待填写 -->
+
+## 非目标
+<!-- 待填写 -->
+
+## 真实性与数据要求
+<!-- 待填写；不得写入数据内容 -->
+
+## 验收标准
+<!-- 待填写 -->
+
+## 开放问题
+<!-- 待填写 -->
+```
+
+### design.md
+
+```markdown
+<!-- ark-artifact: design -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Design
+
+## 问题陈述
+<!-- 待填写 -->
+
+## 核心命题承接
+<!-- 待填写 -->
+
+## 方案概述
+<!-- 待填写 -->
+
+## 模块 / 组件结构
+<!-- 待填写 -->
+
+## 数据流 / 调用流
+<!-- 待填写 -->
+
+## 接口边界
+<!-- 待填写 -->
+
+## 真实依赖与替身边界
+<!-- 待填写 -->
+
+## 扩展文档索引
+<!-- 无 -->
+
+## 风险与权衡
+<!-- 待填写 -->
+```
+
+### plan.md
+
+```markdown
+<!-- ark-artifact: plan -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Plan
+
+## 目标
+<!-- 待填写 -->
+
+## 核心命题与范围保障
+<!-- 待填写 -->
+
+## 范围
+<!-- 待填写 -->
+
+## 非范围
+<!-- 待填写 -->
+
+## 真实性锚点与最小闭环
+<!-- 待填写 -->
+
+## 阶段表
+<!-- 待填写 -->
+
+## 风险
+<!-- 待填写 -->
+
+## 阻塞项
+<!-- 当前无 -->
+
+## 验证策略
+<!-- 待填写 -->
+
+## 当前状态
+<!-- Status: not started / in progress / blocked / done -->
+```
+
+### tasks.md
+
+```markdown
+<!-- ark-artifact: tasks -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Tasks
+
+## Done
+<!-- 无 -->
+
+## Doing
+<!-- 无 -->
+
+## Ready for validation
+<!-- 无 -->
+
+## Todo
+<!-- 待填写 -->
+
+## Blocked
+<!-- 无 -->
+```
+
+### decisions.md
+
+```markdown
+<!-- ark-artifact: decisions -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Decisions
+
+<!-- 暂无决策记录 -->
+```
+
+### validation.md
+
+```markdown
+<!-- ark-artifact: validation -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Validation
+
+## 验证对象
+<!-- 待填写 -->
+
+## 已执行验证
+<!-- 无 -->
+
+## 未覆盖内容
+<!-- 待填写 -->
+
+## 建议验证但未执行
+<!-- 待填写 -->
+
+## 暂时无法验证项
+<!-- 待填写 -->
+
+## 风险结论
+<!-- 待填写 -->
+```
+
+### handoff.md
+
+```markdown
+<!-- ark-artifact: handoff -->
+<!-- schema-version: 1.1 -->
+<!-- last-updated: YYYY-MM-DD -->
+
+# Handoff
+
+## 当前目标
+<!-- 待填写 -->
+
+## 当前阶段
+<!-- 待填写 -->
+
+## 已完成
+<!-- 无 -->
+
+## 未完成
+<!-- 待填写 -->
+
+## 风险 / 阻塞
+<!-- 无 -->
+
+## 下一次必须继承的结论
+<!-- 待填写 -->
+
+## 恢复顺序
+<!-- 待填写 -->
+
+## 推荐下一步
+<!-- 待填写 -->
+
+## 推荐 Skill
+<!-- 待填写 -->
+```

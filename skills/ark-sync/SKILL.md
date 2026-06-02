@@ -123,6 +123,8 @@ ark-sync **不做**：
 - 扩展文档正文改写（那是 ark-solution）
 - 无法确认时标 unknown，不做深度推断
 
+模板占位与实质性内容判定必须遵循 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md`。判断 Artifact 可信度时，不得把 `YYYY-MM-DD`、`待填写`、状态选项、示例路径或注释说明当作项目事实。
+
 ## 工作流
 1. 读取关键 Artifact，优先查看 `plan`、`tasks`、`validation`、`handoff`。
 2. 检查代码与文档是否描述同一阶段。

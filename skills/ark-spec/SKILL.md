@@ -53,6 +53,8 @@ version: "1.0"
 - 已包含 analyze 预填充且不只是模板占位注释
 - 已有 2 个以上非模板章节被填充
 
+实质性内容的具体判定规则见 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md`。仅包含版本头、`YYYY-MM-DD`、`待填写`、示例编号、状态选项或注释说明时，必须视为初始模板内容。
+
 ### 后续步骤
 
 2. 用面向需求的语言重述问题（不要加入技术实现细节）。

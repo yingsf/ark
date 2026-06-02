@@ -31,7 +31,7 @@ version: "1.0"
 - 当前最可信 / 最不可信 Artifact、用户下一步需要提供的真实配置、样例数据或外部依据（如有）
 
 ## 相关 Artifact
-- 主要读取 docs，仅在极少数情况下做小幅状态澄清
+- 只读取 docs，不更新任何 Artifact。若发现状态需要修正，推荐 `/ark:ark-sync`、`/ark:ark-handoff` 或对应专责 Skill。
 
 ## 工作流
 1. 先读取 `handoff`，了解最近一次暂停点。
@@ -43,6 +43,8 @@ version: "1.0"
 7. 判断当前最可信和最不可信的 Artifact；若上游变更未传播或 Done 缺验证记录，优先推荐 `/ark:ark-sync` 或 `/ark:ark-validate`。
 8. 依据裁决优先级序列判断下一步。
 9. 给出最小但清晰的下一步建议，并说明是否需要用户提供真实配置、样例数据、凭据或外部依据。
+
+模板占位与实质性内容判定必须遵循 `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md`。不得把模板中的状态选项、示例路径、`YYYY-MM-DD` 或 `待填写` 当作真实项目状态。
 
 `last-updated` 使用约束：
 - 只把 `last-updated` 作为跨日期的粗粒度 freshness 信号

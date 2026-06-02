@@ -24,7 +24,8 @@ version: "1.0"
 - 用户明确要求不在项目中添加任何文件
 
 ## Mode A 必须确认的输入
-- project name：默认从当前目录名获取，需经过 Python 标识符合法性处理后确认
+- distribution name：默认从当前目录名获取，用于 `pyproject.toml` 的 `[project].name`，可包含连字符
+- package name：由 distribution name 标准化得到，用于 `src/<package_name>/`、import 包名、hatch packages 和 ruff first-party 配置
 - target directory：默认当前目录
 - Python version：默认 `3.12`，可选范围 `3.10`–`3.14`
 - 是否创建 pytest 测试（默认启用）
@@ -39,7 +40,7 @@ Mode A 不得静默使用 `unknown`。只有用户明确选择"不确定 / unkno
 
 ## 输出文件
 `.gitignore`、`pyproject.toml`、`README.md`、`CHANGELOG.md`、`CLAUDE.md`、`MEMORY.md`、
-`src/<project_name>/__init__.py`、`tests/__init__.py`、`tests/conftest.py`（如启用测试）、
+`src/<package_name>/__init__.py`、`tests/__init__.py`、`tests/conftest.py`（如启用测试）、
 `docs/ark/` 及 7 个核心 Artifact
 
 > `.venv/` 由 uv 按需创建，不是保证产物。
@@ -130,19 +131,28 @@ Mode B 项目画像：
 - 推断必须标注不确定项，不得把目录名暗示写成确定结论
 
 ## 核心原则
-- 除了 `__init__.py`，不要创建其他 `.py` 文件
+- Mode A 的 uv 可用路径必须使用 `uv init --bare`，不得保留 uv 生成的示例代码、console script 或 sample function
+- 除了包 / 测试 `__init__.py` 和显式启用测试时的基础测试脚手架，不要创建其他 `.py` 文件
 - 包名目录必须是合法的 Python 标识符
 - 优先使用 uv，不可用时使用手动 fallback 流程
 - 模板文件存在时使用模板，不存在时使用 fallback 内容（见 references/）
 - docs/ Artifact 必须自动创建，不需要用户确认
 
-## 项目名标准化规则
+## 命名与占位符规则
+`distribution_name`、`package_name` 和模板中的 `project_name` 必须分开处理：
+
+- `<distribution_name>`：发布包名，用于 `pyproject.toml` 的 `[project].name` 和 `uv init --name`；允许 `my-api`
+- `<package_name>`：Python import 包名，用于 `src/<package_name>/`、`packages = ["src/<package_name>"]`、ruff `known-first-party`；必须是合法 Python 标识符，如 `my_api`
+- `<project_name>`：面向用户展示的项目名；当旧模板上下文未区分时，不得用它替代 `<package_name>` 写入 Python 包路径
+
+package name 标准化规则：
+
 1. 连字符 `-` 替换为下划线 `_`
 2. 移除空格及其他特殊字符
 3. 如果以数字开头，添加前缀 `_`
 4. 全部转为小写
 
-模板占位符统一使用 `<project_name>`。生成项目文件时必须替换所有 `<project_name>`、`<python_version>`、`<python_version_short>` 和 `<source_and_test_dirs>`，不得混用花括号占位符格式。
+生成项目文件时必须替换所有 `<distribution_name>`、`<package_name>`、`<project_name>`、`<python_version>`、`<python_version_short>` 和 `<source_and_test_dirs>`，不得混用花括号占位符格式。
 
 ## 工作流
 
@@ -200,13 +210,14 @@ Mode A 参数确认必须一次性列出：
 ### 第三步：选择执行路径
 
 **路径 A（uv 可用）**：
-1. `uv init <project_name> --python <version>`（在 target directory 中原地初始化，不得额外嵌套一层目录）
-2. 在 pyproject.toml 添加 pytest 依赖（如启用）
-3. 创建 `src/<project_name>/__init__.py`
+1. `uv init --bare --name <distribution_name> --python <version> --build-backend hatch --no-workspace --vcs none --no-readme --no-pin-python`（在 target directory 中原地初始化，不得传入 PATH，不得额外嵌套一层目录；`--bare` 用于避免 uv 生成示例代码和 console script）
+2. 复查 `pyproject.toml`：不得包含 `[project.scripts]`；不得出现 uv sample function、`main()`、`hello()` 或 `Hello from ...`
+3. 创建 `src/<package_name>/__init__.py`
 4. 创建 tests/ 结构（如启用）
-5. 确保 `pyproject.toml` 包含正确的 build-system 配置（src layout 需要）：若缺少 `[build-system]` 则追加 hatchling 配置，若缺少 `[tool.hatch.build.targets.wheel]` 则追加 `packages = ["src/<project_name>"]`
-6. `uv sync`
-7. `uv add --dev ruff pyright`（安装默认开发质量工具到 dev 依赖）
+5. 在 pyproject.toml 添加 pytest 依赖（如启用）
+6. 确保 `pyproject.toml` 包含正确的 build-system 配置（src layout 需要）：若缺少 `[build-system]` 则追加 hatchling 配置，若缺少 `[tool.hatch.build.targets.wheel]` 则追加 `packages = ["src/<package_name>"]`
+7. `uv sync`
+8. `uv add --dev ruff pyright`（安装默认开发质量工具到 dev 依赖）
 
 `pyproject.toml` 的 build-system 必须写为：
 ```toml
@@ -234,7 +245,7 @@ build-backend = "hatchling.build"
 1. **`.claude/ruff-hook.py`** — 将 `${CLAUDE_PLUGIN_ROOT}/scripts/ruff-hook.py` 复制到目标项目的 `.claude/` 目录下。这是文件级 format hook 的执行入口，只执行 `ruff format`，使用本地副本避免 `${CLAUDE_PLUGIN_ROOT}` 变量不展开的 bug。
 2. **`pyrightconfig.json`** — 替换 `<python_version>`、`<source_and_test_dirs>` 为探测值
 3. **`.claude/settings.local.json`** — 本地配置，含 ruff format hook + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
-4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<project_name>`、`<source_and_test_dirs>`
+4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<package_name>`、`<source_and_test_dirs>`
 
 每个质量工具配置写入后必须复查文件存在性和关键内容：
 - `.claude/ruff-hook.py`
@@ -374,7 +385,8 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 
 **模式 A（全新项目）：**
 - 包名必须是合法的 Python 标识符
-- 除了 `__init__.py`，不应创建其他 `.py` 文件
+- uv 可用路径必须使用 `uv init --bare`；不得保留 uv 生成的示例代码、console script 或 sample function
+- 除了包 / 测试 `__init__.py` 和显式启用测试时的基础测试脚手架，不应创建其他 `.py` 文件
 - docs/ Artifact 必须自动创建
 - `CLAUDE.md` 应包含 `fastchain-enhanced` 中文 Google 风格 docstring 与中文注释规范
 - `CLAUDE.md` 应包含 ARK 项目画像；数据源只记录元信息，不创建或托管数据目录

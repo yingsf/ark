@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -89,8 +89,11 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 ```text
 /plugin marketplace update ark
+/plugin update ark@ark
 /reload-plugins
 ```
+
+`/plugin marketplace update ark` 用于刷新 marketplace listing；`/plugin update ark@ark` 才会更新已安装插件。ARK 使用显式版本号发布，每次发布都会同步更新 `plugin.json`、`marketplace.json` 和 README badge；如果版本号未变，Claude Code 可能认为已安装版本就是最新版本并跳过更新。
 
 升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 `/ark:ark-init`，选择 Mode B 检查是否需要补齐。
 
@@ -208,8 +211,8 @@ ARK 会先检测当前目录：
 选择 Mode A 后，ARK 会要求确认核心参数：
 
 ```text
-project name: my-api
-标准化包名: my_api
+distribution name: my-api
+package name: my_api
 target directory: 当前目录
 Python version: 3.12
 是否创建 pytest 测试: 是
@@ -223,9 +226,9 @@ Mode A 会要求确认项目类型；如果你选择 `unknown`，ARK 会优先�
 Mode A 的执行重点：
 
 1. 检测 `uv`、Git 状态和目标目录冲突。
-2. 创建 `src/` layout。
-3. 生成或补齐 `pyproject.toml`。
-4. 安装默认开发质量工具：ruff、pyright。
+2. 使用 `uv init --bare` 原地生成干净的 `pyproject.toml`，不保留 uv 示例代码或 console script。
+3. 手动创建 `src/<package_name>/` layout 和测试结构。
+4. 补齐 hatch build 配置和默认开发质量工具：ruff、pyright。
 5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。
 6. 创建 `CLAUDE.md` 和 `MEMORY.md`，并在 `CLAUDE.md` 中写入 ARK 项目画像和默认 `fastchain-enhanced` 中文 Google 风格 docstring / 注释规范。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
@@ -265,44 +268,11 @@ my-api/
 └── README.md
 ```
 
-### Artifact 版本头
+### Mode A 产物说明
 
-每个核心 Artifact 顶部都会包含：
+每个核心 Artifact 顶部都会写入 `ark-artifact`、`schema-version` 和 `last-updated` 版本头，便于 `ark-sync` 判断旧项目状态。Mode A 还会在 `CLAUDE.md` 中记录一次初始化时的能力快照；后续 Skill 执行时仍会按需重新检查 git、uv、pytest、ruff、pyright 等能力。
 
-```markdown
-<!-- ark-artifact: spec -->
-<!-- schema-version: 1.1 -->
-<!-- last-updated: YYYY-MM-DD -->
-```
-
-`ark-sync` 会使用这些版本头判断旧项目 Artifact 是否为 `unknown`，但缺少版本头不会阻塞工作流。
-
-其中 `schema-version` 表示 Artifact 结构版本；`last-updated` 表示该 Artifact 内容最后一次真实修改日期，不是 revision 或同日排序字段。同一天多次更新同一 Artifact 时应保持当天日期，不应递增为未来日期。
-
-### Artifact 协议要点
-
-- `spec.md` 记录「核心命题与不变量」：不同项目可对应产品精髓、业务闭环、公开 API、命令契约、数据/AI 评估闭环或 Claude 插件宿主约束。
-- `design.md` / `plan.md` / `tasks.md` 应持续承接核心命题；实施阶段只代表工程推进顺序，不应裁剪已确认范围。
-- `tasks.md` 使用 `Todo → Doing → Ready for validation → Done` 的主路径。实现完成但尚未验证时进入 `Ready for validation`，只有 `validation.md` 有真实证据时才能进入 `Done`。
-- `ark-implement` 会读取 `validation.md`、`handoff.md`、`decisions.md` 和相关扩展文档中的前序结论；`ark-validate` 负责记录验证证据并闭合 Done 状态。
-- `ark-sync` 会检查上游变更是否已传播到下游 Artifact，并指出推荐修复顺序。
-- 每个完成点建议形成 checkpoint commit；ARK 只给出建议，不自动提交。
-
-### 能力快照
-
-Mode A 会在项目 `CLAUDE.md` 中记录初始化时的能力快照：
-
-```markdown
-## ARK 能力快照
-<!-- ark-init: 仅初始化时参考，运行时各 Skill 按需重新检查 -->
-- git: 可用
-- uv: 可用, 0.x.x
-- pytest: 可用
-- ruff: 可用
-- pyright: 可用
-```
-
-这只是初始化时参考。各 Skill 执行时会按需重新检查关键能力。
+更细的 Artifact 协议、版本头语义和初始化契约由 Skill/reference 文件维护，README 只保留使用入口。
 
 ### Mode A 后的推荐下一步
 
@@ -467,34 +437,6 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | `.claude/settings.local.json` | 本地辅助配置；只有用户确认后才生成或合并缺失 hook，默认不提交 |
 
 Mode B 会同时检查 `requirements*.txt`、`setup.cfg`、`tox.ini`、`noxfile.py`、`.pre-commit-config.yaml` 等既有工具链信号，不会把 `uv add --dev` 强加给使用其他包管理方式的项目。
-
-### Mode B 输出示例
-
-一次成功的 Mode B 初始化输出通常应包含：
-
-```text
-### 模式 B（已有项目）
-
-#### 1. 项目扫描摘要
-- 项目布局类型：app layout
-- 技术栈：FastAPI, SQLAlchemy, pytest
-- 包名与 Python 版本：backend / 3.12
-
-#### 2. 执行结果
-| 步骤 | 状态 |
-|------|------|
-| 项目扫描 | 成功 |
-| CLAUDE.md | 基于 scan 生成 |
-| MEMORY.md | 使用模板 |
-| docs/ Artifact | 使用模板 |
-| 质量工具安装 | 已存在 / 跳过（用户选择） |
-| 质量工具配置 | 仅报告建议 / 本地辅助已创建 / 跳过（用户选择） |
-| 能力探测 | 用户未确认，仅报告 |
-| 项目画像 | 用户未确认，仅报告 |
-
-#### 3. 下一步
-- 强烈建议：直接让 ARK 分析项目（对应 `/ark:ark-analyze`）
-```
 
 ### Mode B 后的推荐下一步
 
@@ -768,7 +710,7 @@ ARK 使用四态判断 Artifact 是否还能作为执行依据：
 
 ## 规则系统
 
-ARK 内置 11 个规则文件，通过项目 `MEMORY.md` 引用。
+ARK 内置 12 个规则文件，通过项目 `MEMORY.md` 引用。
 
 | 规则文件 | 作用 |
 |----------|------|
@@ -778,6 +720,7 @@ ARK 内置 11 个规则文件，通过项目 `MEMORY.md` 引用。
 | `capability-policy.md` | 依赖能力和降级策略 |
 | `project-reality-policy.md` | 项目画像、真实性锚点、数据源元信息和验证保真度 |
 | `extension-doc-policy.md` | 扩展文档类型、写入边界和漂移处理 |
+| `artifact-placeholder-policy.md` | Artifact 模板占位与实质性内容判定 |
 | `sub-agent-protocol.md` | sub-agent 写权限、输出格式和复核流程 |
 | `task-sizing-summary.md` | 任务规模快速判断 |
 | `task-sizing-rules.md` | 任务规模完整规则 |
