@@ -101,6 +101,29 @@ def check_artifact_templates(errors: list[str]) -> None:
     spec = read(artifact_dir / "spec.template.md")
     if "核心命题与不变量" not in spec:
         fail(errors, "spec.template.md missing core proposition section")
+    for token in ("用户可观察能力", "不得写成文件/函数级实现步骤"):
+        if token not in spec:
+            fail(errors, f"spec.template.md missing {token}")
+
+    design = read(artifact_dir / "design.template.md")
+    for token in (
+        "## 技术闭环建议",
+        "最小可运行闭环",
+        "最小契约验证",
+        "不建议拆分为 task 的低层实现点",
+    ):
+        if token not in design:
+            fail(errors, f"design.template.md missing {token}")
+
+    plan = read(artifact_dir / "plan.template.md")
+    for token in (
+        "## 阶段推进路径",
+        "交付单元 / 技术闭环",
+        "建议 task 边界",
+        "不建议拆分为",
+    ):
+        if token not in plan:
+            fail(errors, f"plan.template.md missing {token}")
 
     forbidden_placeholders = {
         "spec.template.md": ("标准 1", "标准 2", "问题 1", "问题 2"),
@@ -217,6 +240,9 @@ def check_init_contracts(errors: list[str]) -> None:
         "可与哪些任务合并验证",
         "验证覆盖范围",
         "覆盖原因",
+        "技术闭环建议",
+        "建议 task 边界",
+        "不建议拆分为",
     ):
         if token not in fallback:
             fail(errors, f"fallback-templates.md missing naming token: {token}")
@@ -396,11 +422,16 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
         ),
         "skills/ark-implement/SKILL.md": (
             "显式功能 Batch 例外",
-            "功能视角",
+            "功能结果",
             "本次新增 / 改变的能力",
             "用户或调用方如何触发",
+            "用户验收方式",
+            "当前完成状态",
+            "任务状态建议",
             "统一验证计划",
-            "输出中必须包含功能视角",
+            "默认输出必须包含功能结果",
+            "条件输出",
+            "仅在已启用、失败、降级或影响可信度时输出",
         ),
         "skills/ark-validate/SKILL.md": (
             "验证覆盖范围",
@@ -414,26 +445,37 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
             "功能交付单元",
             "可验证技术闭环",
             "验证可以聚合",
+            "spec.md",
+            "design.md",
+            "plan.md",
+            "建议 task 边界",
         ),
         "rules/task-sizing-summary.md": (
             "Task 粒度",
             "当前执行窗口建议 3-8 个 task",
             "明确覆盖范围",
+            "design",
+            "plan",
         ),
         "rules/artifact-update-policy.md": (
             "验证可聚合但不能泛化",
             "功能交付单元或可验证技术闭环",
             "覆盖任务、覆盖原因和未覆盖任务",
+            "技术闭环建议",
+            "建议 task 边界",
         ),
         "rules/artifact-roles.md": (
             "任务粒度服务闭环",
             "验证可聚合",
             "罗列文件/函数级实现步骤",
+            "上游不制造碎片",
         ),
         "README.md": (
             "从 1.0.8 起",
+            "从 1.0.9 起",
             "功能交付单元或可验证技术闭环",
-            "功能视角",
+            "功能结果",
+            "用户验收方式",
             "同闭环任务可以作为明确 batch",
         ),
     }

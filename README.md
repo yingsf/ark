@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.9-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -294,7 +294,9 @@ ark-intake → ark-spec → ark-design → ark-solution（按需）→ ark-plan
 
 从 1.0.8 起，`ark-tasks` 默认按功能交付单元或可验证技术闭环拆分任务，不按文件、函数、类或配置项拆分。低层实现步骤会放入任务的实施要点；多个同闭环任务可以作为明确 batch 执行，并用同一条 validation 记录覆盖。
 
-`ark-implement` 的报告会先输出功能视角：本次新增或改变了什么能力、用户或调用方如何触发、能观察到什么结果、当前不包含什么和仍有哪些限制。然后才说明文件级修改。
+从 1.0.9 起，上游 Artifact 也按同一粒度协作：`ark-spec` 的验收标准按用户可观察能力、业务闭环或公开契约表达；`ark-design` 给出技术闭环建议，不生成执行清单；`ark-plan` 维护阶段推进路径、建议 task 边界和不建议拆分项。
+
+`ark-implement` 的默认报告会先输出功能结果：当前完成状态、任务状态建议、本次能力变化、用户或调用方如何触发、可观察结果、当前限制和用户验收方式。Reality Check、注释/docstring、Checkpoint、Sub-agent 等过程细节仅在影响判断时输出。
 
 若初始化时项目类型选择为 `unknown` 或目标仍不清楚，推荐先执行 `/ark:ark-intake`。只有在目录中已有实质代码、或你明确希望分析已有代码时，Mode A 才建议 `/ark:ark-analyze`。
 
@@ -668,13 +670,13 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 说明 | `/ark:ark-helper` | 回答 ARK 用法、概念和通用流程 |
 | 澄清 | `/ark:ark-intake` | 澄清目标、范围、规模和推荐流程；只分流与建议落盘，不直接写 Artifact |
 | 分析 | `/ark:ark-analyze` | 读取代码库，建立架构认知，可预填充 spec/design |
-| 规划 | `/ark:ark-spec` | 写需求规格 |
-| 规划 | `/ark:ark-design` | 写技术设计 |
+| 规划 | `/ark:ark-spec` | 写需求规格和用户/业务/契约视角验收标准 |
+| 规划 | `/ark:ark-design` | 写技术设计和技术闭环建议 |
 | 规划 | `/ark:ark-solution` | 写专题方案、详细设计、接口契约、集成或数据源元信息 |
-| 规划 | `/ark:ark-plan` | 写阶段计划 |
+| 规划 | `/ark:ark-plan` | 写阶段推进路径、task 边界和验证策略 |
 | 规划 | `/ark:ark-tasks` | 按功能交付单元或技术闭环拆分任务和状态 |
 | 决策 | `/ark:ark-decide` | 记录重要工程决策 |
-| 实施 | `/ark:ark-implement` | 最小可行实现，输出功能视角，支持 batch 和 checkpoint；检查真实性锚点并识别 spec/design/extension 漂移 |
+| 实施 | `/ark:ark-implement` | 最小可行实现，默认输出功能结果和验收方式，支持 batch 和 checkpoint；检查真实性锚点并识别 spec/design/extension 漂移 |
 | 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案；识别修复暴露的需求/设计/扩展文档漂移 |
 | 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构；识别设计现实和扩展文档变化 |
 | 审查 | `/ark:ark-review` | 评审代码变更和风险 |

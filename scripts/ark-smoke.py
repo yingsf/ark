@@ -80,6 +80,18 @@ def smoke_artifact_templates(errors: list[str]) -> None:
                 for token in ("## 验证覆盖范围", "覆盖任务", "覆盖原因"):
                     if token not in text:
                         fail(errors, f"{destination.name} missing {token}")
+            if artifact == "spec":
+                for token in ("用户可观察能力", "不得写成文件/函数级实现步骤"):
+                    if token not in text:
+                        fail(errors, f"{destination.name} missing {token}")
+            if artifact == "design":
+                for token in ("## 技术闭环建议", "最小可运行闭环", "最小契约验证"):
+                    if token not in text:
+                        fail(errors, f"{destination.name} missing {token}")
+            if artifact == "plan":
+                for token in ("## 阶段推进路径", "建议 task 边界", "不建议拆分为"):
+                    if token not in text:
+                        fail(errors, f"{destination.name} missing {token}")
         if (root / "ark").exists():
             fail(errors, "smoke scaffold unexpectedly created nested ark directory")
 

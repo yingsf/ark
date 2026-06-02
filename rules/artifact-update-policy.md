@@ -130,6 +130,8 @@
 
 `spec.md` 应定义核心命题与不变量；`design.md` 应说明技术方案如何承接这些命题与不变量。若后续 Artifact、扩展文档或代码现实弱化了这些约束，应标记 stale/conflicting 并建议执行对应 Skill。
 
+`spec.md` 的验收标准必须按用户可观察能力、业务闭环、公开契约、真实入口或真实数据结果表达，不得写成文件、函数、类、配置项或实现步骤。`design.md` 可以定义模块和接口边界，但应向 plan 提供技术闭环建议，而不是执行步骤清单。`plan.md` 的阶段推进路径必须包含建议 task 边界和不建议拆分项，避免向 `tasks.md` 传递文件/函数级碎片。
+
 允许其他 Skill 识别并报告 spec/design 漂移，但不得直接落盘：
 - `/ark:ark-implement`：本次实现改变能力范围、验收标准、外部接口、MCP/API 契约、模块边界、数据流、运行时机制、资源生命周期、并发/降级策略时，建议 `/ark:ark-spec` 或 `/ark:ark-design`
 - `/ark:ark-debug`：修复 bug 时发现原需求边界、验收标准、错误语义、降级策略或设计假设不成立时，建议 `/ark:ark-spec` 或 `/ark:ark-design`

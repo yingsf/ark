@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.9] - 2026-06-02
+
+### Changed
+
+- Aligned `ark-spec`, `ark-design`, and `ark-plan` with functional delivery-unit task sizing so upstream artifacts do not create file/function-level task fragmentation.
+- Simplified the default `ark-implement` report around functional results, implementation summary, validation status, and risk/writeback while making process-heavy sections conditional.
+- Added checks, smoke coverage, and tests for plan task-boundary guidance, design technical-loop guidance, spec acceptance granularity, and implement report structure.
+
 ## [1.0.8] - 2026-06-02
 
 ### Changed

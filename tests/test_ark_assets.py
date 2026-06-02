@@ -15,7 +15,7 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         version = plugin["version"]
-        self.assertEqual(version, "1.0.8")
+        self.assertEqual(version, "1.0.9")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
         self.assertIn(f"version-{version}-blue.svg", (ROOT / "README.md").read_text())
@@ -93,10 +93,14 @@ class ArkAssetTests(unittest.TestCase):
 
         for token in (
             "显式功能 Batch 例外",
-            "功能视角",
+            "功能结果",
+            "当前完成状态",
+            "任务状态建议",
             "本次新增 / 改变的能力",
             "用户或调用方如何触发",
+            "用户验收方式",
             "统一验证计划",
+            "条件输出",
         ):
             self.assertIn(token, implement_skill)
 
@@ -112,6 +116,44 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("可与哪些任务合并验证", tasks_template)
         self.assertIn("## 验证覆盖范围", validation_template)
         self.assertIn("覆盖原因", validation_template)
+
+    def test_planning_granularity_contract_assets_exist(self) -> None:
+        spec_skill = (ROOT / "skills/ark-spec/SKILL.md").read_text()
+        design_skill = (ROOT / "skills/ark-design/SKILL.md").read_text()
+        plan_skill = (ROOT / "skills/ark-plan/SKILL.md").read_text()
+        spec_template = (ROOT / "templates/artifacts/spec.template.md").read_text()
+        design_template = (ROOT / "templates/artifacts/design.template.md").read_text()
+        plan_template = (ROOT / "templates/artifacts/plan.template.md").read_text()
+
+        for token in (
+            "用户可观察能力",
+            "业务闭环",
+            "不得写成文件、函数、类、配置项或实现步骤",
+        ):
+            self.assertIn(token, spec_skill)
+
+        for token in (
+            "技术闭环建议",
+            "最小可运行闭环",
+            "最小契约验证",
+            "不建议拆成 task 的低层实现点",
+        ):
+            self.assertIn(token, design_skill)
+
+        for token in (
+            "阶段推进路径",
+            "建议 task 边界",
+            "不建议拆分为",
+            "3-8 个当前窗口 task",
+        ):
+            self.assertIn(token, plan_skill)
+
+        self.assertIn("不得写成文件/函数级实现步骤", spec_template)
+        self.assertIn("## 技术闭环建议", design_template)
+        self.assertIn("最小可运行闭环", design_template)
+        self.assertIn("## 阶段推进路径", plan_template)
+        self.assertIn("建议 task 边界", plan_template)
+        self.assertIn("不建议拆分为", plan_template)
 
     def test_repository_checks_pass(self) -> None:
         result = subprocess.run(
