@@ -1,6 +1,6 @@
 {
   "name": "ark",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Artifact-driven Reactive Kernel - Python engineering workflow for Claude Code",
   "author": { "name": "Yingshufeng" },
   "license": "MIT",

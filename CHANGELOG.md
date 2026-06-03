@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.11] - 2026-06-03
+
+### Changed
+
+- Upgraded `ark-review` to default deep contract-driven code review with Findings, Craftsmanship, Verification, Open Questions, ARK Follow-up, and Verdict sections.
+- Added review references for contract-driven Python review, craftsmanship review, and recheck workflows.
+- Added repository checks and tests for the upgraded `ark-review` contract.
+
 ## [1.0.10] - 2026-06-02
 
 ### Changed

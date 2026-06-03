@@ -1,134 +1,146 @@
 ---
 name: ark-review
 description: |
-  对当前代码修改进行正确性、可维护性、风险和测试充分性评审。
-  触发时机：实现完成后、合并前、怀疑变更可能藏有回归风险时。
-  关键词：code review、代码评审、review、检查代码、审查、合并前检查。
+  对当前代码修改执行 ARK 集成型深度契约驱动代码审查，检查实现是否真实满足任务契约、设计约束、运行时边界和测试证明要求。
+  触发时机：实现完成后、合并前、复审修复结果、怀疑变更可能藏有回归风险时。
+  关键词：code review、代码评审、review、检查代码、审查、合并前检查、契约审查、复审。
 version: "1.0"
 ---
 
 # /ark-review
 
 ## 目标
-对当前代码修改进行正确性、可维护性、风险和测试充分性评审，输出分级明确、可执行的反馈。
+对当前代码修改执行深度契约驱动审查，判断实现是否真实满足用户要求、任务契约、设计约束、运行时边界和测试证明要求，并输出分级明确、可执行、可追踪到 ARK 后续流程的反馈。
 
-**与 `/ark:ark-validate` 的区别**：review 评估代码改动本身的质量（是否正确、是否清晰、是否有风险）；validate 记录验证已执行的证据。两者职责不同，不应相互替代。
+**与 `/ark:ark-validate` 的区别**：review 评估代码改动本身的质量、风险和契约符合性；validate 记录已执行验证的证据。两者职责不同，不应相互替代。
 
 ## 执行边界
 
-本 Skill 应由当前 `/ark:ark-review` Skill 直接执行。若环境中安装了其他 review agent（如 superpowers:code-reviewer），不得将本 Skill 的执行路由或转交给外部 agent。外部 agent 的结果只能作为输入材料引用，不能替代本 Skill 的固定输出格式与分级标准。
+- 本 Skill 应由当前 `/ark:ark-review` Skill 直接执行
+- 若环境中安装了其他 review agent（如 superpowers:code-reviewer），不得将本 Skill 的执行路由或转交给外部 agent
+- 外部 agent 的结果只能作为输入材料引用，不能替代本 Skill 的固定输出格式与分级标准
+- Review 只观察、判断和建议，不直接修代码，不直接写入 `docs/ark/validation.md`
+- Critical / Major finding 可提出 `tasks.md` 待新增条目，但不直接写入 `tasks.md`
 
-## 前置建议
-- review 评估的是代码本身，不依赖 Artifact 同步状态，通常不需要先执行 `/ark:ark-sync`
-- 如果实现目标不明确，建议先确认 `docs/ark/spec.md` 或 `docs/ark/plan.md`
+## 默认审查资料
 
-## 适用场景
-- 实现完成后、合并或定稿前
-- 用户要求做 code review
-- 怀疑变更可能藏有回归风险
+按优先级读取：
 
-## 不适用场景
-- 没有明确的代码改动目标
-- 当前真正需要的是实现而不是评审
+1. 用户本轮明确要求、指定 diff、指定文件或复审目标
+2. `docs/ark/tasks.md` 中的任务、完成信号、验收标准和当前状态
+3. `docs/ark/spec.md`、`docs/ark/design.md`、`docs/ark/plan.md`
+4. 相关扩展文档、接口契约、集成说明、数据源元信息和项目画像
+5. 被审查的实现代码、测试代码、相关调用方和上下游模块
+6. 项目配置、质量工具配置和 CI 配置
+7. 已有验证结果、上一轮 Findings 和修复点（复审时必须读取）
 
-## 输入
-- 改动文件、相关测试、相关 Artifact（spec / design / plan）、预期行为
+当材料冲突时，以用户本轮要求和任务契约为最高优先级，并在 `Open Questions` 中指出冲突。
 
-## 输出
-- 按严重程度分组的问题清单、风险点、测试或设计缺口、可执行的反馈建议
+## 默认引用资料
 
-## 相关 Artifact
-- 可引用 `docs/ark/design.md`、`docs/ark/plan.md`、`docs/ark/spec.md`
-- 可引用扩展文档和项目画像，检查实现是否偏离专题方案、契约、集成或数据源元信息
-- 可为 `docs/ark/validation.md` 提供输入（review 发现的缺口）
-- 严重问题可建议更新 `docs/ark/plan.md`
+执行 `/ark:ark-review` 时默认按适用性读取以下 references；某项不适用可以说明不适用，但不能跳过契约审查：
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/ark-review/references/contract-driven-python-review.md`
+- `${CLAUDE_PLUGIN_ROOT}/skills/ark-review/references/craftsmanship-review.md`
+- `${CLAUDE_PLUGIN_ROOT}/skills/ark-review/references/recheck-guidelines.md`
 
 ## 工作流
-1. 在上下文中阅读代码，理解改动意图。
-2. 优先检查正确性（逻辑错误、边界处理、异常路径）。
-3. 评估可维护性（接口清晰度、职责单一性、可读性）。显式检查：函数认知复杂度是否明显过高（例如超过项目配置阈值）、是否存在不必要的 protected/internal 成员访问（若存在应优先评估是否补正式接口）、是否存在已形成维护负担的大段重复代码（包括当前变更与前序批次已落地代码之间的跨文件重复）。
-4. 检查回归风险（改动是否影响未修改的行为路径）。
-5. 审视测试是否缺覆盖或断言过弱。
-6. 检查是否符合 `docs/ark/design.md` 的接口边界与设计约束。
-7. 检查是否符合相关扩展文档：专题方案、接口契约、集成说明、数据源元信息和替身边界。
-8. 检查验证真实性：是否把 mock/fake/in-memory/合成数据当成真实依赖或真实数据已验证。
-9. 检查文档与注释质量：公共接口是否具备项目约定的 docstring（无明确约定时按 ARK 默认 `fastchain-enhanced` 中文 Google 风格判断），复杂逻辑是否有必要中文注释，注释是否解释原因与约束，是否存在影响维护的注释缺失、过度注释或与代码不一致。
-10. 检查注释详细度分级：L2/L3 对象（核心 service/manager/provider/adapter、资源生命周期、外部依赖、数据导入链路、启动链路等）是否只有一句空泛说明；L0 简单对象是否被低价值注释污染。
-11. 检查模块级与变量说明边界：ARK 默认不主动新增顶部模块级 docstring；不得使用赋值语句后的三引号字符串说明常量、变量、集合、配置项或枚举值。
-12. 检查中文标点与尾随注释：中文 docstring / 中文注释描述句行末不得使用 `。`、`！`、`？`、`；`；业务解释类注释应写在代码上方，不写解释性尾随注释。
-13. 按严重级别整理结论（见分级标准）。
 
-## 问题分级标准
+1. 锁定评审范围：用户要求、当前 diff、指定文件、最近实现目标或复审对象
+2. 提炼任务契约：API / CLI / 配置 / 数据结构、状态更新语义、失败路径、默认范围、权限 / 租户 / batch / version 边界、排序 / 去重 / 聚合、安全输出、完成信号和验收标准
+3. 审查实现是否满足契约，重点寻找测试通过但业务语义不对的问题
+4. 审查跨层口径一致性：上游、当前层、下游、测试和文档是否对同一业务概念使用同一语义
+5. 审查默认行为是否 fail-closed，避免缺省范围、空状态、配置缺失或 fallback 放大查询范围或权限范围
+6. 审查运行时边界：可变状态暴露、deep copy / snapshot / 不可变边界、失败路径、异常语义、资源生命周期、并发和安全输出
+7. 审查测试是否真的证明契约，而不是只覆盖 happy path、假上下文或实现细节
+8. 审查是否符合 `spec.md`、`design.md`、`plan.md`、扩展文档、真实性锚点和替身边界
+9. 审查 Craftsmanship：API 易用性、数据边界、抽象层次、错误语义、测试质量、注释与 docstring；Craftsmanship 不等于 Finding
+10. 运行与本次变更相关的验证命令；若不能运行，必须说明原因
+11. 按固定输出格式给出 Findings、Craftsmanship、Verification、Open Questions、ARK Follow-up 和 Verdict
 
-| 级别 | 判断依据 | 典型示例 |
-|------|---------|----------|
-| **Critical** | 行为错误、数据损坏、安全漏洞、必然崩溃 | 边界条件未处理导致 KeyError、SQL 注入风险 |
-| **Major** | 逻辑隐患、显著维护障碍、测试严重不足 | 错误被静默吞掉、核心路径无测试、函数认知复杂度明显过高（例如超过项目配置阈值）已影响理解和修改、在类外直接访问 protected/internal 成员且无合理设计说明或长期依赖内部状态替代正式接口、跨文件大段重复已形成维护负担、核心生命周期/外部依赖边界缺少必要 docstring 导致后续维护风险明显 |
-| **Minor** | 代码清晰度问题、轻微重复、命名不清 | 函数名意图不明、局部变量命名模糊、公共接口缺少必要 docstring、L2/L3 对象只有一句空泛说明、ARK 新生成代码新增顶部模块级 docstring 或变量后置三引号、轻度复杂度上升趋势但未失控、可后续整理的轻度重复 |
-| **Suggestion** | 可接受的改进建议，不影响合并 | 可提取的公共逻辑、文档补充建议、中文句末标点或尾随解释注释等项目风格偏好问题 |
+## 严重级别
 
-## Finding 后续路径
+| 级别 | 判断依据 |
+|------|----------|
+| **Critical** | 明确违反任务契约、导致运行时错误/数据损坏/安全漏洞/权限绕过/状态污染，或修复破坏核心主路径 |
+| **Major** | 主路径可能可用，但边界、失败路径、测试缺口、跨层口径、默认范围或可维护性风险会显著影响后续可靠性 |
+| **Minor** | 局部可读性、类型/lint/test 写法、注释/docstring、轻度重复或小型边界问题，影响有限但建议修复 |
 
-按 finding 类型推荐后续 Skill：
+Findings 只放真实问题，不放纯风格偏好。低置信度担忧应写入 `Open Questions`，不要伪装成 Finding。
+
+## ARK Follow-up 规则
 
 | Finding 类型 | 推荐后续 Skill |
-|-------------|---------------|
-| 行为错误 / 失败路径 / 回归风险 | ark-debug |
-| 结构问题 / 重复 / 可维护性 | ark-refactor 或 ark-implement |
-| 测试缺口 | ark-test |
-| 设计偏差 | ark-design 或 ark-plan |
-| 扩展文档偏差（专题方案、契约、集成、数据源） | ark-solution |
-| 验证证据不足 | ark-validate |
+|---------------|----------------|
+| 行为错误 / 失败路径 / 回归风险 | `/ark:ark-debug` |
+| 结构问题 / 重复 / 可维护性 | `/ark:ark-refactor` 或 `/ark:ark-implement` |
+| 测试缺口 | `/ark:ark-test` |
+| 设计偏差 / 计划偏差 | `/ark:ark-design` 或 `/ark:ark-plan` |
+| 扩展文档偏差（专题方案、契约、集成、数据源） | `/ark:ark-solution` |
+| 验证证据不足 | `/ark:ark-validate` |
 
-## Finding 追加规则
-
-Critical / Major finding：
-  - 必须输出 tasks.md 待新增条目清单（格式：优先级、描述、建议 Skill）
-  - 不直接写入 tasks.md（保持 review 的观察者角色）
-  - 后续处理：
-    - 已有 tasks.md 且只需小幅追加 → 由 ark-implement 或 ark-tasks 追加
-    - 无 tasks.md 或需要重排任务优先级 → 走 ark-tasks
-
-Minor / Suggestion：
-  - 列出建议条目，用户决定是否记录到 tasks.md P2
-
-## 验证要求
-- 优先报告真实问题，而不是风格噪音
-- 区分「确认缺陷」与「低置信度担忧」
-- Critical 和 Major 必须给出具体改进建议，不能只写「这里有问题」
-- 文档与注释问题应聚焦"是否影响理解和维护"。公共接口、资源/并发/降级等复杂逻辑缺少说明时可作为真实可维护性问题；纯措辞差异或不影响维护的个人风格偏好不得淹没正确性与风险问题
-- 句末中文终止标点、解释性尾随注释默认作为 Suggestion；如果项目 CLAUDE.md 已明确禁止且批量出现，可提升为 Minor
-- ARK 新生成代码新增顶部模块级 docstring 或变量后置三引号默认作为 Minor；既有历史代码中的同类风格只在本次改动直接涉及时报告
-- 注释与代码行为不一致时按真实维护风险分级，不视为普通风格问题
-- 若实现与扩展文档或真实性锚点冲突，应作为设计/验证风险报告，而不是普通文档风格问题
-
-## 停止条件
-- 评审结果具体、分级清晰、可执行
-- Critical 和 Major 问题已被明确说明
+Critical / Major finding 必须在 `ARK Follow-up` 中输出 tasks.md 待新增条目建议，包含优先级、描述和建议后续 Skill。Review 不直接写入 `tasks.md`。
 
 ## 固定输出格式
 
-### 1. 评审范围
-### 2. 问题列表
-- **Critical**（必须修复）：
-- **Major**（强烈建议修复）：
-- **Minor**（建议修复）：
-- **Suggestion**（可选改进）：
-### 3. 风险点
-### 4. 测试与设计缺口
-### 4.5 注释与 docstring 检查
-- 注释详细度分级问题：
-- 模块级 docstring / 变量后置三引号：
-- 中文句末标点 / 尾随解释注释：
-- 注释与代码一致性：
-### 5. tasks.md 待新增条目（Critical / Major 时必须输出）
-- 优先级：P0 / P1
-- 描述：
-- 建议后续 Skill：
-（Minor / Suggestion 可选输出）
-### 6. 总结
-- 当前状态：可合并 / 修复后可合并 / 需要重大修改
-- 建议下一步
+```markdown
+## Findings
 
-## 备注
-不要用无意义表扬冲淡重要问题。有 Critical 问题时，不得给出「可合并」结论。
+- Severity: Critical / Major / Minor
+  Location: `path:line`
+  Problem:
+  Why it matters:
+  Fix:
+  Test gap:
+
+如果没有 Findings，写：
+
+未发现阻断性问题。
+
+## Craftsmanship
+
+- Level: Upgrade / Polish / Keep
+  Location: `path:line` 或 `整体`
+  Current:
+  Better:
+  Why:
+  Do now: 是 / 否
+
+如果没有必要建议，写：
+
+当前实现质量与任务范围匹配，未发现值得立即调整的 craftsmanship 问题。
+
+## Verification
+
+- `命令`：结果
+
+## Open Questions
+
+- 列出影响判断的问题；如果没有，写“无。”
+
+## ARK Follow-up
+
+- 推荐 Skill：
+- tasks.md 待新增条目（Critical / Major 时必须输出）：
+
+## Verdict
+
+用 2-4 句话说明是否建议通过、是否需要修复后再合并。
+```
+
+## 验证要求
+
+- Findings 必须排在最前面，并按 Critical、Major、Minor 排序
+- 每个 Finding 必须有具体文件和行号；无法定位到文件行号的问题只能写入 `Open Questions`
+- 每个 Critical / Major 必须给出具体修法和测试缺口，不能只写“这里有问题”
+- 如果验证命令失败，必须说明失败原因及其是否影响 verdict
+- 如果所有测试通过，也不能因此跳过契约审查
+- 如果发现测试失败，必须在 Findings 或 Verification 中明确说明
+- 复审时必须明确上一轮问题是否已闭合，以及是否引入新的契约偏差
+- 新文件是 untracked 时，最终提醒提交不要漏加；不要把 untracked 本身当作代码 bug
+
+## 停止条件
+
+- 审查范围、Findings、验证结果、Open Questions、后续 ARK 路径和 Verdict 已完整输出
+- Critical / Major 问题已给出可执行修法和测试建议
+- 没有足够上下文继续判断时，已明确列出阻塞判断的缺失信息

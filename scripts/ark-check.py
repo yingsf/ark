@@ -412,6 +412,77 @@ def check_stage_contracts(errors: list[str]) -> None:
         fail(errors, "rules/ark.md missing ark-stage routing")
 
 
+def check_review_contracts(errors: list[str]) -> None:
+    skill_rel = "skills/ark-review/SKILL.md"
+    contract_rel = "skills/ark-review/references/contract-driven-python-review.md"
+    craft_rel = "skills/ark-review/references/craftsmanship-review.md"
+    recheck_rel = "skills/ark-review/references/recheck-guidelines.md"
+
+    review_skill = read(ROOT / skill_rel)
+    for rel in (contract_rel, craft_rel, recheck_rel):
+        if f"${{CLAUDE_PLUGIN_ROOT}}/{rel}" not in review_skill:
+            fail(errors, f"{skill_rel} missing review reference: {rel}")
+
+    for token in (
+        "深度契约驱动",
+        "任务契约",
+        "测试通过但业务语义不对",
+        "fail-closed",
+        "Craftsmanship 不等于 Finding",
+        "Review 只观察、判断和建议",
+        "## Findings",
+        "## Craftsmanship",
+        "## Verification",
+        "## Open Questions",
+        "## ARK Follow-up",
+        "## Verdict",
+        "Location: `path:line`",
+    ):
+        if token not in review_skill:
+            fail(errors, f"{skill_rel} missing deep review token: {token}")
+
+    contract = read(ROOT / contract_rel)
+    for token in (
+        "契约识别",
+        "跨层口径一致性",
+        "fail-closed",
+        "敏感信息",
+        "测试通过但业务语义不对",
+        "deep copy",
+        "排序、去重、聚合专项",
+        "类型与运行时一致性",
+    ):
+        if token not in contract:
+            fail(errors, f"{contract_rel} missing contract-review token: {token}")
+
+    craft = read(ROOT / craft_rel)
+    for token in (
+        "Craftsmanship 不等于 Finding",
+        "Upgrade",
+        "Polish",
+        "Keep",
+        "Do now",
+        "API 设计",
+        "数据边界",
+        "错误语义",
+        "测试质量",
+    ):
+        if token not in craft:
+            fail(errors, f"{craft_rel} missing craftsmanship token: {token}")
+
+    recheck = read(ROOT / recheck_rel)
+    for token in (
+        "复审",
+        "上一轮 Findings",
+        "修复前会失败",
+        "修复后会通过",
+        "破坏原有主路径",
+        "新的 Finding",
+    ):
+        if token not in recheck:
+            fail(errors, f"{recheck_rel} missing recheck token: {token}")
+
+
 def check_execution_efficiency_contracts(errors: list[str]) -> None:
     checks = {
         "skills/ark-tasks/SKILL.md": (
@@ -493,6 +564,7 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
             "从 1.0.8 起",
             "从 1.0.9 起",
             "从 1.0.10 起",
+            "从 1.0.11 起",
             "功能交付单元或可验证技术闭环",
             "功能结果",
             "用户验收方式",
@@ -687,12 +759,35 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "Checkpoint 建议",
         ],
         "skills/ark-review/SKILL.md": [
-            "fastchain-enhanced",
-            "注释详细度分级",
-            "顶部模块级 docstring",
-            "变量后置三引号",
-            "句末中文终止标点",
-            "尾随解释注释",
+            "深度契约驱动",
+            "任务契约",
+            "测试通过但业务语义不对",
+            "fail-closed",
+            "Craftsmanship 不等于 Finding",
+            "ARK Follow-up",
+            "Verdict",
+        ],
+        "skills/ark-review/references/contract-driven-python-review.md": [
+            "契约识别",
+            "跨层口径一致性",
+            "fail-closed",
+            "敏感信息",
+            "测试通过但业务语义不对",
+            "deep copy",
+        ],
+        "skills/ark-review/references/craftsmanship-review.md": [
+            "Craftsmanship 不等于 Finding",
+            "Upgrade",
+            "Polish",
+            "Keep",
+            "Do now",
+        ],
+        "skills/ark-review/references/recheck-guidelines.md": [
+            "复审",
+            "上一轮 Findings",
+            "修复前会失败",
+            "修复后会通过",
+            "破坏原有主路径",
         ],
         "skills/ark-sync/SKILL.md": [
             "变更传播判断",
@@ -813,6 +908,7 @@ def main() -> int:
     check_placeholder_policy(errors)
     check_subagent_and_validation_contracts(errors)
     check_stage_contracts(errors)
+    check_review_contracts(errors)
     check_execution_efficiency_contracts(errors)
     check_contract_fixtures(errors)
     check_release_and_ci_assets(errors)

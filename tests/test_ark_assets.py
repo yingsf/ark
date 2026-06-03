@@ -15,7 +15,7 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         version = plugin["version"]
-        self.assertEqual(version, "1.0.10")
+        self.assertEqual(version, "1.0.11")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
         self.assertIn(f"version-{version}-blue.svg", (ROOT / "README.md").read_text())
@@ -193,6 +193,66 @@ class ArkAssetTests(unittest.TestCase):
             self.assertTrue(bad.exists(), f"missing {bad}")
             self.assertTrue(good.read_text().strip())
             self.assertTrue(bad.read_text().strip())
+
+    def test_review_contract_assets_exist(self) -> None:
+        review_skill = (ROOT / "skills/ark-review/SKILL.md").read_text()
+        contract_reference = (
+            ROOT / "skills/ark-review/references/contract-driven-python-review.md"
+        ).read_text()
+        craft_reference = (
+            ROOT / "skills/ark-review/references/craftsmanship-review.md"
+        ).read_text()
+        recheck_reference = (
+            ROOT / "skills/ark-review/references/recheck-guidelines.md"
+        ).read_text()
+
+        for token in (
+            "深度契约驱动",
+            "任务契约",
+            "测试通过但业务语义不对",
+            "fail-closed",
+            "Craftsmanship 不等于 Finding",
+            "## Findings",
+            "## Craftsmanship",
+            "## Verification",
+            "## Open Questions",
+            "## ARK Follow-up",
+            "## Verdict",
+        ):
+            self.assertIn(token, review_skill)
+
+        for rel in (
+            "skills/ark-review/references/contract-driven-python-review.md",
+            "skills/ark-review/references/craftsmanship-review.md",
+            "skills/ark-review/references/recheck-guidelines.md",
+        ):
+            self.assertIn(f"${{CLAUDE_PLUGIN_ROOT}}/{rel}", review_skill)
+
+        for token in (
+            "契约识别",
+            "跨层口径一致性",
+            "fail-closed",
+            "敏感信息",
+            "测试通过但业务语义不对",
+        ):
+            self.assertIn(token, contract_reference)
+
+        for token in (
+            "Craftsmanship 不等于 Finding",
+            "Upgrade",
+            "Polish",
+            "Keep",
+            "Do now",
+        ):
+            self.assertIn(token, craft_reference)
+
+        for token in (
+            "上一轮 Findings",
+            "修复前会失败",
+            "修复后会通过",
+            "破坏原有主路径",
+        ):
+            self.assertIn(token, recheck_reference)
 
     def test_repository_checks_pass(self) -> None:
         result = subprocess.run(

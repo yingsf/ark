@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.10-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.11-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -297,6 +297,8 @@ ark-intake → ark-spec → ark-design → ark-solution（按需）→ ark-plan
 从 1.0.9 起，上游 Artifact 也按同一粒度协作：`ark-spec` 的验收标准按用户可观察能力、业务闭环或公开契约表达；`ark-design` 给出技术闭环建议，不生成执行清单；`ark-plan` 维护阶段推进路径、建议 task 边界和不建议拆分项。
 
 从 1.0.10 起，`ark-implement` 的批次、Sub-agent、Checkpoint 和注释/docstring 细则拆入 references；默认报告继续聚焦功能结果、验收方式、验证状态和下一步行动，减少过程噪音。
+
+从 1.0.11 起，`ark-review` 默认执行深度契约驱动代码审查：先提炼任务契约，再检查实现、测试、跨层口径、fail-closed 默认行为、安全输出和 craftsmanship，并把问题映射到后续 ARK Skill。
 
 `ark-implement` 的默认报告会先输出功能结果：当前完成状态、任务状态建议、本次能力变化、用户或调用方如何触发、可观察结果、当前限制和用户验收方式。Reality Check、注释/docstring、Checkpoint、Sub-agent 等过程细节仅在影响判断时输出。
 
@@ -681,7 +683,7 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 实施 | `/ark:ark-implement` | 最小可行实现，默认输出功能结果和验收方式，支持 batch 和 checkpoint；检查真实性锚点并识别 spec/design/extension 漂移 |
 | 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案；识别修复暴露的需求/设计/扩展文档漂移 |
 | 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构；识别设计现实和扩展文档变化 |
-| 审查 | `/ark:ark-review` | 评审代码变更和风险 |
+| 审查 | `/ark:ark-review` | 深度契约驱动代码审查，检查实现、测试、风险和后续 ARK 路径 |
 | 验证 | `/ark:ark-test` | 创建和组织测试 |
 | 验证 | `/ark:ark-validate` | 记录验证证据，只验证不修复；同闭环任务可共享验证记录 |
 | 恢复 | `/ark:ark-handoff` | 写入恢复点 |

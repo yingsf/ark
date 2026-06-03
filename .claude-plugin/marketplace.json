@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Artifact-driven Reactive Kernel - Python engineering workflow plugin marketplace",
-    "version": "1.0.10"
+    "version": "1.0.11"
   },
   "plugins": [
     {
       "name": "ark",
       "source": "./",
       "description": "Artifact-driven Reactive Kernel - Python engineering workflow for Claude Code",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "author": {
         "name": "Yingshufeng"
       },
