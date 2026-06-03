@@ -78,7 +78,16 @@ def smoke_artifact_templates(errors: list[str]) -> None:
                     if token not in text:
                         fail(errors, f"{destination.name} missing {token}")
             if artifact == "validation":
-                for token in ("## 验证覆盖范围", "覆盖任务", "覆盖原因", "未覆盖任务"):
+                for token in (
+                    "## 验证覆盖范围",
+                    "覆盖任务",
+                    "覆盖原因",
+                    "未覆盖任务",
+                    "外部审查 evidence",
+                    "外部 Verdict",
+                    "Findings 状态",
+                    "复检状态",
+                ):
                     if token not in text:
                         fail(errors, f"{destination.name} missing {token}")
                 if "阶段推进路径" not in text:

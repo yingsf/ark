@@ -36,10 +36,12 @@ python scripts/ark-check.py --release
 python scripts/ark-smoke.py
 python scripts/ark-smoke.py --require-uv
 python scripts/ark-skill-smoke.py
+python scripts/ark-review-gate-smoke.py
 python -m unittest discover -s tests
 uv run python scripts/ark-check.py --release
 uv run python scripts/ark-smoke.py --require-uv
 uv run python scripts/ark-skill-smoke.py
+uv run python scripts/ark-review-gate-smoke.py
 uv run python -m unittest discover -s tests
 ```
 

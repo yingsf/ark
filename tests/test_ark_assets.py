@@ -54,10 +54,12 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python scripts/ark-release-check.py --list",
             "uv run python scripts/ark-smoke.py --require-uv",
             "uv run python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
             "Claude Code CLI not available; skipping plugin validate.",
             "python scripts/ark-skill-smoke.py",
+            "python scripts/ark-review-gate-smoke.py",
         ):
             self.assertIn(token, workflow)
 
@@ -67,9 +69,11 @@ class ArkAssetTests(unittest.TestCase):
             "python scripts/ark-check.py --release",
             "python scripts/ark-smoke.py --require-uv",
             "python scripts/ark-skill-smoke.py",
+            "python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-check.py --release",
             "uv run python scripts/ark-smoke.py --require-uv",
             "uv run python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "claude plugin validate .",
             "/plugin install ark@ark",
             "/plugin update ark@ark",
@@ -104,8 +108,10 @@ class ArkAssetTests(unittest.TestCase):
         for token in (
             "python scripts/ark-check.py --release",
             "python scripts/ark-skill-smoke.py",
+            "python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-check.py --release",
             "uv run python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
             "--list",
@@ -125,7 +131,9 @@ class ArkAssetTests(unittest.TestCase):
         for token in (
             "python scripts/ark-check.py --release",
             "python scripts/ark-skill-smoke.py",
+            "python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "claude plugin validate .",
         ):
             self.assertIn(token, result.stdout)
@@ -235,6 +243,10 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("可与哪些任务合并验证", tasks_template)
         self.assertIn("## 验证覆盖范围", validation_template)
         self.assertIn("覆盖原因", validation_template)
+        self.assertIn("外部审查 evidence", validation_template)
+        self.assertIn("外部 Verdict", validation_template)
+        self.assertIn("Findings 状态", validation_template)
+        self.assertIn("复检状态", validation_template)
         self.assertIn("阶段推进路径", validation_template)
         self.assertNotIn("阶段表", validation_template)
 
@@ -373,6 +385,12 @@ class ArkAssetTests(unittest.TestCase):
             "可延期",
             "不处理",
             "External Review Gate",
+            "不得修改源代码",
+            "不得写入 `docs/ark/validation.md`",
+            "不得把 task 标记为 Done",
+            "不得把外部 review findings 直接改成 tasks",
+            "validation.md：不写入",
+            "tasks.md：不标记 Done",
         ):
             self.assertIn(token, gate_skill)
 
@@ -398,6 +416,44 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("/ark:ark-review-gate", readme)
         self.assertIn("ARK 内置 13 个规则文件", readme)
 
+    def test_review_gate_smoke_contract_passes(self) -> None:
+        review_gate_smoke = (ROOT / "scripts/ark-review-gate-smoke.py").read_text()
+        good_fixture = (
+            ROOT / "tests/fixtures/contracts/review-gate-smoke.good.md"
+        ).read_text()
+        bad_fixture = (
+            ROOT / "tests/fixtures/contracts/review-gate-smoke.bad.md"
+        ).read_text()
+
+        for token in (
+            "Review Gate Smoke Good Fixture",
+            "review-gate-smoke.good.md",
+            "review-gate-smoke.bad.md",
+            "Gate 结论：immediate",
+            "Gate 结论：batch-candidate",
+            "Gate 结论：batch-ready",
+            "外部审查状态：findings-imported",
+            "外部审查状态：recheck-pending",
+            "外部审查状态：passed",
+            "validation.md：已更新",
+            "tasks.md：已更新",
+        ):
+            self.assertIn(token, review_gate_smoke)
+
+        self.assertIn("validation.md：不写入", good_fixture)
+        self.assertIn("tasks.md：不标记 Done", good_fixture)
+        self.assertIn("validation.md：已更新", bad_fixture)
+        self.assertIn("tasks.md：已更新", bad_fixture)
+
+        result = subprocess.run(
+            [sys.executable, "scripts/ark-review-gate-smoke.py"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_snippet_contract_assets_exist(self) -> None:
         validation_snippet = (
             ROOT / "templates/snippets/validation-entry.snippet.md"
@@ -413,6 +469,11 @@ class ArkAssetTests(unittest.TestCase):
             "覆盖原因",
             "未覆盖任务",
             "不覆盖原因",
+            "外部审查 evidence",
+            "外部 Verdict",
+            "Findings 状态",
+            "复检状态",
+            "未做外部审查原因",
             "阶段推进路径",
         ):
             self.assertIn(token, validation_snippet)

@@ -591,6 +591,12 @@ def check_external_review_gate_contracts(errors: list[str]) -> None:
             "不处理",
             "External Review Gate",
             "${CLAUDE_PLUGIN_ROOT}/rules/external-review-gate.md",
+            "不得修改源代码",
+            "不得写入 `docs/ark/validation.md`",
+            "不得把 task 标记为 Done",
+            "不得把外部 review findings 直接改成 tasks",
+            "validation.md：不写入",
+            "tasks.md：不标记 Done",
         ),
         "rules/external-review-gate.md": (
             "高风险不过夜",
@@ -668,6 +674,20 @@ def check_external_review_gate_contracts(errors: list[str]) -> None:
             "Gate 结论",
             "外部审查状态",
             "3 tasks / 90 minutes / 1 feature loop / 500 core diff lines",
+        ),
+        "templates/artifacts/validation.template.md": (
+            "外部审查 evidence",
+            "外部 Verdict",
+            "Findings 状态",
+            "复检状态",
+            "未做外部审查原因",
+        ),
+        "templates/snippets/validation-entry.snippet.md": (
+            "外部审查 evidence",
+            "外部 Verdict",
+            "Findings 状态",
+            "复检状态",
+            "未做外部审查原因",
         ),
         "templates/project/MEMORY.md.template": (
             "external-review-gate.md",
@@ -842,10 +862,19 @@ def implement_report_errors(text: str) -> list[str]:
         "任务状态建议",
         "用户验收方式",
         "### 3. 验证状态",
-        "### 4. 风险与回写",
+        "### 4. 外部审查门禁",
+        "Gate 结论",
+        "风险等级",
+        "命中规则",
+        "当前 batch",
+        "是否建议继续下一个 task",
+        "下一步建议",
+        "### 5. 风险与回写",
     ):
         if token not in text:
             errors.append(f"missing {token}")
+    if "### 4. 风险与回写" in text:
+        errors.append("uses stale report section number: ### 4. 风险与回写")
     for token in ("功能视角", "### Sub-agent 状态", "模块级 docstring / 变量后置三引号检查"):
         if token in text:
             errors.append(f"contains default-report noise or stale token: {token}")
@@ -854,11 +883,56 @@ def implement_report_errors(text: str) -> list[str]:
 
 def validation_coverage_errors(text: str) -> list[str]:
     errors: list[str] = []
-    for token in ("验证覆盖范围", "覆盖任务", "覆盖原因", "未覆盖任务", "不覆盖原因"):
+    for token in (
+        "验证覆盖范围",
+        "覆盖任务",
+        "覆盖原因",
+        "未覆盖任务",
+        "不覆盖原因",
+        "外部审查 evidence",
+        "外部 Verdict",
+        "Findings 状态",
+        "复检状态",
+        "未做外部审查原因",
+    ):
         if token not in text:
             errors.append(f"missing {token}")
     if "全部通过" in text and "覆盖任务" not in text:
         errors.append("uses broad validation without coverage mapping")
+    return errors
+
+
+def review_gate_smoke_errors(text: str) -> list[str]:
+    errors: list[str] = []
+    for token in (
+        "Review Gate Smoke Good Fixture",
+        "High-risk immediate",
+        "Low-risk batch candidate",
+        "Batch ready",
+        "Findings imported",
+        "Recheck pending",
+        "Gate passed",
+        "Gate 结论：immediate",
+        "Gate 结论：batch-candidate",
+        "Gate 结论：batch-ready",
+        "外部审查状态：pending",
+        "外部审查状态：package-prepared",
+        "外部审查状态：findings-imported",
+        "外部审查状态：recheck-pending",
+        "外部审查状态：passed",
+        "Findings 分类：必须修复 / 可延期 / 不处理",
+        "下一步：/ark:ark-review-gate prepare",
+        "下一步：/ark:ark-debug",
+        "下一步：/ark:ark-review-gate recheck",
+        "下一步：/ark:ark-validate",
+        "validation.md：不写入",
+        "tasks.md：不标记 Done",
+    ):
+        if token not in text:
+            errors.append(f"missing {token}")
+    for token in ("validation.md：已更新", "tasks.md：已更新", "任务已 Done", "已修改源码"):
+        if token in text:
+            errors.append(f"contains review-gate boundary violation: {token}")
     return errors
 
 
@@ -868,6 +942,7 @@ def check_contract_fixtures(errors: list[str]) -> None:
         "plan-granularity": plan_granularity_errors,
         "implement-report": implement_report_errors,
         "validation-coverage": validation_coverage_errors,
+        "review-gate-smoke": review_gate_smoke_errors,
     }
 
     for name, checker in checks.items():
@@ -899,12 +974,14 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
             "python scripts/ark-check.py",
             "python scripts/ark-release-check.py --list",
             "python scripts/ark-smoke.py",
+            "python scripts/ark-review-gate-smoke.py",
             "python scripts/ark-skill-smoke.py",
             "python -m unittest",
             "python -m pip install uv",
             "uv run python scripts/ark-check.py",
             "uv run python scripts/ark-release-check.py --list",
             "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-skill-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
@@ -928,8 +1005,10 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
         release_check_text = read(release_check)
         for token in (
             "python scripts/ark-check.py --release",
+            "python scripts/ark-review-gate-smoke.py",
             "python scripts/ark-skill-smoke.py",
             "uv run python scripts/ark-check.py --release",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-skill-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
@@ -939,6 +1018,26 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
         ):
             if token not in release_check_text:
                 fail(errors, f"scripts/ark-release-check.py missing token: {token}")
+    review_gate_smoke = ROOT / "scripts" / "ark-review-gate-smoke.py"
+    if not review_gate_smoke.exists():
+        fail(errors, "missing scripts/ark-review-gate-smoke.py")
+    else:
+        review_gate_smoke_text = read(review_gate_smoke)
+        for token in (
+            "Review Gate Smoke Good Fixture",
+            "review-gate-smoke.good.md",
+            "review-gate-smoke.bad.md",
+            "Gate 结论：immediate",
+            "Gate 结论：batch-candidate",
+            "Gate 结论：batch-ready",
+            "外部审查状态：findings-imported",
+            "外部审查状态：recheck-pending",
+            "外部审查状态：passed",
+            "validation.md：已更新",
+            "tasks.md：已更新",
+        ):
+            if token not in review_gate_smoke_text:
+                fail(errors, f"scripts/ark-review-gate-smoke.py missing token: {token}")
     if not (ROOT / "tests").exists():
         fail(errors, "missing tests directory")
     skill_smoke = ROOT / "scripts" / "ark-skill-smoke.py"
@@ -973,9 +1072,11 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
             "python scripts/ark-release-check.py --list",
             "python scripts/ark-check.py --release",
             "python scripts/ark-smoke.py --require-uv",
+            "python scripts/ark-review-gate-smoke.py",
             "python scripts/ark-skill-smoke.py",
             "uv run python scripts/ark-check.py --release",
             "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-skill-smoke.py",
             "claude plugin validate .",
             "/plugin install ark@ark",

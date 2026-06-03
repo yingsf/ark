@@ -59,6 +59,10 @@ def build_checks(require_claude: bool, skip_claude: bool) -> list[Check]:
             display="python scripts/ark-skill-smoke.py",
         ),
         python_command(
+            "scripts/ark-review-gate-smoke.py",
+            display="python scripts/ark-review-gate-smoke.py",
+        ),
+        python_command(
             "-m",
             "unittest",
             "discover",
@@ -82,6 +86,12 @@ def build_checks(require_claude: bool, skip_claude: bool) -> list[Check]:
             name="uv ARK skill smoke",
             command=["uv", "run", "python", "scripts/ark-skill-smoke.py"],
             display="uv run python scripts/ark-skill-smoke.py",
+            required_binary="uv",
+        ),
+        Check(
+            name="uv ARK review gate smoke",
+            command=["uv", "run", "python", "scripts/ark-review-gate-smoke.py"],
+            display="uv run python scripts/ark-review-gate-smoke.py",
             required_binary="uv",
         ),
         Check(

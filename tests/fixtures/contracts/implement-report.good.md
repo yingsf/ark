@@ -17,6 +17,14 @@
 - 已执行检查：单元测试
 - 未执行验证：真实身份源集成
 
-### 4. 风险与回写
+### 4. 外部审查门禁
+- Gate 结论：batch-candidate
+- 风险等级：Low
+- 命中规则：同一功能闭环，未修改公共接口或安全边界，本地测试通过
+- 当前 batch：T1
+- 是否建议继续下一个 task：是
+- 下一步建议：继续下一个同闭环低风险 task；达到 batch 上限后执行 `/ark:ark-review-gate prepare`
+
+### 5. 风险与回写
 - 假设 / 限制 / 延期项：身份源仍为本地配置
 - Artifact 回写：tasks.md 进入 Ready for validation
