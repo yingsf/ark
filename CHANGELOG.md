@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Added a one-command release gate script with strict changelog release checks and optional Claude plugin validation.
+- Strengthened version, README badge, marketplace, and changelog consistency checks.
+- Improved `ark-skill-smoke.py` failure output with a focused failure summary, failed command, and inspection paths.
+- Added a FastAPI `/hello` endpoint skill smoke that verifies a minimal ARK Artifact loop with an isolated temporary uv cache.
+- Added CI and release checklist gates for the new skill smoke.
+- Strengthened release checks with required uv smoke coverage.
+
 ## [1.0.12] - 2026-06-03
 
 ### Fixed

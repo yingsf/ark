@@ -20,14 +20,20 @@ jobs:
           python -m json.tool .claude-plugin/marketplace.json
       - name: Run ARK repository checks
         run: python scripts/ark-check.py
+      - name: List release checks
+        run: python scripts/ark-release-check.py --list
       - name: Run ARK smoke checks
         run: python scripts/ark-smoke.py
+      - name: Run ARK skill smoke
+        run: python scripts/ark-skill-smoke.py
       - name: Run unit tests
         run: python -m unittest discover -s tests
       - name: Run ARK checks with uv
         run: |
           uv run python scripts/ark-check.py
+          uv run python scripts/ark-release-check.py --list
           uv run python scripts/ark-smoke.py --require-uv
+          uv run python scripts/ark-skill-smoke.py
           uv run python -m unittest discover -s tests
       - name: Validate Claude plugin if CLI is available
         run: |

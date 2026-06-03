@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -27,6 +28,12 @@ STAGE_TEMPLATES = {
     "stages": "stages.template.md",
     "stage-summary": "stage-summary.template.md",
 }
+VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
+README_VERSION_BADGE_RE = re.compile(r"version-(\d+\.\d+\.\d+)-blue\.svg")
+CHANGELOG_VERSION_RE = re.compile(
+    r"^## \[(?P<version>\d+\.\d+\.\d+)\] - (?P<date>\d{4}-\d{2}-\d{2})$",
+    re.MULTILINE,
+)
 
 
 def read(path: Path) -> str:
@@ -37,28 +44,88 @@ def fail(errors: list[str], message: str) -> None:
     errors.append(message)
 
 
-def check_versions(errors: list[str]) -> None:
+def unreleased_body(changelog_text: str) -> str:
+    match = re.search(r"^## Unreleased\s*$", changelog_text, re.MULTILINE)
+    if not match:
+        return ""
+    next_release = re.search(r"^## \[\d+\.\d+\.\d+\]", changelog_text[match.end() :], re.MULTILINE)
+    if not next_release:
+        return changelog_text[match.end() :].strip()
+    return changelog_text[match.end() : match.end() + next_release.start()].strip()
+
+
+def check_changelog_contract(
+    errors: list[str],
+    changelog_text: str,
+    version: str,
+    release_mode: bool,
+) -> None:
+    if not changelog_text.startswith("# Changelog"):
+        fail(errors, "CHANGELOG.md should start with # Changelog")
+    if "## Unreleased" not in changelog_text:
+        fail(errors, "CHANGELOG.md missing ## Unreleased section")
+
+    matches = list(CHANGELOG_VERSION_RE.finditer(changelog_text))
+    if not matches:
+        fail(errors, "CHANGELOG.md missing versioned release entries")
+        return
+
+    versions = [match.group("version") for match in matches]
+    duplicate_versions = sorted({item for item in versions if versions.count(item) > 1})
+    if duplicate_versions:
+        fail(errors, "CHANGELOG.md contains duplicate release entries: " + ", ".join(duplicate_versions))
+
+    latest_version = versions[0]
+    if latest_version != version:
+        fail(
+            errors,
+            f"CHANGELOG.md latest release entry is {latest_version}, expected {version}",
+        )
+    if version not in versions:
+        fail(errors, f"CHANGELOG.md missing release entry for {version}")
+
+    if release_mode and unreleased_body(changelog_text):
+        fail(
+            errors,
+            "CHANGELOG.md has Unreleased content; move it to the target version before release",
+        )
+
+
+def check_versions(errors: list[str], release_mode: bool = False) -> None:
     plugin = json.loads(read(ROOT / ".claude-plugin" / "plugin.json"))
     marketplace = json.loads(read(ROOT / ".claude-plugin" / "marketplace.json"))
     version = plugin.get("version")
+    plugin_name = plugin.get("name")
+
+    if not isinstance(version, str) or not VERSION_RE.fullmatch(version):
+        fail(errors, "plugin.json version must use semantic x.y.z format")
 
     if marketplace.get("metadata", {}).get("version") != version:
         fail(errors, "marketplace metadata version does not match plugin.json")
 
-    for item in marketplace.get("plugins", []):
-        if item.get("name") == plugin.get("name") and item.get("version") != version:
+    matching_plugins = [
+        item for item in marketplace.get("plugins", []) if item.get("name") == plugin_name
+    ]
+    if len(matching_plugins) != 1:
+        fail(errors, "marketplace must contain exactly one plugin entry matching plugin.json name")
+    for item in matching_plugins:
+        if item.get("version") != version:
             fail(errors, "marketplace plugin version does not match plugin.json")
 
     readme = read(ROOT / "README.md")
     badge = f"version-{version}-blue.svg"
     if badge not in readme:
         fail(errors, f"README version badge does not contain {badge}")
+    readme_badges = sorted(set(README_VERSION_BADGE_RE.findall(readme)))
+    stale_badges = [item for item in readme_badges if item != version]
+    if stale_badges:
+        fail(errors, "README contains stale version badge(s): " + ", ".join(stale_badges))
 
     changelog = ROOT / "CHANGELOG.md"
     if not changelog.exists():
         fail(errors, "missing CHANGELOG.md for explicit versioned releases")
-    elif f"## [{version}]" not in read(changelog):
-        fail(errors, f"CHANGELOG.md missing release entry for {version}")
+    else:
+        check_changelog_contract(errors, read(changelog), version, release_mode)
 
 
 def check_artifact_templates(errors: list[str]) -> None:
@@ -699,11 +766,15 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
         text = read(workflow)
         for token in (
             "python scripts/ark-check.py",
+            "python scripts/ark-release-check.py --list",
             "python scripts/ark-smoke.py",
+            "python scripts/ark-skill-smoke.py",
             "python -m unittest",
             "python -m pip install uv",
             "uv run python scripts/ark-check.py",
+            "uv run python scripts/ark-release-check.py --list",
             "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-skill-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
             "Claude Code CLI not available; skipping plugin validate.",
@@ -719,8 +790,46 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
         for token in ("--require-uv", "uv bare smoke was required"):
             if token not in smoke_text:
                 fail(errors, f"scripts/ark-smoke.py missing required uv smoke token: {token}")
+    release_check = ROOT / "scripts" / "ark-release-check.py"
+    if not release_check.exists():
+        fail(errors, "missing scripts/ark-release-check.py")
+    else:
+        release_check_text = read(release_check)
+        for token in (
+            "python scripts/ark-check.py --release",
+            "python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-check.py --release",
+            "uv run python scripts/ark-skill-smoke.py",
+            "uv run python -m unittest discover -s tests",
+            "claude plugin validate .",
+            "--list",
+            "--require-claude",
+            "--skip-claude",
+        ):
+            if token not in release_check_text:
+                fail(errors, f"scripts/ark-release-check.py missing token: {token}")
     if not (ROOT / "tests").exists():
         fail(errors, "missing tests directory")
+    skill_smoke = ROOT / "scripts" / "ark-skill-smoke.py"
+    if not skill_smoke.exists():
+        fail(errors, "missing scripts/ark-skill-smoke.py")
+    else:
+        skill_smoke_text = read(skill_smoke)
+        for token in (
+            "hello-ark-api",
+            "GET /hello",
+            "Hello, ARK!",
+            "UV_CACHE_DIR",
+            "UV_PYTHON_INSTALL_DIR",
+            "uv run --no-project --python",
+            "Failure summary:",
+            "Failed command:",
+            "Next steps:",
+            "Temporary project cleaned.",
+            "Temporary project kept for inspection:",
+        ):
+            if token not in skill_smoke_text:
+                fail(errors, f"scripts/ark-skill-smoke.py missing token: {token}")
     if not (ROOT / "RELEASE.md").exists():
         fail(errors, "missing RELEASE.md")
     else:
@@ -729,9 +838,14 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
             CANONICAL_UV_INIT,
             "git status --short",
             "[project.scripts]",
+            "python scripts/ark-release-check.py",
+            "python scripts/ark-release-check.py --list",
+            "python scripts/ark-check.py --release",
             "python scripts/ark-smoke.py --require-uv",
-            "uv run python scripts/ark-check.py",
+            "python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-check.py --release",
             "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-skill-smoke.py",
             "claude plugin validate .",
             "/plugin install ark@ark",
             "/plugin update ark@ark",
@@ -945,9 +1059,19 @@ def check_workflow_tokens(errors: list[str]) -> None:
                 fail(errors, f"{rel} missing workflow token: {token}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Validate ARK repository assets and release contracts."
+    )
+    parser.add_argument(
+        "--release",
+        action="store_true",
+        help="enable strict release checks, including empty Unreleased changelog content",
+    )
+    args = parser.parse_args(argv)
+
     errors: list[str] = []
-    check_versions(errors)
+    check_versions(errors, release_mode=args.release)
     check_artifact_templates(errors)
     check_ruff_snippet(errors)
     check_skill_references(errors)

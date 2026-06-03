@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import unittest
@@ -18,7 +19,14 @@ class ArkAssetTests(unittest.TestCase):
         self.assertEqual(version, "1.0.12")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
-        self.assertIn(f"version-{version}-blue.svg", (ROOT / "README.md").read_text())
+        readme = (ROOT / "README.md").read_text()
+        changelog = (ROOT / "CHANGELOG.md").read_text()
+        self.assertIn(f"version-{version}-blue.svg", readme)
+        self.assertEqual(set(re.findall(r"version-(\d+\.\d+\.\d+)-blue\.svg", readme)), {version})
+        self.assertIn("## Unreleased", changelog)
+        latest_release = re.search(r"^## \[(\d+\.\d+\.\d+)\] - \d{4}-\d{2}-\d{2}$", changelog, re.MULTILINE)
+        self.assertIsNotNone(latest_release)
+        self.assertEqual(latest_release.group(1), version)
 
     def test_init_uses_bare_uv_contract(self) -> None:
         canonical = (
@@ -41,18 +49,27 @@ class ArkAssetTests(unittest.TestCase):
 
         for token in (
             "python -m pip install uv",
+            "python scripts/ark-release-check.py --list",
             "uv run python scripts/ark-check.py",
+            "uv run python scripts/ark-release-check.py --list",
             "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-skill-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
             "Claude Code CLI not available; skipping plugin validate.",
+            "python scripts/ark-skill-smoke.py",
         ):
             self.assertIn(token, workflow)
 
         for token in (
+            "python scripts/ark-release-check.py",
+            "python scripts/ark-release-check.py --list",
+            "python scripts/ark-check.py --release",
             "python scripts/ark-smoke.py --require-uv",
-            "uv run python scripts/ark-check.py",
+            "python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-check.py --release",
             "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-skill-smoke.py",
             "claude plugin validate .",
             "/plugin install ark@ark",
             "/plugin update ark@ark",
@@ -61,6 +78,57 @@ class ArkAssetTests(unittest.TestCase):
 
         self.assertIn("--require-uv", smoke)
         self.assertIn("uv bare smoke was required", smoke)
+
+    def test_skill_smoke_contract_assets_exist(self) -> None:
+        skill_smoke = (ROOT / "scripts" / "ark-skill-smoke.py").read_text()
+
+        for token in (
+            "hello-ark-api",
+            "GET /hello",
+            "Hello, ARK!",
+            "UV_CACHE_DIR",
+            "UV_PYTHON_INSTALL_DIR",
+            "uv run --no-project --python",
+            "Failure summary:",
+            "Failed command:",
+            "Next steps:",
+            "Temporary project cleaned.",
+            "Temporary project kept for inspection:",
+            "Ready for validation",
+            "validation.md #验证记录 2026-06-03",
+        ):
+            self.assertIn(token, skill_smoke)
+
+    def test_release_check_script_lists_release_gates(self) -> None:
+        release_check = (ROOT / "scripts" / "ark-release-check.py").read_text()
+        for token in (
+            "python scripts/ark-check.py --release",
+            "python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-check.py --release",
+            "uv run python scripts/ark-skill-smoke.py",
+            "uv run python -m unittest discover -s tests",
+            "claude plugin validate .",
+            "--list",
+            "--require-claude",
+            "--skip-claude",
+        ):
+            self.assertIn(token, release_check)
+
+        result = subprocess.run(
+            [sys.executable, "scripts/ark-release-check.py", "--list"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for token in (
+            "python scripts/ark-check.py --release",
+            "python scripts/ark-skill-smoke.py",
+            "uv run python scripts/ark-skill-smoke.py",
+            "claude plugin validate .",
+        ):
+            self.assertIn(token, result.stdout)
 
     def test_package_name_placeholder_is_used_for_python_package(self) -> None:
         claude_template = (ROOT / "templates/project/CLAUDE.md.template").read_text()

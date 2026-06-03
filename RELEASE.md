@@ -14,19 +14,44 @@ ARK uses explicit plugin versions. If `plugin.json` keeps the same version strin
 
 ## Local Checks
 
-For release checks, uv must be installed. Run:
+For release checks, uv must be installed. After moving `CHANGELOG.md` `Unreleased`
+content into the target version entry, run the one-command release gate:
+
+```bash
+python scripts/ark-release-check.py
+```
+
+To inspect the gate without running it:
+
+```bash
+python scripts/ark-release-check.py --list
+```
+
+The release gate runs:
 
 ```bash
 python -m json.tool .claude-plugin/plugin.json
 python -m json.tool .claude-plugin/marketplace.json
-python scripts/ark-check.py
+python scripts/ark-check.py --release
 python scripts/ark-smoke.py
 python scripts/ark-smoke.py --require-uv
+python scripts/ark-skill-smoke.py
 python -m unittest discover -s tests
-uv run python scripts/ark-check.py
+uv run python scripts/ark-check.py --release
 uv run python scripts/ark-smoke.py --require-uv
+uv run python scripts/ark-skill-smoke.py
 uv run python -m unittest discover -s tests
 ```
+
+If Claude Code CLI is available on `PATH`, the release gate also runs:
+
+```bash
+claude plugin validate .
+```
+
+Use `python scripts/ark-release-check.py --require-claude` when the release
+machine must have Claude Code CLI, or `--skip-claude` when plugin validation is
+handled manually.
 
 Then inspect tracked/untracked changes:
 
