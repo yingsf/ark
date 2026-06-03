@@ -75,6 +75,25 @@ version: "1.0"
 10. 检查是否需要回写 Artifact（见下方回写规则）。
 11. 执行修复后 spec/design/extension 漂移检查：只识别 bug 修复是否改变需求、设计现实或扩展文档现实，发现后建议对应 Skill，不直接回写 spec/design 或扩展文档。
 
+## 外部 findings 修复模式
+
+当输入来自 `/ark:ark-review-gate import` 或用户明确要求修复外部审查 findings 时，进入外部 findings 修复模式。
+
+执行要求：
+- 保留外部 finding 的编号、来源、严重级别、文件行号和原始问题摘要；没有编号时先为本轮修复生成稳定编号（如 `F1`、`F2`）。
+- 只处理“必须修复”项；“可延期”和“不处理”项不得顺手修复，除非用户明确改变范围。
+- 每个必须修复 finding 必须绑定修复目标、修复位置、验证方式和复检关注点。
+- 若某个必须修复 finding 无法修复，必须标为 `still-open` 或 `blocked`，说明阻塞原因，不得把它写成已关闭。
+- 修复完成后不得直接声称外部审查通过；正确路径是 `/ark:ark-test` 补充或运行回归 → `/ark:ark-review-gate recheck` 生成定向复检包 → `/ark:ark-validate` 记录最终 evidence。
+- 若本轮只修复部分 findings，必须输出未闭合项，禁止进入 validate 完结建议。
+
+Finding 闭合状态必须使用以下字段：
+
+| Finding | 处理状态 | 修复位置 | 验证方式 | 复检关注点 |
+|---------|----------|----------|----------|------------|
+
+`处理状态` 只能是：`fixed` / `still-open` / `blocked` / `deferred` / `not-applicable`。
+
 ## 回写规则
 
 ### 回写 `docs/ark/plan.md`
@@ -106,6 +125,8 @@ version: "1.0"
 - 若 bug 与真实依赖、真实数据或公开契约相关，验证思路必须区分真实验证与替身验证
 - 来自外部 review gate 的 findings 必须保持修复边界：只修复“必须修复”项；“可延期”项应输出后续 task 建议或明确不处理
 - 外部 findings 修复后，默认建议 `/ark:ark-review-gate recheck` 做定向复检，而不是重新扩大审查范围
+- 外部 findings 未全部 `fixed` 或 `not-applicable` 前，不得建议直接进入 `/ark:ark-validate` 完结；必须先修复剩余项或说明 blocked / deferred 状态
+- 外部 findings 修复后应为 `/ark:ark-test` 提供 finding 级测试目标，并为 `/ark:ark-review-gate recheck` 提供闭合摘要
 
 ## 停止条件
 - 根因已足够清晰，可进入修复
@@ -121,6 +142,11 @@ version: "1.0"
 - 必须修复：
 - 可延期：
 - 不处理：
+- Finding 闭合状态：
+  | Finding | 处理状态 | 修复位置 | 验证方式 | 复检关注点 |
+  |---------|----------|----------|----------|------------|
+- 给 `/ark:ark-test` 的 finding 级测试目标：
+- 给 `/ark:ark-review-gate recheck` 的闭合摘要：
 - 建议复检：`/ark:ark-review-gate recheck`
 ### 6. 建议下一步（通常：`/ark:ark-test` 补充回归 → `/ark:ark-review-gate recheck`（如适用）→ `/ark:ark-validate`）
 ### 7. Artifact 回写

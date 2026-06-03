@@ -30,6 +30,7 @@ version: "1.0"
 ## 输出
 - 当前状态一致性评估、已发现的冲突或过期内容、建议更新的 Artifact 列表、推荐下一步 Skill
 - 扩展文档可信度摘要、项目真实性锚点缺口（如有）
+- External Review Gate 状态漂移（如存在）：pending、findings-imported、recheck-pending、passed 与 tasks/validation/handoff 是否一致
 
 ## 相关 Artifact
 - 可读取全部 docs Artifact
@@ -56,6 +57,8 @@ sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_
   - plan/tasks 已大量推进，但项目画像中的真实入口、真实依赖、真实数据源或公开契约仍未接入
   - spec/design/plan/tasks 对核心命题与不变量的承接不完整或逐层弱化
   - tasks.md 存在 Ready for validation 项但 validation.md 尚未记录对应验证结论
+  - handoff.md 中 External Review Gate 为 `findings-imported`，但未看到 `/ark:ark-debug` 修复摘要、Finding 闭合状态或 recheck 准备记录
+  - handoff.md 中 External Review Gate 为 `recheck-pending`，但 validation.md 尚未记录外部复检 evidence
   - 代码现实已经越过 tasks 依赖顺序，但尚未造成明确相反状态
 
 **conflicting**：
@@ -68,6 +71,8 @@ sync 执行时，对每个核心 Artifact 判断可信度（定义见 `${CLAUDE_
   - 扩展文档正文与核心 Artifact 或代码现实明显相反
   - validation 把 mock/fake/in-memory/合成数据证据描述成真实验证通过
   - Done 项缺少 validation.md 记录引用，或 validation 记录与 Done 结论相反
+  - task 已进入 External Review Gate，handoff 仍为 `pending`、`findings-imported` 或 `recheck-pending`，但 tasks.md 已标记 Done
+  - validation.md 记录外部审查通过，但 handoff.md 仍显示 `findings-imported` 且存在未闭合必须修复项
   - 同一个 task ID 跨状态重复出现
   - 代码现实明显跳过未完成依赖并实现后续 task，导致 tasks 依赖顺序与实际执行相反
 
@@ -130,16 +135,31 @@ ark-sync **不做**：
 2. 检查代码与文档是否描述同一阶段。
 3. 检查任务状态是否过期。
 4. 检查是否存在「实现已完成但未验证」或「handoff 仍停留在旧阶段」的情况。
-5. 检查 spec/design 漂移信号（见下方"spec/design 漂移检查"）。
-6. 检查扩展文档漂移信号和 design.md 中的扩展文档索引。
-7. 检查真实性锚点：plan/tasks/validation 是否已经建立与项目类型匹配的最小真实闭环；若长期停留在替身环境，标记为风险。
-8. 检查核心命题与不变量传播：spec → design → plan → tasks 是否断裂或弱化。
-9. 检查上游变更传播：spec/design/solution/validation/handoff 的更新时间和内容是否已被下游反映。
-10. 依据一致性判例表输出结论。
-11. 指出需要更新的具体文件与原因。
-12. 推荐下一步动作。
-13. 如状态非常明确且改动很小，可在严格白名单内直接修正（见下文"可直接修正范围"）。
-14. 扫描项目源代码目录结构（根据项目布局：src/ 下的子目录，或根目录下的包目录），当模块数 >= 3 时生成项目地图摘要。
+5. 检查 External Review Gate 状态漂移：`pending` / `package-prepared` / `findings-imported` / `recheck-pending` / `passed` 是否与 tasks、validation、handoff 和本轮修复摘要一致。
+6. 检查 spec/design 漂移信号（见下方"spec/design 漂移检查"）。
+7. 检查扩展文档漂移信号和 design.md 中的扩展文档索引。
+8. 检查真实性锚点：plan/tasks/validation 是否已经建立与项目类型匹配的最小真实闭环；若长期停留在替身环境，标记为风险。
+9. 检查核心命题与不变量传播：spec → design → plan → tasks 是否断裂或弱化。
+10. 检查上游变更传播：spec/design/solution/validation/handoff 的更新时间和内容是否已被下游反映。
+11. 依据一致性判例表输出结论。
+12. 指出需要更新的具体文件与原因。
+13. 推荐下一步动作。
+14. 如状态非常明确且改动很小，可在严格白名单内直接修正（见下文"可直接修正范围"）。
+15. 扫描项目源代码目录结构（根据项目布局：src/ 下的子目录，或根目录下的包目录），当模块数 >= 3 时生成项目地图摘要。
+
+## External Review Gate 状态漂移检查
+
+检查 `docs/ark/handoff.md` 的 External Review Gate 区域、`docs/ark/tasks.md` 的任务状态、`docs/ark/validation.md` 的外部审查 evidence，以及最近 `/ark:ark-debug` / `/ark:ark-test` 输出摘要。
+
+判定规则：
+- `pending` 或 `package-prepared`：应推荐 `/ark:ark-review-gate prepare` 或等待外部审查；不得推荐直接 validate 完结。
+- `findings-imported` 且无 Finding 闭合状态：标记 stale，推荐 `/ark:ark-debug` 修复必须修复项。
+- `findings-imported` 且已有 Finding 闭合状态但未生成复检包：标记 stale，推荐 `/ark:ark-review-gate recheck`。
+- `recheck-pending`：推荐 `/ark:ark-review-gate recheck` 或等待外部复检结果；不得将任务推进 Done。
+- `passed` 但 validation.md 缺外部审查 evidence：标记 stale，推荐 `/ark:ark-validate` 记录 evidence。
+- `pending` / `findings-imported` / `recheck-pending` 与 tasks Done 同时存在：标记 conflicting。
+
+sync 只能指出漂移和推荐下一步；不得直接写 `validation.md`，也不得把 task 标记 Done 来绕过外部复检。
 
 ## spec/design 漂移检查
 
@@ -251,6 +271,14 @@ ark-sync **不做**：
 - handoff 是否反映当前任务：
 - 核心命题与不变量是否被下游承接：
 - 推荐修复顺序：
+
+### 1.9 External Review Gate 状态漂移
+- handoff gate 状态：
+- tasks 对应状态：
+- validation 外部审查 evidence：
+- Finding 闭合状态：
+- 判断：一致 / stale / conflicting / unknown
+- 推荐下一步：
 
 ### 2. 已发现问题
 文档过期项、状态冲突项、缺失验证项、可疑 handoff 项

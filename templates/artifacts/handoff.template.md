@@ -62,6 +62,7 @@ YYYY-MM-DD
 - Batch 范围：
 - 触发上限：3 tasks / 90 minutes / 1 feature loop / 500 core diff lines / user requested / none
 - 外部审查状态：pending / package-prepared / findings-imported / recheck-pending / passed / blocked / 不适用
+- Finding 闭合状态：无 / 未修复 / 部分修复 / 已修复待复检 / 已复检通过 / 不适用
 - 下一步：
 
 ## 恢复顺序

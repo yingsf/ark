@@ -38,7 +38,7 @@ version: "1.0"
 2. 再读取 `tasks`，判断当前 Doing / Ready for validation / Blocked / Todo。
 3. 再读取 `plan`，判断当前所在阶段。
 4. 再读取 `validation`，检查是否存在未验证实现。
-5. 检查 `handoff.md` 是否存在 External Review Gate pending、findings-imported 或 recheck-pending 状态。
+5. 检查 `handoff.md` 是否存在 External Review Gate pending、package-prepared、findings-imported、recheck-pending 或 passed 但 validation 未记录 evidence 的状态。
 6. 再读取 `spec` 和 `design`，了解项目已确认的规格与架构。
 7. 若存在 `docs/ark/stages.md`，读取 Current Stage、Stage History 和 Carryover Gates；未完成 gate 应作为下一步裁决的高优先级约束。
 8. 检查扩展文档索引、项目真实性锚点状态、核心命题与不变量承接状态。
@@ -61,7 +61,7 @@ version: "1.0"
 2. **判阶段门禁** — `stages.md` 中存在未闭合 Carryover Gates，且当前目标会进入该 gate 约束范围 → 优先推荐 `/ark:ark-stage` 审计阶段门禁，或按 gate 证据推荐 `/ark:ark-validate` / `/ark:ark-implement`
 3. **判核心命题承接** — spec/design/plan/tasks 对核心命题与不变量承接断裂或弱化 → 优先 `/ark:ark-sync`，再按原因推荐 `/ark:ark-spec`、`/ark:ark-design` 或 `/ark:ark-plan`
 4. **判真实性锚点** — tasks 已推进较多但真实入口、真实依赖、真实数据源或公开契约仍无闭环，或 validation 把替身当真实通过 → 优先 `/ark:ark-sync`；若原因已明确是计划缺口 → `/ark:ark-plan`
-5. **判外部审查门禁** — handoff 存在 External Review Gate pending / package-prepared / findings-imported / recheck-pending，或 Ready for validation task 已标记 external review gate 但缺外部审查 evidence → 优先 `/ark:ark-review-gate`
+5. **判外部审查门禁** — handoff 存在 External Review Gate pending / package-prepared / findings-imported / recheck-pending，或 Ready for validation task 已标记 external review gate 但缺外部审查 evidence → 优先处理外部审查链路。`pending` / `package-prepared` 推荐 `/ark:ark-review-gate prepare`；`findings-imported` 且未见 Finding 闭合状态推荐 `/ark:ark-debug`；已有闭合状态或 `recheck-pending` 推荐 `/ark:ark-review-gate recheck`；`passed` 但缺 validation evidence 推荐 `/ark:ark-validate`。
 6. **判验证闭环** — Ready for validation 项缺验证记录、Done 项缺验证记录，或当前阶段已进入验证前状态但 validation 缺记录 → 优先 `/ark:ark-validate`；Doing 项不单独触发（可能仍在进行中）
 7. **判规格/设计/扩展文档更新** — 已明确是需求边界、验收标准、能力承诺变化 → `/ark:ark-spec`；已明确是模块边界、接口契约、数据流或运行机制变化 → `/ark:ark-design`；已明确是专题方案、契约、集成或数据源元信息变化 → `/ark:ark-solution`
 8. **判唯一活跃执行项** — tasks 中有单一 Doing 且无阻塞 → 推进 `/ark:ark-implement`
@@ -79,7 +79,10 @@ version: "1.0"
 | 核心命题与不变量在 design/plan/tasks 中弱化或遗漏 | `/ark:ark-sync`，再按原因推荐 spec/design/plan |
 | 扩展文档或 design 索引与文件现实冲突 | `/ark:ark-sync` 或 `/ark:ark-solution` |
 | 真实基础设施、数据源或公开契约长期未进入闭环 | `/ark:ark-sync` 或 `/ark:ark-plan` |
-| External Review Gate pending / findings-imported / recheck-pending | `/ark:ark-review-gate` |
+| External Review Gate pending / package-prepared | `/ark:ark-review-gate prepare` |
+| External Review Gate findings-imported 且未见 Finding 闭合状态 | `/ark:ark-debug` |
+| External Review Gate findings-imported 已修复 / recheck-pending | `/ark:ark-review-gate recheck` |
+| External Review Gate passed 但 validation 缺 evidence | `/ark:ark-validate` |
 | 功能已实现但无验证记录 / Ready for validation 待验证 | `/ark:ark-validate` |
 | 目标清晰、Doing 明确、无阻塞 | `/ark:ark-implement` |
 | 无 Doing，但存在可执行 Todo | `/ark:ark-implement`（从第一个可执行 Todo 开始，先锁定本轮唯一执行目标） |
