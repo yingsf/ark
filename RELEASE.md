@@ -14,14 +14,18 @@ ARK uses explicit plugin versions. If `plugin.json` keeps the same version strin
 
 ## Local Checks
 
-Run:
+For release checks, uv must be installed. Run:
 
 ```bash
 python -m json.tool .claude-plugin/plugin.json
 python -m json.tool .claude-plugin/marketplace.json
 python scripts/ark-check.py
 python scripts/ark-smoke.py
+python scripts/ark-smoke.py --require-uv
 python -m unittest discover -s tests
+uv run python scripts/ark-check.py
+uv run python scripts/ark-smoke.py --require-uv
+uv run python -m unittest discover -s tests
 ```
 
 Then inspect tracked/untracked changes:
@@ -34,7 +38,13 @@ Before publishing, confirm any new release assets are intentionally added to the
 
 ## Plugin Smoke
 
-When Claude Code is available, validate and install from a local marketplace:
+When Claude Code CLI is available, validate the plugin manifest:
+
+```bash
+claude plugin validate .
+```
+
+Then validate and install from a local marketplace inside Claude Code:
 
 ```text
 /plugin validate .

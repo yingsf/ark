@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import shutil
@@ -159,9 +160,11 @@ def smoke_init_contract(errors: list[str]) -> None:
             fail(errors, f"{path.relative_to(ROOT)} still documents non-bare uv command")
 
 
-def smoke_optional_uv_bare(errors: list[str]) -> None:
+def smoke_optional_uv_bare(errors: list[str], *, require_uv: bool) -> None:
     uv = shutil.which("uv")
     if uv is None:
+        if require_uv:
+            fail(errors, "uv bare smoke was required, but uv was not found on PATH")
         return
 
     with tempfile.TemporaryDirectory(prefix="ark-uv-smoke-") as tmp:
@@ -218,14 +221,27 @@ def smoke_optional_uv_bare(errors: list[str]) -> None:
                 fail(errors, f"uv bare smoke unexpectedly created {path.name}")
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Smoke checks for ARK plugin assets without invoking Claude Code."
+    )
+    parser.add_argument(
+        "--require-uv",
+        action="store_true",
+        help="Fail when uv is not available instead of skipping the uv bare init smoke.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     errors: list[str] = []
     smoke_manifest(errors)
     smoke_artifact_templates(errors)
     smoke_mode_b_boundaries(errors)
     smoke_stage_templates(errors)
     smoke_init_contract(errors)
-    smoke_optional_uv_bare(errors)
+    smoke_optional_uv_bare(errors, require_uv=args.require_uv)
     if errors:
         print("ARK smoke checks failed:")
         for error in errors:

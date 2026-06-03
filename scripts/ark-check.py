@@ -697,19 +697,45 @@ def check_release_and_ci_assets(errors: list[str]) -> None:
         fail(errors, "missing .github/workflows/ark-check.yml")
     else:
         text = read(workflow)
-        for token in ("python scripts/ark-check.py", "python scripts/ark-smoke.py", "python -m unittest"):
+        for token in (
+            "python scripts/ark-check.py",
+            "python scripts/ark-smoke.py",
+            "python -m unittest",
+            "python -m pip install uv",
+            "uv run python scripts/ark-check.py",
+            "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python -m unittest discover -s tests",
+            "claude plugin validate .",
+            "Claude Code CLI not available; skipping plugin validate.",
+        ):
             if token not in text:
                 fail(errors, f"ark-check workflow missing command: {token}")
 
-    if not (ROOT / "scripts" / "ark-smoke.py").exists():
+    smoke = ROOT / "scripts" / "ark-smoke.py"
+    if not smoke.exists():
         fail(errors, "missing scripts/ark-smoke.py")
+    else:
+        smoke_text = read(smoke)
+        for token in ("--require-uv", "uv bare smoke was required"):
+            if token not in smoke_text:
+                fail(errors, f"scripts/ark-smoke.py missing required uv smoke token: {token}")
     if not (ROOT / "tests").exists():
         fail(errors, "missing tests directory")
     if not (ROOT / "RELEASE.md").exists():
         fail(errors, "missing RELEASE.md")
     else:
         release = read(ROOT / "RELEASE.md")
-        for token in (CANONICAL_UV_INIT, "git status --short", "[project.scripts]"):
+        for token in (
+            CANONICAL_UV_INIT,
+            "git status --short",
+            "[project.scripts]",
+            "python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-check.py",
+            "uv run python scripts/ark-smoke.py --require-uv",
+            "claude plugin validate .",
+            "/plugin install ark@ark",
+            "/plugin update ark@ark",
+        ):
             if token not in release:
                 fail(errors, f"RELEASE.md missing release gate token: {token}")
 

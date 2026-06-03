@@ -34,6 +34,34 @@ class ArkAssetTests(unittest.TestCase):
             self.assertIn(canonical, text)
             self.assertNotIn("uv init --name <project_name>", text)
 
+    def test_release_and_ci_gates_include_required_uv_smoke(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "ark-check.yml").read_text()
+        release = (ROOT / "RELEASE.md").read_text()
+        smoke = (ROOT / "scripts" / "ark-smoke.py").read_text()
+
+        for token in (
+            "python -m pip install uv",
+            "uv run python scripts/ark-check.py",
+            "uv run python scripts/ark-smoke.py --require-uv",
+            "uv run python -m unittest discover -s tests",
+            "claude plugin validate .",
+            "Claude Code CLI not available; skipping plugin validate.",
+        ):
+            self.assertIn(token, workflow)
+
+        for token in (
+            "python scripts/ark-smoke.py --require-uv",
+            "uv run python scripts/ark-check.py",
+            "uv run python scripts/ark-smoke.py --require-uv",
+            "claude plugin validate .",
+            "/plugin install ark@ark",
+            "/plugin update ark@ark",
+        ):
+            self.assertIn(token, release)
+
+        self.assertIn("--require-uv", smoke)
+        self.assertIn("uv bare smoke was required", smoke)
+
     def test_package_name_placeholder_is_used_for_python_package(self) -> None:
         claude_template = (ROOT / "templates/project/CLAUDE.md.template").read_text()
         ruff_snippet = (ROOT / "templates/project/pyproject-ruff.snippet.toml").read_text()
