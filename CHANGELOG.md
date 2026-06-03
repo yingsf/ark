@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.12] - 2026-06-03
+
+### Fixed
+
+- Aligned `validation-entry.snippet.md` with the validation coverage contract.
+- Reduced decision record placeholder residue risk and added checks for snippet placeholder drift.
+
 ## [1.0.11] - 2026-06-03
 
 ### Changed

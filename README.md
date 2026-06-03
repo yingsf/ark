@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.11-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.12-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -299,6 +299,8 @@ ark-intake → ark-spec → ark-design → ark-solution（按需）→ ark-plan
 从 1.0.10 起，`ark-implement` 的批次、Sub-agent、Checkpoint 和注释/docstring 细则拆入 references；默认报告继续聚焦功能结果、验收方式、验证状态和下一步行动，减少过程噪音。
 
 从 1.0.11 起，`ark-review` 默认执行深度契约驱动代码审查：先提炼任务契约，再检查实现、测试、跨层口径、fail-closed 默认行为、安全输出和 craftsmanship，并把问题映射到后续 ARK Skill。
+
+从 1.0.12 起，验证记录片段与 validation 覆盖契约保持一致，决策记录片段也降低了标题和日期占位残留风险。
 
 `ark-implement` 的默认报告会先输出功能结果：当前完成状态、任务状态建议、本次能力变化、用户或调用方如何触发、可观察结果、当前限制和用户验收方式。Reality Check、注释/docstring、Checkpoint、Sub-agent 等过程细节仅在影响判断时输出。
 

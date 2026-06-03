@@ -1,7 +1,9 @@
-## Decision: <标题>
+## Decision
 
-- Date: YYYY-MM-DD
+- Title:
+- Date:
 - Status: proposed | accepted | superseded
+<!-- 写入真实决策标题和真实日期后再落盘；不得保留空标题、YYYY-MM-DD 或 <标题> 占位 -->
 
 ### 背景
 <!-- 这个决策的背景，当时面临什么问题或约束 -->

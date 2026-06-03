@@ -15,7 +15,7 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         version = plugin["version"]
-        self.assertEqual(version, "1.0.11")
+        self.assertEqual(version, "1.0.12")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
         self.assertIn(f"version-{version}-blue.svg", (ROOT / "README.md").read_text())
@@ -253,6 +253,34 @@ class ArkAssetTests(unittest.TestCase):
             "破坏原有主路径",
         ):
             self.assertIn(token, recheck_reference)
+
+    def test_snippet_contract_assets_exist(self) -> None:
+        validation_snippet = (
+            ROOT / "templates/snippets/validation-entry.snippet.md"
+        ).read_text()
+        decision_snippet = (
+            ROOT / "templates/snippets/decision-record.snippet.md"
+        ).read_text()
+        decide_skill = (ROOT / "skills/ark-decide/SKILL.md").read_text()
+
+        for token in (
+            "验证覆盖范围",
+            "覆盖任务",
+            "覆盖原因",
+            "未覆盖任务",
+            "不覆盖原因",
+            "阶段推进路径",
+        ):
+            self.assertIn(token, validation_snippet)
+
+        self.assertIn("- Title:", decision_snippet)
+        self.assertIn("- Date:", decision_snippet)
+        self.assertIn("不得保留空标题", decision_snippet)
+        self.assertNotIn("## Decision: <标题>", decision_snippet)
+        self.assertNotIn("- Date: YYYY-MM-DD", decision_snippet)
+
+        for token in ("真实标题", "真实日期", "YYYY-MM-DD", "<标题>"):
+            self.assertIn(token, decide_skill)
 
     def test_repository_checks_pass(self) -> None:
         result = subprocess.run(

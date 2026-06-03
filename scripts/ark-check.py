@@ -290,7 +290,11 @@ def check_placeholder_policy(errors: list[str]) -> None:
             "建议项 1",
             "无法验证项 1",
         ),
-        "templates/snippets/decision-record.snippet.md": ("方案 A", "方案 B"),
+        "templates/snippets/decision-record.snippet.md": (
+            "方案 A",
+            "方案 B",
+            "Date: YYYY-MM-DD",
+        ),
     }
     for rel, tokens in snippet_forbidden.items():
         text = read(ROOT / rel)
@@ -304,6 +308,7 @@ def check_subagent_and_validation_contracts(errors: list[str]) -> None:
     protocol = read(ROOT / "rules" / "sub-agent-protocol.md")
     validate = read(ROOT / "skills" / "ark-validate" / "SKILL.md")
     snippet = read(ROOT / "templates" / "snippets" / "validation-entry.snippet.md")
+    decision_snippet = read(ROOT / "templates" / "snippets" / "decision-record.snippet.md")
     next_skill = read(ROOT / "skills" / "ark-next" / "SKILL.md")
     claude_template = read(ROOT / "templates" / "project" / "CLAUDE.md.template")
 
@@ -314,9 +319,25 @@ def check_subagent_and_validation_contracts(errors: list[str]) -> None:
     for token in ("只验证和记录，不修复", "不得修改任何源代码文件", "保真度 L0-L5"):
         if token not in validate:
             fail(errors, f"ark-validate missing validation boundary token: {token}")
-    for token in ("保真度", "真实性锚点", "替身使用", "当前不可接受风险"):
+    for token in (
+        "保真度",
+        "真实性锚点",
+        "替身使用",
+        "当前不可接受风险",
+        "验证覆盖范围",
+        "覆盖任务",
+        "覆盖原因",
+        "未覆盖任务",
+        "不覆盖原因",
+        "阶段推进路径",
+    ):
         if token not in snippet:
             fail(errors, f"validation-entry.snippet.md missing token: {token}")
+    for token in ("Title:", "Date:", "不得保留空标题", "YYYY-MM-DD", "<标题>"):
+        if token not in decision_snippet:
+            fail(errors, f"decision-record.snippet.md missing token: {token}")
+    if "## Decision: <标题>" in decision_snippet or "- Date: YYYY-MM-DD" in decision_snippet:
+        fail(errors, "decision-record.snippet.md contains high-risk inline placeholder")
     if "只读取 docs，不更新任何 Artifact" not in next_skill:
         fail(errors, "ark-next should be read-only and recommend sync/handoff for writes")
     if "按对应 ARK Skill 的可写范围更新 Artifact" not in claude_template:
@@ -565,6 +586,7 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
             "从 1.0.9 起",
             "从 1.0.10 起",
             "从 1.0.11 起",
+            "从 1.0.12 起",
             "功能交付单元或可验证技术闭环",
             "功能结果",
             "用户验收方式",
