@@ -71,6 +71,7 @@ version: "1.0"
    - 活跃任务：<从 tasks.md 读取 Doing 状态的任务>
    - 待验证任务：<从 tasks.md 读取 Ready for validation 状态的任务>
    - 阻塞项：<从 tasks.md 读取 Blocked 状态的任务>
+   - 外部审查门禁：<从 handoff.md 读取 External Review Gate pending / findings-imported / recheck-pending 状态>
    - 真实性锚点：<是否已有最小真实闭环，或仍停留在替身/unknown>
 
 4. **推荐下一步**
@@ -79,6 +80,7 @@ version: "1.0"
    - 若 spec.md / design.md 的更新原因已经明确，可推荐 `/ark:ark-spec` 或 `/ark:ark-design`
    - 若专题方案、接口契约、集成或数据源元信息缺失/过期，可推荐 `/ark:ark-solution`
    - 若 tasks 推进较多但真实锚点仍缺失，优先推荐 `/ark:ark-sync` 或 `/ark:ark-plan`
+   - 若存在 External Review Gate pending、findings-imported 或 recheck-pending，优先推荐 `/ark:ark-review-gate`
    - 若存在 Ready for validation 项或 Done 项缺验证记录，优先推荐 `/ark:ark-validate` 或 `/ark:ark-sync`
    - 给出 1-2 个推荐，附理由
    - 等用户选择后激活对应 Skill
@@ -106,6 +108,7 @@ version: "1.0"
 - 活跃任务：<Doing 状态的任务列表>
 - 待验证任务：<Ready for validation 状态的任务列表>
 - 阻塞项：<Blocked 状态的任务列表>
+- 外部审查门禁：<pending / findings-imported / recheck-pending / 无>
 - 真实性锚点：<真实入口 / 真实依赖 / 数据源 / 契约状态>
 
 ### 2. 推荐下一步

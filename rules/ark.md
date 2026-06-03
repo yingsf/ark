@@ -81,6 +81,7 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 | 实现已有 plan/task/batch、按计划继续开发 | ark-implement |
 | bug、报错、异常、失败 | ark-debug |
 | 继续、推进、不确定当前该做什么 | ark-next |
+| 外部审查、跨智能体审查、Codex review、review gate、审查门禁 | ark-review-gate |
 | 审查、review、检查代码 | ark-review |
 | 重构、优化结构 | ark-refactor |
 | 文档、README、说明 | ark-docs |
@@ -93,6 +94,16 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 若未能自动触发：输出推荐入口（如"建议使用 /ark:ark-debug 排查此问题"）。
 意图不明确时：展示当前 Artifact 状态和可选路径，请用户确认。
 安全约束：每个 Skill 内部边界不受触发方式影响。
+
+## 外部审查门禁
+
+当用户采用跨智能体审查流程时，ARK 不要求每个 task 都立即进入完整外部 review。应使用 `/ark:ark-review-gate` 按 `${CLAUDE_PLUGIN_ROOT}/rules/external-review-gate.md` 判断：
+
+- 高风险 task：立即外部审查
+- 低风险同闭环 task：进入小批量 batch，最多 3 个 task / 90 分钟 / 1 个功能闭环 / 500 行核心 diff
+- 修复后复检：只复查上一轮 findings 和明显回归，不重新扩大范围
+
+外部 review 通过不替代 `/ark:ark-validate`；Done 仍必须有 validation 记录。
 
 ## 旧项目升级
 

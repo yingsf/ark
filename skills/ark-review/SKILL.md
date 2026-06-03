@@ -14,6 +14,8 @@ version: "1.0"
 
 **与 `/ark:ark-validate` 的区别**：review 评估代码改动本身的质量、风险和契约符合性；validate 记录已执行验证的证据。两者职责不同，不应相互替代。
 
+**与 `/ark:ark-review-gate` 的区别**：review 是 Claude Code 内部深度契约审查；review-gate 组织跨智能体外部审查门禁，决定何时去 Codex/其他 agent 审查、生成审查包、导入 findings 和生成定向复检包。若用户明确采用跨智能体审查流程，`ark-review` 不要求成为每个 task 的必经步骤。
+
 ## 执行边界
 
 - 本 Skill 应由当前 `/ark:ark-review` Skill 直接执行
@@ -21,6 +23,7 @@ version: "1.0"
 - 外部 agent 的结果只能作为输入材料引用，不能替代本 Skill 的固定输出格式与分级标准
 - Review 只观察、判断和建议，不直接修代码，不直接写入 `docs/ark/validation.md`
 - Critical / Major finding 可提出 `tasks.md` 待新增条目，但不直接写入 `tasks.md`
+- 外部 Codex/其他 agent 的审查节奏和 findings 导入由 `/ark:ark-review-gate` 组织；本 Skill 不维护 external review pending batch
 
 ## 默认审查资料
 

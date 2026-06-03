@@ -16,7 +16,7 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         version = plugin["version"]
-        self.assertEqual(version, "1.0.12")
+        self.assertEqual(version, "1.0.13")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
         readme = (ROOT / "README.md").read_text()
@@ -349,6 +349,54 @@ class ArkAssetTests(unittest.TestCase):
             "破坏原有主路径",
         ):
             self.assertIn(token, recheck_reference)
+
+    def test_external_review_gate_contract_assets_exist(self) -> None:
+        gate_skill = (ROOT / "skills/ark-review-gate/SKILL.md").read_text()
+        gate_rule = (ROOT / "rules/external-review-gate.md").read_text()
+        implement_skill = (ROOT / "skills/ark-implement/SKILL.md").read_text()
+        debug_skill = (ROOT / "skills/ark-debug/SKILL.md").read_text()
+        validate_skill = (ROOT / "skills/ark-validate/SKILL.md").read_text()
+        handoff_template = (ROOT / "templates/artifacts/handoff.template.md").read_text()
+        memory_template = (ROOT / "templates/project/MEMORY.md.template").read_text()
+        readme = (ROOT / "README.md").read_text()
+
+        for token in (
+            "高风险不过夜，低风险不单审",
+            "immediate",
+            "batch-candidate",
+            "batch-ready",
+            "blocked",
+            "prepare",
+            "import",
+            "recheck",
+            "必须修复",
+            "可延期",
+            "不处理",
+            "External Review Gate",
+        ):
+            self.assertIn(token, gate_skill)
+
+        for token in (
+            "高风险不过夜",
+            "低风险不单审",
+            "小批量有上限",
+            "复检不扩域",
+            "review 不替代 validate",
+            "外部审查 evidence",
+        ):
+            self.assertIn(token, gate_rule)
+
+        self.assertIn("External Review Gate 轻量评估", implement_skill)
+        self.assertIn("/ark:ark-review-gate prepare", implement_skill)
+        self.assertIn("/ark:ark-review-gate import", debug_skill)
+        self.assertIn("只修复必须修复项", debug_skill)
+        self.assertIn("external review pending", validate_skill)
+        self.assertIn("Done 还必须有外部审查 evidence", validate_skill)
+        self.assertIn("## External Review Gate", handoff_template)
+        self.assertIn("external-review-gate.md", memory_template)
+        self.assertIn("23 个专责 Skill", readme)
+        self.assertIn("/ark:ark-review-gate", readme)
+        self.assertIn("ARK 内置 13 个规则文件", readme)
 
     def test_snippet_contract_assets_exist(self) -> None:
         validation_snippet = (

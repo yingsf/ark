@@ -39,6 +39,7 @@ version: "1.0"
 ## 输出
 - 已完成的代码修改
 - 功能结果报告：本次新增/改变的能力、触发方式、可观察结果、限制和与原目标的对应关系
+- 外部审查门禁建议：immediate / batch-candidate / batch-ready / blocked
 - 对假设、限制、延期项的说明
 - 必要时对 plan / tasks / decisions 的回写
 - 对后续 test / validate 的建议
@@ -110,9 +111,10 @@ version: "1.0"
 6. 在修改完成点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行）；若工具修改了文件，重新读取当前内容或 diff。
 7. 检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求。
 8. 输出功能结果：先说明新增/改变的能力、触发方式、可观察结果、限制和与原目标的对应关系，再说明文件修改。
-9. 执行 spec/design/extension 漂移检查：只识别本次实现是否改变需求、设计现实或扩展文档现实，发现后在输出中建议对应 Skill，不直接回写 spec/design 或扩展文档。
-10. 若实现完成但尚未验证，tasks.md 只能更新为 Ready for validation，不得标记 Done。
-11. 完成当前目标后停止，建议 `/ark:ark-test` 和 `/ark:ark-validate`；如需继续下一个任务，请用户再次执行 `/ark:ark-implement`。
+9. 执行 External Review Gate 轻量评估：按 `${CLAUDE_PLUGIN_ROOT}/rules/external-review-gate.md` 判断当前 task 是 `immediate`、`batch-candidate`、`batch-ready` 还是 `blocked`。
+10. 执行 spec/design/extension 漂移检查：只识别本次实现是否改变需求、设计现实或扩展文档现实，发现后在输出中建议对应 Skill，不直接回写 spec/design 或扩展文档。
+11. 若实现完成但尚未验证，tasks.md 只能更新为 Ready for validation，不得标记 Done。
+12. 完成当前目标后停止，若 gate 为 `immediate` 或 `batch-ready`，优先建议 `/ark:ark-review-gate prepare`；若 gate 为 `batch-candidate`，说明可继续下一个同闭环低风险 task；否则建议 `/ark:ark-test` 和 `/ark:ark-validate`。
 
 ### Medium / Large 任务
 1. 读取相关代码和 Artifact，确认当前 plan/tasks/validation/handoff 状态有效。
@@ -126,7 +128,7 @@ version: "1.0"
 9. **批次评估**：若出现批次触发信号（见下方「批次实施机制」），拆分为实施批次并只完成当前批次。否则正常执行。
 10. 选择最小可行修改：小步推进、局部修改、可验证、可回退。每个批次内的修改应构成一个相对完整的子问题，并尽量靠近最小真实闭环。
 11. 避免混入无关改动（风格清理、无关重命名、大面积重构）。
-12. **批次执行**：每完成一个批次后，在稳定点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行），检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求，输出功能结果，执行 spec/design/extension 漂移检查，输出批次完成状态，更新 tasks.md 记录批次进展。然后建议下一批次或停止。
+12. **批次执行**：每完成一个批次后，在稳定点执行局部质量整理（ruff check --fix + ruff format 仅限已改 Python 文件，pyright 按项目能力执行），检查新增/修改的公共接口、关键方法和复杂逻辑是否符合注释/docstring 要求，输出功能结果，执行 External Review Gate 轻量评估，执行 spec/design/extension 漂移检查，输出批次完成状态，更新 tasks.md 记录批次进展。然后按 gate 结论建议外部审查、继续同闭环低风险 task 或停止。
 13. 实施后检查是否需要回写 Artifact（见下方回写规则）。
 14. 若当前会话需要中断，优先完成当前批次再执行 `/ark:ark-handoff`。若处于批次中间且无法完成，handoff 应记录当前批次进展。
 15. 完成当前目标后停止，建议 `/ark:ark-test` 和 `/ark:ark-validate`；如需继续下一个任务，请用户再次执行 `/ark:ark-implement`。
@@ -243,6 +245,9 @@ Checkpoint 细则见 `${CLAUDE_PLUGIN_ROOT}/skills/ark-implement/references/batc
 - 若本次无直接用户可见功能变化，必须明确写明，并说明它支撑的内部能力或间接价值
 - 若实现结果与原目标存在偏差，必须先在功能结果中说明，不得只放在限制项或 Artifact 回写中
 - 默认报告只输出影响用户判断、验收和下一步行动的内容；过程细节按条件输出
+- 默认输出必须包含外部审查门禁，说明 Gate 结论、风险等级、命中规则、当前 batch、是否建议继续下一个 task 和下一步建议
+- Gate 结论为 `immediate` 或 `batch-ready` 时，不应建议继续下一个 task，应建议 `/ark:ark-review-gate prepare`
+- Gate 结论为 `batch-candidate` 时，只能建议继续同一功能闭环内的低风险 task，且最多遵守 3 个 task / 90 分钟 / 1 个功能闭环 / 500 行核心 diff 的上限
 - Sub-agent 状态仅在已启用、失败、降级或影响可信度时输出
 - 注释与 docstring 详情仅在新增/修改对象需要说明、存在例外、未满足要求或用户关注代码规范时输出
 - Reality Check 详情仅在涉及真实依赖、真实数据源、替身边界、契约风险或可信度变化时输出；普通场景压缩到验证状态或风险与回写中
@@ -300,7 +305,15 @@ Checkpoint 细则见 `${CLAUDE_PLUGIN_ROOT}/skills/ark-implement/references/batc
 - 真实锚点 / 替身边界摘要：
 - 建议下一步：
 
-### 4. 风险与回写
+### 4. 外部审查门禁
+- Gate 结论：immediate / batch-candidate / batch-ready / blocked
+- 风险等级：High / Medium / Low
+- 命中规则：
+- 当前 batch：
+- 是否建议继续下一个 task：
+- 下一步建议：
+
+### 5. 风险与回写
 - 假设 / 限制 / 延期项：
 - Artifact 回写：
 - 需要更新 spec/design/decisions/扩展文档：

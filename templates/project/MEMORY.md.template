@@ -13,6 +13,7 @@
 - `${CLAUDE_PLUGIN_ROOT}/rules/extension-doc-policy.md` - 扩展文档承载规则
 - `${CLAUDE_PLUGIN_ROOT}/rules/artifact-placeholder-policy.md` - Artifact 模板占位与实质性内容判定
 - `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md` - Sub-agent 写权限隔离
+- `${CLAUDE_PLUGIN_ROOT}/rules/external-review-gate.md` - 跨智能体外部审查门禁
 - `${CLAUDE_PLUGIN_ROOT}/rules/task-sizing-summary.md` - 任务规模快速判断
 
 ## 使用说明

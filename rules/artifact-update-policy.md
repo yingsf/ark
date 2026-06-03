@@ -92,6 +92,7 @@
 以下情况可触发更新建议：
 - `/ark:ark-sync`：handoff 与当前阶段明显不符
 - `/ark:ark-next`：handoff 是推荐下一步的主要信息来源，若过期应标注
+- `/ark:ark-review-gate`：记录 external review pending batch、gate 结论、findings 导入状态和下一步复检动作
 
 **不应用于**：代替 plan 作为主执行文档 · 代替 tasks 管理状态
 
@@ -230,9 +231,15 @@
 - 发现严重问题导致计划需要调整 → 建议更新 `docs/ark/plan.md`
 - review 结论影响验证策略 → 建议更新 `docs/ark/validation.md`
 
+### `/ark:ark-review-gate`
+- 只组织跨智能体外部审查门禁，不修代码，不写 `docs/ark/validation.md`，不把 task 标记 Done
+- 可在 `docs/ark/handoff.md` 记录 External Review Gate 状态：pending task、batch 范围、gate 结论、findings 导入状态、recheck 状态和下一步
+- 导入外部 findings 后，只输出“必须修复 / 可延期 / 不处理”分类和 `/ark:ark-debug` 修复输入，不直接修改源代码
+
 ### `/ark:ark-validate`
 - 真实执行验证并写入 `docs/ark/validation.md`
 - 验证通过且能对应到 `tasks.md` 的 Ready for validation 项 → 可将任务迁移到 Done，并写入 validation 章节引用
+- 若 task 已进入 external review gate，必须有外部 review 通过或 findings 修复并复检通过 evidence，才能从 Ready for validation 迁移到 Done
 - 验证失败 → 保持 Ready for validation 或转 Blocked，记录失败事实、复现条件和建议 `/ark:ark-debug`
 
 ### `/ark:ark-sync`

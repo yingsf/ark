@@ -20,6 +20,7 @@ version: "1.0"
 - 某个失败需要根因分析
 - 已有缺陷现象或复现路径
 - `/ark:ark-validate` 发现验证失败，需要定位和修复问题
+- `/ark:ark-review-gate import` 已导入外部审查 findings，需要按“必须修复”项做最小修复
 
 ## 不适用场景
 - 没有任何具体症状
@@ -27,6 +28,7 @@ version: "1.0"
 
 ## 输入
 - bug 描述、观察到的症状、复现步骤（如有）、相关代码与日志、最近变更（如已知）
+- 外部 review findings 分类（如来自 `/ark:ark-review-gate import`）：只处理“必须修复”，不顺手处理“可延期”或“不处理”项
 
 ## 信息收集策略
 
@@ -66,10 +68,12 @@ version: "1.0"
 3. 识别相关执行路径或模块边界。
 4. 基于证据提出根因假设，明确标注哪些是假设、哪些已确认。
 5. 限定影响范围与变更边界：最小修复优先，不得顺带清理无关代码。
-6. 形成修复方案，必须包含对应验证方式（如何确认已修复）。
-7. 修复完成后建议执行 `/ark:ark-test` 补充回归测试。
-8. 检查是否需要回写 Artifact（见下方回写规则）。
-9. 执行修复后 spec/design/extension 漂移检查：只识别 bug 修复是否改变需求、设计现实或扩展文档现实，发现后建议对应 Skill，不直接回写 spec/design 或扩展文档。
+6. 如果输入来自外部 review findings，先按“必须修复 / 可延期 / 不处理”复核边界；只修复必须修复项，除非用户明确要求，不处理延期项。
+7. 形成修复方案，必须包含对应验证方式（如何确认已修复）。
+8. 修复完成后建议执行 `/ark:ark-test` 补充回归测试。
+9. 若修复来自 external review gate，建议 `/ark:ark-review-gate recheck` 生成定向复检包，不建议直接重新全量 review。
+10. 检查是否需要回写 Artifact（见下方回写规则）。
+11. 执行修复后 spec/design/extension 漂移检查：只识别 bug 修复是否改变需求、设计现实或扩展文档现实，发现后建议对应 Skill，不直接回写 spec/design 或扩展文档。
 
 ## 回写规则
 
@@ -100,6 +104,8 @@ version: "1.0"
 - 必须区分假设与已确认事实
 - 修复建议必须绑定验证思路（如何证明 bug 已修复）
 - 若 bug 与真实依赖、真实数据或公开契约相关，验证思路必须区分真实验证与替身验证
+- 来自外部 review gate 的 findings 必须保持修复边界：只修复“必须修复”项；“可延期”项应输出后续 task 建议或明确不处理
+- 外部 findings 修复后，默认建议 `/ark:ark-review-gate recheck` 做定向复检，而不是重新扩大审查范围
 
 ## 停止条件
 - 根因已足够清晰，可进入修复
@@ -111,8 +117,13 @@ version: "1.0"
 ### 2. 根因分析（区分假设 vs 已确认）
 ### 3. 影响范围
 ### 4. 修复方案（附验证方式）
-### 5. 建议下一步（通常：`/ark:ark-test` 补充回归 → `/ark:ark-validate`）
-### 6. Artifact 回写
+### 5. 外部 findings 处理（如适用）
+- 必须修复：
+- 可延期：
+- 不处理：
+- 建议复检：`/ark:ark-review-gate recheck`
+### 6. 建议下一步（通常：`/ark:ark-test` 补充回归 → `/ark:ark-review-gate recheck`（如适用）→ `/ark:ark-validate`）
+### 7. Artifact 回写
 - `plan.md` / `tasks.md` / `decisions.md`：已更新 / 建议更新 / 无需更新
 - `spec.md`：若发现漂移，建议 `/ark:ark-spec` 并说明原因；无漂移可省略
 - `design.md`：若发现漂移，建议 `/ark:ark-design` 并说明原因；无漂移可省略

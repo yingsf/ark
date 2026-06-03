@@ -28,11 +28,13 @@ version: "1.0"
 
 ## 输入
 - 当前任务目标、`docs/ark/plan.md`、`docs/ark/tasks.md`、`docs/ark/validation.md`、当前代码与文档状态
+- `docs/ark/handoff.md` 中已有 External Review Gate 记录，外部审查 pending batch 或 findings 状态（如有）
 - 项目画像、核心命题与不变量、扩展文档索引和真实性锚点状态（如存在）
 
 ## 输出
 - 当前目标、当前阶段判断、已完成内容、未完成内容、风险/阻塞、推荐下一步、关键文件列表
 - Artifact 和扩展文档可信度、真实性锚点状态、下一次必须继承的结论
+- External Review Gate 状态：pending task、batch 范围、外部审查状态和下一步（如采用跨智能体审查）
 
 ## 相关 Artifact
 - `docs/ark/handoff.md`
@@ -44,8 +46,9 @@ version: "1.0"
 4. 若后续恢复时可能踩坑，优先写在风险与阻塞里。
 5. 推荐下一步应尽量具体。
 6. 记录扩展文档可信度和真实性锚点状态，尤其是仍为替身的依赖、数据或契约。
-7. 提炼下一次必须继承的结论：核心命题与不变量、validation 未覆盖项、已定 decisions、不要重复讨论的问题。
-8. 列出关键文件帮助快速恢复上下文。
+7. 若存在 external review pending batch、findings-imported 或 recheck-pending，必须记录 External Review Gate 状态，避免下次恢复时误把任务当作可 Done。
+8. 提炼下一次必须继承的结论：核心命题与不变量、validation 未覆盖项、已定 decisions、不要重复讨论的问题。
+9. 列出关键文件帮助快速恢复上下文。
 
 ## 验证要求
 - handoff 必须与当前真实状态一致
@@ -59,6 +62,7 @@ version: "1.0"
 - plan / tasks 与代码状态脱节 → 推荐 `/ark:ark-sync`
 - 扩展文档或真实性锚点状态不可信 → 推荐 `/ark:ark-sync`
 - 还有明确实现项未完成 → 推荐 `/ark:ark-implement`
+- 存在 external review pending / findings-imported / recheck-pending → 推荐 `/ark:ark-review-gate prepare`、`/ark:ark-debug` 或 `/ark:ark-review-gate recheck`
 
 ## 固定输出格式
 
@@ -76,10 +80,16 @@ version: "1.0"
 ### 7. Artifact 信任状态
 ### 8. 扩展文档信任状态
 ### 9. 真实性锚点状态
-### 10. 恢复顺序
-### 11. 推荐下一步
-### 12. 推荐 Skill
-### 13. 恢复提示
+### 10. External Review Gate
+- Gate 结论：
+- Pending task：
+- Batch 范围：
+- 外部审查状态：
+- 下一步：
+### 11. 恢复顺序
+### 12. 推荐下一步
+### 13. 推荐 Skill
+### 14. 恢复提示
 
 ## 备注
 handoff 的核心价值是「未来继续时不用重新想一遍现在发生了什么」。

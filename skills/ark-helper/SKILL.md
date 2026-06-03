@@ -62,6 +62,7 @@ ARK 通过路由倾向工作：描述你的任务，Claude 会优先倾向匹配
 - 新需求 / 不确定要做什么 → ark-intake
 - 修 bug / 排查错误 → ark-debug
 - 写代码 / 实现功能 → ark-implement
+- 跨智能体外部审查门禁 / Codex 审查包 / findings 导入 → ark-review-gate
 - 审查代码变更 → ark-review
 - 不确定下一步 → ark（查看状态）或 ark-next（裁决下一步）
 - 写专题方案、接口契约、集成或数据源元信息 → ark-solution
@@ -99,6 +100,12 @@ ARK 通过路由倾向工作：描述你的任务，Claude 会优先倾向匹配
 - `ark-design` 维护 `docs/ark/design.md`，负责全局设计摘要、模块边界和扩展文档索引。
 - `ark-solution` 维护项目自有扩展文档，负责专题详细方案、详细设计、接口契约、集成说明和数据源元信息。
 - `ark-solution` 不直接修改 `docs/ark/*`；如果全局摘要或索引需要同步，它会建议后续执行 `ark-design`。
+
+### ark-review 和 ark-review-gate 有什么区别？
+
+- `ark-review` 是 Claude Code 内部深度契约代码审查。
+- `ark-review-gate` 组织跨智能体外部审查流程：判断当前 task 是立即去外部审查，还是进入同闭环低风险 batch；生成外部审查包；导入外部 findings；生成修复后的定向复检包。
+- 如果你采用外部 Codex 审查，推荐流程是 `ark-implement → ark-review-gate prepare → 外部审查 → ark-review-gate import → ark-debug → ark-review-gate recheck → ark-validate`。
 
 ### ARK 会管理 data 目录吗？
 

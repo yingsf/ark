@@ -54,6 +54,16 @@ YYYY-MM-DD
 - 真实依赖 / 数据源 / 契约：
 - 替身边界：
 
+## External Review Gate
+<!-- 未采用跨智能体外部审查时写“未启用”。存在 pending batch 时必须记录真实状态。-->
+- Gate 结论：immediate / batch-candidate / batch-ready / blocked / 未启用
+- 风险等级：High / Medium / Low / 不适用
+- Pending task：
+- Batch 范围：
+- 触发上限：3 tasks / 90 minutes / 1 feature loop / 500 core diff lines / user requested / none
+- 外部审查状态：pending / package-prepared / findings-imported / recheck-pending / passed / blocked / 不适用
+- 下一步：
+
 ## 恢复顺序
 <!-- 明确下次会话的恢复动作序列，比"关键文件"更强 -->
 <!-- 真实 handoff 时写入恢复动作序列；不要保留模板占位 -->

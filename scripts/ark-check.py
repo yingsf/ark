@@ -485,7 +485,7 @@ def check_stage_contracts(errors: list[str]) -> None:
 
     readme = read(ROOT / "README.md")
     for token in (
-        "22 个专责 Skill",
+        "23 个专责 Skill",
         "/ark:ark-stage",
         "closed-with-risk",
         "Carryover Gates",
@@ -571,6 +571,135 @@ def check_review_contracts(errors: list[str]) -> None:
             fail(errors, f"{recheck_rel} missing recheck token: {token}")
 
 
+def check_external_review_gate_contracts(errors: list[str]) -> None:
+    checks = {
+        "skills/ark-review-gate/SKILL.md": (
+            "immediate",
+            "batch-candidate",
+            "batch-ready",
+            "blocked",
+            "高风险不过夜，低风险不单审",
+            "3 个 task",
+            "90 分钟",
+            "1 个功能闭环",
+            "500 行核心 diff",
+            "prepare",
+            "import",
+            "recheck",
+            "必须修复",
+            "可延期",
+            "不处理",
+            "External Review Gate",
+            "${CLAUDE_PLUGIN_ROOT}/rules/external-review-gate.md",
+        ),
+        "rules/external-review-gate.md": (
+            "高风险不过夜",
+            "低风险不单审",
+            "小批量有上限",
+            "复检不扩域",
+            "review 不替代 validate",
+            "immediate",
+            "batch-candidate",
+            "batch-ready",
+            "blocked",
+            "外部审查 evidence",
+        ),
+        "skills/ark-implement/SKILL.md": (
+            "外部审查门禁",
+            "External Review Gate 轻量评估",
+            "immediate",
+            "batch-candidate",
+            "batch-ready",
+            "blocked",
+            "/ark:ark-review-gate prepare",
+        ),
+        "skills/ark-debug/SKILL.md": (
+            "/ark:ark-review-gate import",
+            "只修复必须修复项",
+            "/ark:ark-review-gate recheck",
+            "外部 findings 处理",
+        ),
+        "skills/ark-validate/SKILL.md": (
+            "外部审查 evidence",
+            "external review pending",
+            "/ark:ark-review-gate recheck",
+            "Done 还必须有外部审查 evidence",
+        ),
+        "skills/ark-review/SKILL.md": (
+            "与 `/ark:ark-review-gate` 的区别",
+            "跨智能体外部审查门禁",
+            "不要求成为每个 task 的必经步骤",
+        ),
+        "skills/ark-next/SKILL.md": (
+            "External Review Gate pending",
+            "findings-imported",
+            "recheck-pending",
+            "/ark:ark-review-gate",
+        ),
+        "skills/ark-handoff/SKILL.md": (
+            "External Review Gate",
+            "pending task",
+            "recheck-pending",
+            "/ark:ark-review-gate recheck",
+        ),
+        "skills/ark-helper/SKILL.md": (
+            "ark-review-gate",
+            "跨智能体外部审查流程",
+            "生成外部审查包",
+        ),
+        "skills/ark/SKILL.md": (
+            "外部审查门禁",
+            "External Review Gate pending",
+            "/ark:ark-review-gate",
+        ),
+        "rules/ark.md": (
+            "外部审查门禁",
+            "ark-review-gate",
+            "高风险 task",
+            "低风险同闭环 task",
+        ),
+        "rules/artifact-update-policy.md": (
+            "/ark:ark-review-gate",
+            "External Review Gate 状态",
+            "findings 导入状态",
+        ),
+        "templates/artifacts/handoff.template.md": (
+            "## External Review Gate",
+            "Gate 结论",
+            "外部审查状态",
+            "3 tasks / 90 minutes / 1 feature loop / 500 core diff lines",
+        ),
+        "templates/project/MEMORY.md.template": (
+            "external-review-gate.md",
+            "跨智能体外部审查门禁",
+        ),
+        "skills/ark-init/references/fallback-templates.md": (
+            "external-review-gate.md",
+            "跨智能体外部审查门禁",
+        ),
+        "README.md": (
+            "23 个专责 Skill",
+            "/ark:ark-review-gate",
+            "跨智能体外部审查",
+            "高风险 task 立即外部审查",
+            "低风险、同一功能闭环内的 task 可以小批量审查",
+            "ARK 内置 13 个规则文件",
+            "external-review-gate.md",
+            "从 1.0.13 起",
+        ),
+    }
+
+    for rel, tokens in checks.items():
+        path = ROOT / rel
+        if not path.exists():
+            fail(errors, f"missing external review gate asset: {rel}")
+            continue
+        text = read(path)
+        for token in tokens:
+            if token not in text:
+                fail(errors, f"{rel} missing external review gate token: {token}")
+
+
 def check_execution_efficiency_contracts(errors: list[str]) -> None:
     checks = {
         "skills/ark-tasks/SKILL.md": (
@@ -654,10 +783,12 @@ def check_execution_efficiency_contracts(errors: list[str]) -> None:
             "从 1.0.10 起",
             "从 1.0.11 起",
             "从 1.0.12 起",
+            "从 1.0.13 起",
             "功能交付单元或可验证技术闭环",
             "功能结果",
             "用户验收方式",
             "同闭环任务可以作为明确 batch",
+            "外部审查门禁",
         ),
     }
 
@@ -951,6 +1082,23 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "修复后会通过",
             "破坏原有主路径",
         ],
+        "skills/ark-review-gate/SKILL.md": [
+            "高风险不过夜，低风险不单审",
+            "immediate",
+            "batch-candidate",
+            "batch-ready",
+            "prepare",
+            "import",
+            "recheck",
+            "External Review Gate",
+        ],
+        "rules/external-review-gate.md": [
+            "高风险不过夜",
+            "低风险不单审",
+            "小批量有上限",
+            "复检不扩域",
+            "review 不替代 validate",
+        ],
         "skills/ark-sync/SKILL.md": [
             "变更传播判断",
             "核心命题与不变量",
@@ -1081,6 +1229,7 @@ def main(argv: list[str] | None = None) -> int:
     check_subagent_and_validation_contracts(errors)
     check_stage_contracts(errors)
     check_review_contracts(errors)
+    check_external_review_gate_contracts(errors)
     check_execution_efficiency_contracts(errors)
     check_contract_fixtures(errors)
     check_release_and_ci_assets(errors)

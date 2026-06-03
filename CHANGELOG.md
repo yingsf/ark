@@ -2,14 +2,23 @@
 
 ## Unreleased
 
+## [1.0.13] - 2026-06-03
+
+### Added
+
+- Added `ark-review-gate` for cross-agent external review gating, Codex/other-agent review packages, findings import, and focused recheck packages.
+- Added `external-review-gate.md` to define immediate review, low-risk batch candidates, batch-ready limits, findings classification, and validation evidence requirements.
+- Added a one-command release gate script with strict changelog release checks and optional Claude plugin validation.
+- Added a FastAPI `/hello` endpoint skill smoke that verifies a minimal ARK Artifact loop with an isolated temporary uv cache.
+
 ### Changed
 
-- Added a one-command release gate script with strict changelog release checks and optional Claude plugin validation.
-- Strengthened version, README badge, marketplace, and changelog consistency checks.
+- Updated `ark-implement` reports with an external review gate recommendation so high-risk tasks stop for review and low-risk same-loop tasks can batch.
+- Updated `ark-debug` to treat imported external findings as bounded repair input and recommend focused recheck after fixes.
+- Updated `ark-validate` so tasks under external review gate cannot move to Done without external review or recheck evidence.
+- Updated `ark-review`, `ark-next`, `ark-handoff`, README, MEMORY templates, and Artifact policies for the new cross-agent review workflow.
+- Strengthened version, README badge, marketplace, changelog, CI, release checklist, uv smoke, and skill smoke checks.
 - Improved `ark-skill-smoke.py` failure output with a focused failure summary, failed command, and inspection paths.
-- Added a FastAPI `/hello` endpoint skill smoke that verifies a minimal ARK Artifact loop with an isolated temporary uv cache.
-- Added CI and release checklist gates for the new skill smoke.
-- Strengthened release checks with required uv smoke coverage.
 
 ## [1.0.12] - 2026-06-03
 

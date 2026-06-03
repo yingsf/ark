@@ -41,6 +41,7 @@ validate 的职责是验证实现是否满足目标，将验证状态如实记�
 ## 输入
 - `/ark:ark-test` 的执行结果摘要（如有）
 - 已修改代码或文档、当前任务目标、相关 Artifact
+- 外部审查 evidence（如采用 `/ark:ark-review-gate`）：审查包、外部 Verdict、findings 分类、修复和复检结果
 - 项目画像、真实性锚点、相关扩展文档、数据源元信息（如有）
 
 ## 相关 Artifact
@@ -138,10 +139,11 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 6. 记录未覆盖内容。
 7. 记录建议验证但未执行项（说明原因）。
 8. 记录暂时无法验证项（说明受限原因）。
-9. 评估验证强度：弱（主要依赖手工或替身）/ 中（有自动化但真实锚点覆盖不全）/ 强（自动化覆盖主要路径 + 真实锚点或最小真实闭环）。
-10. **如果发现验证失败**：记录失败项、错误信息、复现条件，不得修复代码，在输出中推荐 `/ark:ark-debug`。
-11. 写入 `docs/ark/validation.md`。
-12. 若验证通过且能对应到 `tasks.md` 中的 Ready for validation 项，可将对应任务迁移到 Done，并写入 validation 记录引用；多个任务共享同一验证记录时，必须确认它们同属一个功能闭环、同一 batch、同一真实入口或同一公开契约。若验证失败，保持 Ready for validation 或转 Blocked，并记录失败事实和建议 `/ark:ark-debug`。
+9. 若 task 命中 external review gate，检查是否已有外部审查通过证据，或 findings 已修复并经定向复检通过。
+10. 评估验证强度：弱（主要依赖手工或替身）/ 中（有自动化但真实锚点覆盖不全）/ 强（自动化覆盖主要路径 + 真实锚点或最小真实闭环）。
+11. **如果发现验证失败**：记录失败项、错误信息、复现条件，不得修复代码，在输出中推荐 `/ark:ark-debug`。
+12. 写入 `docs/ark/validation.md`。
+13. 若验证通过且能对应到 `tasks.md` 中的 Ready for validation 项，可将对应任务迁移到 Done，并写入 validation 记录引用；多个任务共享同一验证记录时，必须确认它们同属一个功能闭环、同一 batch、同一真实入口或同一公开契约。若采用 external review gate，但外部审查证据缺失或未通过，即使本地测试通过，也必须保持 Ready for validation，并记录 `external review pending`。若验证失败，保持 Ready for validation 或转 Blocked，并记录失败事实和建议 `/ark:ark-debug`。
 
 ## 验证要求
 - 严格区分事实、建议与限制
@@ -157,6 +159,8 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 - Ready for validation → Done 迁移必须有真实验证记录支撑；不得仅凭实现完成或计划验证将任务标记为 Done
 - Done 任务必须引用 `validation.md` 中的具体记录；多个 Done 任务可引用同一条记录，但该记录必须列出覆盖任务、覆盖原因和未覆盖任务；验证失败时不得写成 Done
 - 不得用一条宽泛验证记录覆盖无关任务；覆盖多个任务时，必须说明同一功能闭环、同一 batch、同一真实入口或同一公开契约的依据
+- 若 task 已进入 external review gate，Done 还必须有外部审查 evidence：外部 review 通过，或 findings 已修复并由 `/ark:ark-review-gate recheck` 生成的定向复检通过
+- 外部审查 pending 时只能记录“本地验证通过但 external review pending”，不得把任务迁移到 Done
 
 ## 停止条件
 - 当前验证状态已可读、可信、可追踪
@@ -178,6 +182,13 @@ sub-agent 遵循 `${CLAUDE_PLUGIN_ROOT}/rules/sub-agent-protocol.md`。
 - 保真度：L0 / L1 / L2 / L3 / L4 / L5
 - 真实性锚点：真实入口 / 真实依赖 / 真实数据源 / 公开契约 / 无直接锚点
 - 替身使用：无 / mock / fake / in-memory / 合成数据（如有，说明退出条件）
+### 2.5 外部审查 evidence（如适用）
+- Gate 结论：
+- 审查类型：single-task / batch
+- 外部 Verdict：pass / needs-fix / blocked / pending
+- Findings 状态：无 / 已修复并复检通过 / 仍待修复
+- 覆盖任务：
+- 证据来源：
 ### 3. 未覆盖内容
 ### 4. 建议验证但未执行（附原因）
 ### 5. 暂时无法验证项（附受限原因）

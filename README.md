@@ -4,7 +4,7 @@
 
 **Artifact-driven Reactive Kernel**
 
-[![Version](https://img.shields.io/badge/version-1.0.12-blue.svg)](https://github.com/yingsf/ark)
+[![Version](https://img.shields.io/badge/version-1.0.13-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -43,7 +43,7 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 ## 核心能力
 
-- **22 个专责 Skill**：入口、初始化、澄清、分析、规划、扩展方案、实施、验证、恢复、阶段治理和文档各有明确边界。
+- **23 个专责 Skill**：入口、初始化、澄清、分析、规划、扩展方案、实施、外部审查门禁、验证、恢复、阶段治理和文档各有明确边界。
 - **自动路由倾向**：用户直接描述任务时，规则会优先引导 Claude 选择对应 ARK Skill；这是倾向，不是运行时强保证。
 - **显式智能入口**：`/ark:ark` 会读取当前 Artifact 状态，判断阶段并推荐下一步。
 - **Sub-agent 支持**：analyze/validate 可用只读或证据收集 agent，implement 可用 batch worker，并通过 write set 审计防止越界写入。
@@ -302,7 +302,9 @@ ark-intake → ark-spec → ark-design → ark-solution（按需）→ ark-plan
 
 从 1.0.12 起，验证记录片段与 validation 覆盖契约保持一致，决策记录片段也降低了标题和日期占位残留风险。
 
-`ark-implement` 的默认报告会先输出功能结果：当前完成状态、任务状态建议、本次能力变化、用户或调用方如何触发、可观察结果、当前限制和用户验收方式。Reality Check、注释/docstring、Checkpoint、Sub-agent 等过程细节仅在影响判断时输出。
+从 1.0.13 起，`ark-review-gate` 支持跨智能体外部审查门禁：高风险 task 立即外部审查，低风险同闭环 task 可进入最多 3 个 task / 90 分钟 / 1 个功能闭环 / 500 行核心 diff 的小批量审查；外部 findings 可导入后交给 `ark-debug` 最小修复，修复后生成定向复检包，复检默认只检查上一轮 findings 和明显回归。
+
+`ark-implement` 的默认报告会先输出功能结果：当前完成状态、任务状态建议、本次能力变化、用户或调用方如何触发、可观察结果、当前限制和用户验收方式；同时给出外部审查门禁建议，说明当前 task 应立即外部审查、进入低风险 batch，还是需要先同步状态。Reality Check、注释/docstring、Checkpoint、Sub-agent 等过程细节仅在影响判断时输出。
 
 若初始化时项目类型选择为 `unknown` 或目标仍不清楚，推荐先执行 `/ark:ark-intake`。只有在目录中已有实质代码、或你明确希望分析已有代码时，Mode A 才建议 `/ark:ark-analyze`。
 
@@ -506,6 +508,8 @@ ark-implement   # 分批实现，可用 sub-agent worker
   ↓
 ark-test        # 补测试
   ↓
+ark-review-gate # 可选：跨智能体外部审查门禁，生成 Codex 审查包或定向复检包
+  ↓
 ark-validate    # 记录验证证据
 ```
 
@@ -522,6 +526,28 @@ ark-test        # 回归测试
   ↓
 ark-validate    # 记录证据；失败时推荐回到 ark-debug
 ```
+
+### 跨智能体外部审查
+
+```text
+ark-implement
+  ↓
+ark-review-gate status   # 判断 immediate / batch-candidate / batch-ready
+  ↓
+ark-review-gate prepare  # 生成给 Codex/其他 agent 的审查包
+  ↓
+外部智能体审查
+  ↓
+ark-review-gate import   # 导入 findings，分类为必须修复 / 可延期 / 不处理
+  ↓
+ark-debug                # 只修复必须修复项
+  ↓
+ark-review-gate recheck  # 生成定向复检包，只复检上一轮 findings
+  ↓
+ark-validate             # 记录本地验证和外部审查 evidence
+```
+
+`ark-review-gate` 的目的不是减少审查质量，而是减少低风险 task 的重复完整审查。高风险 task 立即外部审查；低风险、同一功能闭环内的 task 可以小批量审查，但最多 3 个 task、90 分钟、1 个功能闭环或 500 行核心 diff，任一上限达到即停下审查。
 
 ### 接手项目
 
@@ -639,6 +665,7 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 实现已有 plan/task/batch | `ark-implement` |
 | bug、报错、异常、失败 | `ark-debug` |
 | 继续、推进、不确定下一步 | `ark-next` |
+| 外部审查、跨智能体审查、Codex review、审查门禁 | `ark-review-gate` |
 | 审查、review、检查代码 | `ark-review` |
 | 重构、优化结构 | `ark-refactor` |
 | 文档、README、说明 | `ark-docs` |
@@ -685,6 +712,7 @@ ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务
 | 实施 | `/ark:ark-implement` | 最小可行实现，默认输出功能结果和验收方式，支持 batch 和 checkpoint；检查真实性锚点并识别 spec/design/extension 漂移 |
 | 实施 | `/ark:ark-debug` | 定位 bug 根因，形成修复方案；识别修复暴露的需求/设计/扩展文档漂移 |
 | 实施 | `/ark:ark-refactor` | 保持行为不变，改善结构；识别设计现实和扩展文档变化 |
+| 审查 | `/ark:ark-review-gate` | 组织跨智能体外部审查门禁，判断立即审查或小批量审查，生成审查包、导入 findings 并生成定向复检包 |
 | 审查 | `/ark:ark-review` | 深度契约驱动代码审查，检查实现、测试、风险和后续 ARK 路径 |
 | 验证 | `/ark:ark-test` | 创建和组织测试 |
 | 验证 | `/ark:ark-validate` | 记录验证证据，只验证不修复；同闭环任务可共享验证记录 |
@@ -743,7 +771,7 @@ ARK 使用四态判断 Artifact 是否还能作为执行依据：
 
 ## 规则系统
 
-ARK 内置 12 个规则文件，通过项目 `MEMORY.md` 引用。
+ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
 
 | 规则文件 | 作用 |
 |----------|------|
@@ -755,6 +783,7 @@ ARK 内置 12 个规则文件，通过项目 `MEMORY.md` 引用。
 | `extension-doc-policy.md` | 扩展文档类型、写入边界和漂移处理 |
 | `artifact-placeholder-policy.md` | Artifact 模板占位与实质性内容判定 |
 | `sub-agent-protocol.md` | sub-agent 写权限、输出格式和复核流程 |
+| `external-review-gate.md` | 跨智能体外部审查门禁、风险分层、小批量审查和复检边界 |
 | `task-sizing-summary.md` | 任务规模快速判断 |
 | `task-sizing-rules.md` | 任务规模完整规则 |
 | `python-backend-conventions.md` | Python 后端编码、fastchain-enhanced 中文注释和维护性规范 |
@@ -781,6 +810,10 @@ ARK 内置 12 个规则文件，通过项目 `MEMORY.md` 引用。
 ### `ark-test` 和 `ark-validate` 有什么区别？
 
 `ark-test` 可以创建或修改测试文件，并执行测试。`ark-validate` 只记录验证事实和证据，不修改源码，也不修复失败。
+
+### `ark-review` 和 `ark-review-gate` 有什么区别？
+
+`ark-review` 是 Claude Code 内部深度契约代码审查。`ark-review-gate` 是跨智能体外部审查门禁，用来决定当前 task 是否需要立即去 Codex/其他 agent 审查，还是可以进入同闭环低风险 batch；它还负责生成外部审查包、导入 findings、生成定向复检包。外部 review 通过后，仍需要 `ark-validate` 记录证据并推进 Done。
 
 ### `ark-solution` 和 `ark-design` 有什么区别？
 
