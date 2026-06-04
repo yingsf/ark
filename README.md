@@ -89,17 +89,26 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 ### Codex 安装
 
-Codex 使用同一仓库中的 `.codex-plugin/plugin.json`，插件核心内容仍是共享的 `skills/`、`rules/`、`templates/` 和 `scripts/`。发布或本地安装时，将插件源指向仓库根目录即可。
+Codex 使用仓库中的 `.codex-plugin/plugin.json` 加载插件，核心内容仍复用 `skills/`、`rules/`、`templates/` 和 `scripts/`。
 
-方式一：直接从 GitHub 添加 marketplace：
+推荐在 Codex App 中让 Codex 代为完成安装。新开一个 Codex thread，直接发送：
+
+```text
+请帮我安装 ARK Codex 插件：
+1. 添加 marketplace：yingsf/ark
+2. 在 Codex App 的插件界面中安装并启用 ARK
+3. 安装完成后，新开或刷新 thread，让 ARK Skills 生效
+
+如果命令行只能添加 marketplace、不能完成 plugin 安装，请继续使用 Codex App 自己的插件安装能力操作。
+```
+
+也可以只先添加 marketplace 来源，再回到 Codex App 插件界面安装并启用 ARK：
 
 ```bash
 codex plugin marketplace add yingsf/ark
 ```
 
-添加后，在 Codex 插件界面找到 ARK 并启用/安装。新开一个 thread 后，Codex 会加载 ARK Skills。
-
-方式二：先 clone 到本地再添加：
+本地开发或调试时，可以添加本地 clone：
 
 ```bash
 git clone https://github.com/yingsf/ark.git
@@ -114,21 +123,7 @@ git clone https://github.com/yingsf/ark.git
 codex plugin marketplace add ./ark
 ```
 
-后续更新 GitHub marketplace：
-
-```bash
-codex plugin marketplace upgrade ark
-```
-
-如果是本地 clone 方式，先拉取仓库更新，再升级 marketplace：
-
-```bash
-cd ark
-git pull
-codex plugin marketplace upgrade ark
-```
-
-这些命令会让 Codex 找到并安装 ARK 插件；用户不需要手动复制 `skills/`、`rules/` 或维护插件路径。
+> 注意：`codex plugin marketplace add ...` 只负责把 ARK 加入 marketplace 来源。在某些 Codex 版本中，由于插件结构或 App 安装流程限制，命令行可以添加 marketplace，但不能直接完成 plugin 安装。遇到这种情况时，不要手动复制插件目录，应让 Codex App 继续完成安装和启用。
 
 Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan`。你可以在技能面板中选择对应入口，也可以直接用自然语言触发：
 
