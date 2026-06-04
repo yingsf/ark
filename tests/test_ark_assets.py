@@ -170,8 +170,12 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("宿主兼容策略", init_skill)
         self.assertIn("Claude Code / Codex / Both", init_skill)
         self.assertIn("Codex | `AGENTS.md`", init_skill)
+        self.assertIn("`Ark: ...` Skill 入口或自然语言触发", init_skill)
         self.assertIn("不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射", init_skill)
+        self.assertIn("`Ark: Ark`", agents_template)
+        self.assertIn("`Ark: Ark Plan`", fallback)
         self.assertIn("Codex 安装", readme)
+        self.assertIn("Codex 会将 ARK 入口显示为 Skill", readme)
         self.assertIn("Both — 同时生成三者", readme)
 
     def test_stage_contract_assets_exist(self) -> None:

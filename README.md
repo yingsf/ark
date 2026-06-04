@@ -91,7 +91,7 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 Codex 使用同一仓库中的 `.codex-plugin/plugin.json`，插件核心内容仍是共享的 `skills/`、`rules/`、`templates/` 和 `scripts/`。发布或本地安装时，将插件源指向仓库根目录即可。
 
-Codex 中没有 Claude Code 的 `/ark:ark-*` 斜杠命令约定。使用自然语言触发对应 Skill：
+Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan`。你可以在技能面板中选择对应入口，也可以直接用自然语言触发：
 
 ```text
 使用 ARK 查看当前项目状态
@@ -99,6 +99,8 @@ Codex 中没有 Claude Code 的 `/ark:ark-*` 斜杠命令约定。使用自然�
 使用 ark-plan 拆解这个需求
 使用 ark-validate 记录验证结果
 ```
+
+当文档中出现 Claude Code 的 `/ark:ark-*` 写法时，在 Codex 中对应选择 `Ark: ...` Skill 或使用上面的自然语言表达即可。
 
 ### 升级
 
@@ -129,7 +131,7 @@ Codex 中没有 Claude Code 的 `/ark:ark-*` 斜杠命令约定。使用自然�
 
 ARK 的日常使用不需要先背命令。项目通过初始化接入后，Claude Code 项目使用 `CLAUDE.md` + `MEMORY.md`，Codex 项目使用 `AGENTS.md`；在对应宿主加载项目上下文和 ARK 插件后，你可以直接描述任务，ARK 会根据 `rules/ark.md` 的路由倾向优先按对应 Skill 的规则处理。
 
-Claude Code 中可使用显式 `/ark:ark-*` 命令来初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。Codex 中使用自然语言等价触发，例如“使用 ark-init 初始化项目”、“使用 ark-next 判断下一步”。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先让 ARK 读取项目状态并推荐下一步，再按推荐继续。
+Claude Code 中可使用显式 `/ark:ark-*` 命令来初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。Codex 中可从技能面板选择 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan` 等入口，也可使用自然语言等价触发，例如“使用 ark-init 初始化项目”、“使用 ark-next 判断下一步”。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先让 ARK 读取项目状态并推荐下一步，再按推荐继续。
 
 ### 全新项目
 

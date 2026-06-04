@@ -140,14 +140,14 @@ ARK 的 `skills/`、`rules/`、`templates/artifacts/` 和 `scripts/` 是 Claude 
 | 宿主配置 | 生成/维护的项目上下文 | 说明 |
 |---|---|---|
 | Claude Code | `CLAUDE.md` + `MEMORY.md` | `MEMORY.md` 可引用 `${CLAUDE_PLUGIN_ROOT}` 下的规则文件 |
-| Codex | `AGENTS.md` | 不写入机器私有插件绝对路径；通过已安装 ARK 插件和自然语言触发 Skill |
+| Codex | `AGENTS.md` | 不写入机器私有插件绝对路径；通过已安装 ARK 插件的 `Ark: ...` Skill 入口或自然语言触发 |
 | Both | `CLAUDE.md` + `MEMORY.md` + `AGENTS.md` | 适合团队同时使用 Claude Code 与 Codex |
 
 宿主配置选择必须使用交互式提问机制，与 Mode A / Mode B 选择相同，不能静默默认。当前环境能明确识别为 Claude Code 时推荐 Claude Code；能明确识别为 Codex 时推荐 Codex；无法识别时推荐 Both。
 
 Codex 的 `AGENTS.md` 模板不得写死 `/Users/...`、`~/.codex/...`、`~/plugins/...` 等本机路径。跨机器恢复时，项目文件只表达 ARK 工作流约定；规则正文由当前环境安装的 ARK 插件提供。
 
-Claude Code 文档中的 `/ark:ark-*` 斜杠命令在 Codex 中应表达为自然语言触发，例如“使用 ark-plan 拆解这个需求”。不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射。
+Claude Code 文档中的 `/ark:ark-*` 斜杠命令在 Codex 中对应为技能面板中的 `Ark: ...` 入口，也可表达为自然语言触发，例如“使用 ark-plan 拆解这个需求”。不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射。
 
 ## 核心原则
 - Mode A 的 uv 可用路径必须使用 `uv init --bare`，不得保留 uv 生成的示例代码、console script 或 sample function

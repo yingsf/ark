@@ -367,8 +367,9 @@ uv run pyright
 ## ARK In Codex
 
 - 当前 Codex 环境应安装 ARK 插件；Skill 正文、规则文件和 Artifact 模板由插件提供
-- 使用自然语言触发 ARK Skill，例如“使用 ARK 查看当前项目状态”、“按 ark-init 接入已有项目”、“使用 ark-plan 拆解这个需求”
-- 不依赖 Claude Code 的 `/ark:ark-*` 斜杠命令；当文档提到 `/ark:ark-plan` 时，在 Codex 中等价表达为“使用 ark-plan”
+- 通过 Codex 技能面板中的 `Ark: ...` 入口触发 ARK Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan`
+- 也可以使用自然语言触发，例如“使用 ARK 查看当前项目状态”、“按 ark-init 接入已有项目”、“使用 ark-plan 拆解这个需求”
+- 不依赖 Claude Code 的 `/ark:ark-*` 斜杠命令；当文档提到 `/ark:ark-plan` 时，在 Codex 中等价选择 `Ark: Ark Plan` 或表达为“使用 ark-plan”
 - 不要在本文件中写入某台机器的插件安装绝对路径；跨机器恢复时以当前环境安装的 ARK 插件为准
 
 ## Commands
