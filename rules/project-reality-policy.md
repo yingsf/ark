@@ -10,7 +10,7 @@ ARK 不应只产出能通过单元测试的占位代码。对需要真实依赖�
 
 ## 项目画像
 
-项目画像用于描述当前项目的真实工作方式，不是新的核心 Artifact。默认记录在项目 `CLAUDE.md` 的 `ARK 项目画像` 小节中；已有项目可由 `/ark:ark-init` Mode B 或 `/ark:ark-analyze` 补充/更新建议。
+项目画像用于描述当前项目的真实工作方式，不是新的核心 Artifact。默认记录在宿主上下文文件的 `ARK 项目画像` 小节中（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`）；已有项目可由 `/ark:ark-init` Mode B 或 `/ark:ark-analyze` 补充/更新建议。
 
 画像字段：
 

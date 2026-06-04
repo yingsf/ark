@@ -416,7 +416,7 @@ Mode B 适合把 ARK 接入已有代码库。它遵循 **Inspect & Respect**：�
 
 - 接手一个已有 Python 项目
 - 在老项目上启用 ARK Artifact 工作流
-- 希望 Claude Code 后续开发有稳定的状态文件
+- 希望 Claude Code 或 Codex 后续开发有稳定的状态文件
 - 不希望初始化过程改动业务代码或现有工程配置
 
 ### 示例：接入已有 FastAPI 项目
@@ -478,6 +478,24 @@ backend/
 └── MEMORY.md
 ```
 
+如果宿主选择 Codex，会创建或建议追加：
+
+```text
+backend/
+├── docs/
+│   └── ark/
+│       ├── spec.md
+│       ├── design.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── decisions.md
+│       ├── validation.md
+│       └── handoff.md
+└── AGENTS.md
+```
+
+如果宿主选择 Both，会同时维护 `CLAUDE.md`、`MEMORY.md` 和 `AGENTS.md`。
+
 它还可能创建 Claude Code 本地辅助文件：
 
 ```text
@@ -489,6 +507,8 @@ backend/
 `.claude/` 是本地辅助配置目录，默认被 ARK `.gitignore` 模板忽略，不作为必须提交的项目状态。Mode B 只有在用户确认后才会创建这些本地辅助文件。团队如需共享 Claude Code 配置，应显式讨论后再调整 `.gitignore`。
 
 如果 `.claude/settings.local.json` 已存在且缺少 ARK hook，ARK 只会在用户确认后合并缺失的 hook/permissions，不覆盖已有字段。
+
+Codex 宿主不创建 `.claude/` 本地辅助文件；Codex 的文件级 format hook 由已安装的 ARK 插件提供。
 
 Mode B 创建 Artifact 时必须使用 ARK 模板；模板不可用时，fallback Artifact 仍必须包含 `ark-artifact`、`schema-version`、`last-updated` 版本头，不生成纯空文件。
 
@@ -505,7 +525,7 @@ Mode B 默认不修改：
 - 已有 `src/`、`app/`、包目录或 `tests/`
 - 已有质量工具配置
 
-如果 `CLAUDE.md` 已存在，能力快照只会在用户确认后更新；未确认时，ARK 只在输出摘要中报告当前探测结果，不写文件。
+如果宿主上下文文件已存在（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`），能力快照只会在用户确认后更新；未确认时，ARK 只在输出摘要中报告当前探测结果，不写文件。
 
 Mode B 会识别并建议写入 `ARK 项目画像`：项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息。它不会创建或托管项目数据目录，数据是否提交 Git 仍由项目自己决定。
 
@@ -516,8 +536,8 @@ Mode B 会轻量采样已有代码中的 docstring 和注释风格：
 - 已有项目风格明确时，后续 `/ark:ark-implement` 优先延续项目风格。
 - 未发现明确约定或风格混乱时，ARK 默认采用 `fastchain-enhanced` 中文 Google 风格：核心路径详细，普通路径标准，简单路径克制；公共类、公共函数、关键方法写中文 docstring，资源封装、核心链路、复杂逻辑、边界条件、降级策略、资源生命周期和并发控制补中文注释。
 - 中文 docstring 和中文注释的描述句默认不使用句末中文终止标点；业务解释类注释优先写在代码上方。
-- 如果 `CLAUDE.md` 不存在，Mode B 生成的项目上下文会记录上述判断。
-- 如果 `CLAUDE.md` 已存在，Mode B 不静默覆盖，只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认后才修改。
+- 如果宿主上下文文件不存在，Mode B 生成的项目上下文会记录上述判断（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`）。
+- 如果宿主上下文文件已存在，Mode B 不静默覆盖，只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认后才修改。
 - Mode B 不批量修改任何已有源码注释。
 
 ### Mode B 的质量工具策略
@@ -529,7 +549,8 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | `pyrightconfig.json` | 不自动创建，只报告建议 |
 | `pyproject.toml [tool.ruff]` | 不自动追加，只报告建议 |
 | ruff / pyright 依赖 | 缺失时提示影响；只有确认项目由 uv / pyproject 管理时才提供 `uv add --dev` 安装选项 |
-| `.claude/settings.local.json` | 本地辅助配置；只有用户确认后才生成或合并缺失 hook，默认不提交 |
+| Claude Code `.claude/settings.local.json` | 本地辅助配置；只有用户确认后才生成或合并缺失 hook，默认不提交 |
+| Codex `PostToolUse` hook | 由已安装 ARK 插件提供，不写入项目 `.claude/` |
 
 Mode B 会同时检查 `requirements*.txt`、`setup.cfg`、`tox.ini`、`noxfile.py`、`.pre-commit-config.yaml` 等既有工具链信号，不会把 `uv add --dev` 强加给使用其他包管理方式的项目。
 
@@ -724,7 +745,7 @@ ark-next
 
 ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务，Claude 会优先选择对应 Skill；如果自动触发未发生，会输出推荐入口。显式命令不是日常使用的唯一入口，而是强制指定流程的工具。
 
-这项能力有一个前提：当前项目已经通过 `/ark:ark-init` 接入 ARK，并且项目 `MEMORY.md` 引用的 ARK 规则已被当前 Claude Code 会话加载。ARK 不是全局运行时调度器；如果同一环境里安装了多个工作流插件，Claude 可能受到其他规则影响。
+这项能力有一个前提：当前项目已经通过 `/ark:ark-init` 接入 ARK，并且当前宿主已经加载 ARK 规则（Claude Code: 项目 `MEMORY.md` 引用规则；Codex: 已安装 ARK 插件并读取项目 `AGENTS.md`）。ARK 不是全局运行时调度器；如果同一环境里安装了多个工作流插件，宿主可能受到其他规则影响。
 
 在多插件环境中，如果你希望明确走 ARK，推荐这样描述：
 
