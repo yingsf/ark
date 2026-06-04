@@ -29,6 +29,7 @@ version: "1.0"
 - target directory：默认当前目录
 - Python version：默认 `3.12`，可选范围 `3.10`–`3.14`
 - 是否创建 pytest 测试（默认启用）
+- 宿主配置：Claude Code / Codex / Both（默认按当前环境推荐；无法判断时推荐 Both）
 - 项目类型画像：backend service / library SDK / CLI / frontend / data-AI / plugin / mixed / unknown
 
 Mode A 不得静默使用 `unknown`。只有用户明确选择"不确定 / unknown"时，才可写入 `unknown`。
@@ -36,16 +37,17 @@ Mode A 不得静默使用 `unknown`。只有用户明确选择"不确定 / unkno
 ## Mode B 输入策略
 - project name：优先从 `pyproject.toml`、包目录或当前目录推断
 - target directory：默认当前目录
+- 宿主配置：Claude Code / Codex / Both（默认按当前环境推荐；无法判断时推荐 Both）
 - 项目类型画像：先扫描推断，必要时请用户确认
 
 ## 输出文件
-`.gitignore`、`pyproject.toml`、`README.md`、`CHANGELOG.md`、`CLAUDE.md`、`MEMORY.md`、
+`.gitignore`、`pyproject.toml`、`README.md`、`CHANGELOG.md`、宿主上下文文件（Claude Code: `CLAUDE.md` + `MEMORY.md`；Codex: `AGENTS.md`；Both: 三者都生成）、
 `src/<package_name>/__init__.py`、`tests/__init__.py`、`tests/conftest.py`（如启用测试）、
 `docs/ark/` 及 7 个核心 Artifact
 
 > `.venv/` 由 uv 按需创建，不是保证产物。
 
-> `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 是 Claude Code 本地辅助文件，默认被 `.gitignore` 忽略，不作为必须提交的项目产物。
+> `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 是 Claude Code 本地辅助文件，默认被 `.gitignore` 忽略，不作为必须提交的项目产物。Codex 宿主通过 ARK 插件自带的 Codex `PostToolUse` hook 调用同一个 `scripts/ruff-hook.py`，达到同等文件级格式化效果，不生成 `.claude/`。
 
 ## 相关 Artifact
 自动创建完整的 7 个核心 Artifact：
@@ -75,15 +77,16 @@ my_project/
 ├── pyproject.toml
 ├── README.md
 ├── CHANGELOG.md
-├── CLAUDE.md
-├── MEMORY.md
+├── CLAUDE.md              # Claude Code 宿主
+├── MEMORY.md              # Claude Code 宿主
+├── AGENTS.md              # Codex 宿主
 ├── .gitignore
 └── .venv/                # 条件产物（由 uv 创建，不保证存在）
 ```
 
 ## 能力探测
 
-初始化时检测并追加到项目 CLAUDE.md（控制在 5-8 行以内）：
+初始化时检测并追加到宿主上下文文件（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`；控制在 5-8 行以内）：
 
 ```markdown
 ## ARK 能力快照
@@ -100,11 +103,11 @@ Agent tool 可用性不在此时探测，由各 Skill 执行时检查工具集�
 能力降级策略见 `${CLAUDE_PLUGIN_ROOT}/rules/capability-policy.md`。
 
 Mode A（全新项目）：生成能力快照。
-Mode B（已有项目）：若 CLAUDE.md 已存在，能力快照只在用户确认后更新；未确认时只在输出摘要中报告当前探测结果，不写文件。若 CLAUDE.md 不存在则正常生成。
+Mode B（已有项目）：若宿主上下文文件已存在，能力快照只在用户确认后更新；未确认时只在输出摘要中报告当前探测结果，不写文件。若对应文件不存在则正常生成。
 
 ## ARK 项目画像
 
-初始化时应在 `CLAUDE.md` 中写入或建议写入轻量项目画像（见 `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md`）：
+初始化时应在宿主上下文文件中写入或建议写入轻量项目画像（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`；见 `${CLAUDE_PLUGIN_ROOT}/rules/project-reality-policy.md`）：
 
 ```markdown
 ## ARK 项目画像
@@ -127,8 +130,24 @@ Mode A 项目画像：
 
 Mode B 项目画像：
 - 基于实际文件推断项目类型、入口、依赖、数据源信号和契约边界
-- 若 `CLAUDE.md` 已存在且非空，未获确认不得静默追加；只在输出中建议追加"ARK 项目画像"章节
+- 若宿主上下文文件已存在且非空，未获确认不得静默追加；只在输出中建议追加"ARK 项目画像"章节
 - 推断必须标注不确定项，不得把目录名暗示写成确定结论
+
+## 宿主兼容策略
+
+ARK 的 `skills/`、`rules/`、`templates/artifacts/` 和 `scripts/` 是 Claude Code 与 Codex 共享的核心内容。初始化项目时必须让用户选择宿主配置：
+
+| 宿主配置 | 生成/维护的项目上下文 | 说明 |
+|---|---|---|
+| Claude Code | `CLAUDE.md` + `MEMORY.md` | `MEMORY.md` 可引用 `${CLAUDE_PLUGIN_ROOT}` 下的规则文件 |
+| Codex | `AGENTS.md` | 不写入机器私有插件绝对路径；通过已安装 ARK 插件的 `Ark: ...` Skill 入口或自然语言触发 |
+| Both | `CLAUDE.md` + `MEMORY.md` + `AGENTS.md` | 适合团队同时使用 Claude Code 与 Codex |
+
+宿主配置选择必须使用交互式提问机制，与 Mode A / Mode B 选择相同，不能静默默认。当前环境能明确识别为 Claude Code 时推荐 Claude Code；能明确识别为 Codex 时推荐 Codex；无法识别时推荐 Both。
+
+Codex 的 `AGENTS.md` 模板不得写死 `/Users/...`、`~/.codex/...`、`~/plugins/...` 等本机路径。跨机器恢复时，项目文件只表达 ARK 工作流约定；规则正文由当前环境安装的 ARK 插件提供。
+
+Claude Code 文档中的 `/ark:ark-*` 斜杠命令在 Codex 中对应为技能面板中的 `Ark: ...` 入口，也可表达为自然语言触发，例如“使用 ark-plan 拆解这个需求”。不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射。
 
 ## 核心原则
 - Mode A 的 uv 可用路径必须使用 `uv init --bare`，不得保留 uv 生成的示例代码、console script 或 sample function
@@ -158,11 +177,11 @@ package name 标准化规则：
 
 ## 交互提问约束
 
-凡是本 Skill 标记为必须确认、选择或提问的步骤，必须使用 Claude Code 的交互式提问机制阻塞等待用户回答，并在收到回答后继续当前 `/ark:ark-init` 流程。
+凡是本 Skill 标记为必须确认、选择或提问的步骤，必须使用当前宿主提供的交互式选择/提问机制阻塞等待用户回答，并在收到回答后继续当前 `/ark:ark-init` 流程。Claude Code 和 Codex 都应优先使用各自的交互式面板或选择控件。
 
 不得只在普通回复中输出"请选择..."、编号列表或 Markdown 选项后结束当前回合。模式选择、项目类型选择、参数确认、质量工具安装选择和冲突处理都属于阻塞式交互步骤。
 
-如果当前运行环境没有可用的交互式提问机制，才允许退化为普通文本提问；此时必须明确说明"当前环境不支持会话内交互选择"，并等待用户下一条消息，不得继续执行初始化。
+只有当前运行环境没有可用的交互式选择/提问机制时，才允许退化为普通文本提问；此时必须明确说明"当前环境不支持会话内交互选择"，并等待用户下一条消息，不得继续执行初始化。
 
 ### 第零步：模式选择
 
@@ -203,6 +222,7 @@ Mode A 参数确认必须一次性列出：
 - 目标目录
 - Python 版本
 - 是否启用测试
+- 宿主配置
 - 项目类型画像
 
 若项目类型尚未由用户明确选择，必须先用交互式提问机制让用户选择项目类型，不得进入 uv init。
@@ -234,7 +254,7 @@ build-backend = "hatchling.build"
 3. 提示用户手动安装依赖
 
 ### 第四步：创建配置文件
-按顺序创建：`.gitignore`（uv init 之后）→ `CLAUDE.md` → `MEMORY.md`
+按顺序创建：`.gitignore`（uv init 之后）→ 宿主上下文文件（Claude Code: `CLAUDE.md` → `MEMORY.md`；Codex: `AGENTS.md`；Both: 三者）
 
 优先使用模板，不存在时使用内联 fallback（fallback 内容见 `references/fallback-templates.md`）
 
@@ -246,6 +266,8 @@ build-backend = "hatchling.build"
 2. **`pyrightconfig.json`** — 替换 `<python_version>`、`<source_and_test_dirs>` 为探测值
 3. **`.claude/settings.local.json`** — 本地配置，含 ruff format hook + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
 4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<package_name>`、`<source_and_test_dirs>`
+
+Codex 宿主不生成 `.claude/` 本地辅助文件；由 ARK 插件自带的 Codex `PostToolUse` hook 调用 `${PLUGIN_ROOT}/scripts/ruff-hook.py`。这与 Claude Code 本地辅助 hook 使用同一份脚本，都会在编辑 Python 文件后执行文件级 `ruff format`。
 
 每个质量工具配置写入后必须复查文件存在性和关键内容：
 - `.claude/ruff-hook.py`
@@ -311,21 +333,21 @@ build-backend = "hatchling.build"
 5. 推断项目名：`pyproject.toml` 中的 `name` 字段 > 根目录下的包目录名 > 当前目录名。
 6. 观察已有代码中的 docstring 和注释风格（语言、是否使用 Google 风格、公共接口说明充分度），只做轻量采样，不批量改代码。
 7. 识别项目类型、运行入口、外部依赖、契约边界和数据源信号；数据源只记录元信息，不读取或复制数据内容。
-8. 将扫描结果用于生成 `CLAUDE.md`。
+8. 将扫描结果用于生成宿主上下文文件。
 
 #### B-第二步：创建工作流文件
 只创建不存在的文件；若文件存在但为空或仅含空行，视为可初始化对象。不触碰已有代码结构。
 
 **必须创建（如不存在）：**
 - `docs/` 目录及 7 个核心 Artifact（必须使用 artifact templates；模板不可用时使用带 `ark-artifact`、`schema-version`、`last-updated` 版本头的 fallback，不得生成纯空文件）
-- `CLAUDE.md`（基于扫描到的真实项目结构动态生成，不使用通用模板）
-- `MEMORY.md`（使用模板或 fallback，见 `references/fallback-templates.md`，不得自定义内容）
+- Claude Code 宿主：`CLAUDE.md`（基于扫描到的真实项目结构动态生成，不使用通用模板）和 `MEMORY.md`（使用模板或 fallback，见 `references/fallback-templates.md`，不得自定义内容）
+- Codex 宿主：`AGENTS.md`（基于扫描到的真实项目结构动态生成，遵循 `templates/project/AGENTS.md.template` 的结构，不写入本机插件绝对路径）
 
-Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
+Mode B 生成宿主上下文文件时应遵循注释风格的 Inspect & Respect：
 - 若现有项目已有明确 docstring / 注释风格，记录并延续该风格
 - 若未观察到明确风格或风格混乱，写入 ARK 默认 `fastchain-enhanced` 中文 Google 风格作为后续新增/修改代码的默认约定
-- 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认覆盖或追加后才修改
-- 若 `CLAUDE.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"ARK 项目画像"章节，用户确认后才修改
+- 若 `CLAUDE.md` 或 `AGENTS.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认覆盖或追加后才修改
+- 若 `CLAUDE.md` 或 `AGENTS.md` 已存在且非空，不静默覆盖；只在输出摘要中建议可追加"ARK 项目画像"章节，用户确认后才修改
 - 不批量修改任何已有源码注释
 
 **不触碰（任何情况下不得修改）：**
@@ -335,10 +357,11 @@ Mode B 生成 `CLAUDE.md` 时应遵循注释风格的 Inspect & Respect：
 - 任何已有代码文件
 
 #### B-第三步：处理冲突
-对每个已存在的工作流文件（`CLAUDE.md`、`MEMORY.md`、`docs/` 下的文件）：若为空或仅含空行则直接初始化；若非空则询问处理方式。
+对每个已存在的工作流文件（`CLAUDE.md`、`MEMORY.md`、`AGENTS.md`、`docs/` 下的文件）：若为空或仅含空行则直接初始化；若非空则询问处理方式。
 
 - `CLAUDE.md`：追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 跳过 / 覆盖（高风险，必须二次确认）
 - `MEMORY.md`：跳过 / 覆盖（高风险，必须二次确认）
+- `AGENTS.md`：追加"Documentation & Comments"章节 / 追加"ARK 项目画像"章节 / 追加"ARK In Codex"章节 / 跳过 / 覆盖（高风险，必须二次确认）
 - `docs/ark/*`：跳过 / 覆盖（高风险，可能丢失 Artifact 状态，必须二次确认）
 
 追加章节只用于补充 Mode B 扫描得到的注释/docstring 风格约定或 ARK 项目画像，不得重写用户已有内容。
@@ -388,17 +411,17 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 - uv 可用路径必须使用 `uv init --bare`；不得保留 uv 生成的示例代码、console script 或 sample function
 - 除了包 / 测试 `__init__.py` 和显式启用测试时的基础测试脚手架，不应创建其他 `.py` 文件
 - docs/ Artifact 必须自动创建
-- `CLAUDE.md` 应包含 `fastchain-enhanced` 中文 Google 风格 docstring 与中文注释规范
-- `CLAUDE.md` 应包含 ARK 项目画像；数据源只记录元信息，不创建或托管数据目录
+- 宿主上下文文件应包含 `fastchain-enhanced` 中文 Google 风格 docstring 与中文注释规范
+- 宿主上下文文件应包含 ARK 项目画像；数据源只记录元信息，不创建或托管数据目录
 - uv 不可用或命令失败不应导致整个流程中断
 - `.gitignore` 创建必须在 `uv init` 之后执行
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
 
 **模式 B（已有项目）：**
 - 不得修改任何已有代码文件或项目配置
-- `CLAUDE.md` 必须基于真实项目结构生成
-- `CLAUDE.md` 必须体现注释风格扫描结果：延续既有风格，或在无明确风格时采用 ARK 默认 `fastchain-enhanced` 中文 Google 风格
-- `CLAUDE.md` 应生成或建议追加 ARK 项目画像，包含项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息
+- 宿主上下文文件必须基于真实项目结构生成
+- 宿主上下文文件必须体现注释风格扫描结果：延续既有风格，或在无明确风格时采用 ARK 默认 `fastchain-enhanced` 中文 Google 风格
+- 宿主上下文文件应生成或建议追加 ARK 项目画像，包含项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息
 - docs/ Artifact 必须自动创建
 - 冲突检测中用户选择「跳过」的文件不应被覆盖
 
@@ -428,6 +451,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | .gitignore | 使用模板 / 使用 fallback |
 | CLAUDE.md | 使用模板 / 使用 fallback |
 | MEMORY.md | 使用模板 / 使用 fallback |
+| AGENTS.md | 使用模板 / 使用 fallback / 非 Codex 宿主跳过 |
 | docs/ Artifact | 使用模板 / 使用带版本头的 fallback |
 | 质量工具安装 | 已安装 / 跳过（原因）|
 | 质量工具配置 | 已创建 / 失败（原因）/ 待手动处理 |
@@ -460,6 +484,7 @@ Mode B 不修改既有 `.gitignore`。若创建了 `.claude/` 本地辅助文件
 | 项目扫描 | 成功 / 失败（原因）|
 | CLAUDE.md | 基于 scan 生成 / 追加注释风格章节 / 跳过（已存在）|
 | MEMORY.md | 使用模板 / 跳过（已存在）|
+| AGENTS.md | 基于 scan 生成 / 追加 Codex 章节 / 跳过（已存在或非 Codex 宿主）|
 | docs/ Artifact | 使用模板 / 使用带版本头的 fallback / 跳过（已存在）|
 | 质量工具安装 | 已安装 / 已存在 / 跳过（用户选择）|
 | 质量工具配置 | 仅报告建议 / 本地辅助已创建 / 跳过（用户选择）/ 失败（原因）|

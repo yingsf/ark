@@ -7,9 +7,10 @@
 [![Version](https://img.shields.io/badge/version-1.0.13-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
+[![Codex Plugin](https://img.shields.io/badge/Codex-Plugin-0ea5e9.svg)](https://developers.openai.com/codex)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-面向 Python 工程项目的 Claude Code 工作流插件。ARK 用文件化 Artifact 管理需求、设计、计划、任务、决策、验证和交接状态，并通过项目画像与真实性锚点，让复杂开发任务可追踪、可验证、可中断恢复。
+面向 Python 工程项目的 Claude Code / Codex 工作流插件。ARK 用文件化 Artifact 管理需求、设计、计划、任务、决策、验证和交接状态，并通过项目画像与真实性锚点，让复杂开发任务可追踪、可验证、可中断恢复。
 
 [安装](#安装) · [快速开始](#快速开始) · [Mode A](#mode-a全新项目) · [Mode B](#mode-b已有项目) · [工作流](#推荐工作流) · [Skill](#skill-一览) · [FAQ](#faq)
 
@@ -19,7 +20,7 @@
 
 ## ARK 是什么
 
-ARK 是一套 **Artifact-first** 的 Claude Code 工程工作流。它不是一组松散 prompt，而是一套围绕项目文件持续维护状态的开发内核。
+ARK 是一套 **Artifact-first** 的 Claude Code / Codex 工程工作流。它不是一组松散 prompt，而是一套围绕项目文件持续维护状态的开发内核。
 
 传统 AI 编程容易遇到这些问题：
 
@@ -64,11 +65,11 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 | 工具 | 要求 |
 |------|------|
-| Claude Code | 已安装并可使用 plugin 命令 |
+| Claude Code 或 Codex | 已安装对应插件宿主 |
 | Git | 推荐安装，用于状态判断和 checkpoint |
 | Python | 推荐 3.12；ARK 支持 3.10-3.14 的项目初始化参数 |
 
-### 安装插件
+### Claude Code 安装
 
 在 Claude Code 中执行：
 
@@ -86,7 +87,87 @@ ARK 的处理方式是把关键状态落到项目文件中：
 | Install for this project | 项目内共享插件配置 | 团队统一使用时选择 |
 | Install locally | 只在当前仓库、当前用户生效 | 试用时选择 |
 
+### Codex 安装
+
+Codex 使用仓库中的 `.codex-plugin/plugin.json` 加载插件，核心内容仍复用 `skills/`、`rules/`、`templates/` 和 `scripts/`。
+
+推荐在 Codex App 中让 Codex 代为完成安装。新开一个 Codex thread，直接发送下面这段话：
+
+```text
+请帮我安装 ARK Codex 插件：
+1. 如果本机还没有源码，请克隆 https://github.com/yingsf/ark.git 到 ~/plugins/ark；如果已有 ~/plugins/ark，请先更新到最新版本。
+2. 检查 ~/plugins/ark/.codex-plugin/plugin.json 是否存在，并运行插件校验；如果校验失败，请指出失败字段，不要继续安装。
+3. 确保 ~/.agents/plugins/marketplace.json 存在，name 为 personal，并在 plugins 数组中加入或更新 ARK 条目：
+   - name: ark
+   - source: {"source": "local", "path": "./plugins/ark"}
+   - policy.installation: AVAILABLE
+   - policy.authentication: ON_INSTALL
+   - category: Productivity
+4. 执行 codex plugin add ark@personal 安装插件。
+5. 打开 Codex 插件界面，进入 ARK 插件详情，审查并信任待审核的 hooks。
+6. 执行 codex plugin list，确认 ark@personal 已 installed, enabled。
+7. 安装完成后，请告诉我需要新开或刷新 Codex thread，ARK Skills 才会生效。
+```
+
+如果你想手动安装，等价命令如下：
+
+```bash
+git clone https://github.com/yingsf/ark.git
+mkdir -p ~/plugins
+mv ark ~/plugins/ark
+```
+
+然后把下面的条目加入 `~/.agents/plugins/marketplace.json` 的 `plugins` 数组：
+
+```json
+{
+  "name": "ark",
+  "source": {
+    "source": "local",
+    "path": "./plugins/ark"
+  },
+  "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "ON_INSTALL"
+  },
+  "category": "Productivity"
+}
+```
+
+最后安装：
+
+```bash
+codex plugin add ark@personal
+codex plugin list
+```
+
+安装后进入 Codex 插件界面，打开 ARK 插件详情，审查并信任待审核的 hooks。ARK 的 hooks 文件位于 `hooks/hooks.json`；Codex 会从插件根目录发现它，不需要也不应该在 `.codex-plugin/plugin.json` 中声明 `hooks` 字段。
+
+> 注意：不要在 ARK 仓库根目录直接执行 `codex plugin marketplace add .` 后再执行 `codex plugin add ark@ark`。当前 Codex marketplace 需要的是 marketplace 根目录，不是单个插件仓库根目录；直接添加 ARK 仓库会导致 `plugin "ark" was not found in marketplace "ark"`。
+
+Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan`。你可以在技能面板中选择对应入口，也可以直接用自然语言触发：
+
+```text
+使用 ARK 查看当前项目状态
+按 ark-init 接入已有项目
+使用 ark-plan 拆解这个需求
+使用 ark-validate 记录验证结果
+```
+
+当文档中出现 Claude Code 的 `/ark:ark-*` 写法时，在 Codex 中对应选择 `Ark: ...` Skill 或使用上面的自然语言表达即可。
+
 ### 升级
+
+Codex 中更新 ARK：
+
+```bash
+cd ~/plugins/ark
+git pull
+codex plugin remove ark
+codex plugin add ark@personal
+```
+
+Claude Code 中升级：
 
 ```text
 /plugin marketplace update ark
@@ -94,9 +175,9 @@ ARK 的处理方式是把关键状态落到项目文件中：
 /reload-plugins
 ```
 
-`/plugin marketplace update ark` 用于刷新 marketplace listing；`/plugin update ark@ark` 才会更新已安装插件。ARK 使用显式版本号发布，每次发布都会同步更新 `plugin.json`、`marketplace.json` 和 README badge；如果版本号未变，Claude Code 可能认为已安装版本就是最新版本并跳过更新。
+`/plugin marketplace update ark` 用于刷新 Claude Code marketplace listing；`/plugin update ark@ark` 才会更新 Claude Code 已安装插件。ARK 使用显式版本号发布，每次发布都会同步更新 `plugin.json`、`marketplace.json` 和 README badge；如果版本号未变，Claude Code 可能认为已安装版本就是最新版本并跳过更新。
 
-升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 `/ark:ark-init`，选择 Mode B 检查是否需要补齐。
+升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md`、`AGENTS.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 ark-init，选择 Mode B 检查是否需要补齐。
 
 ### 卸载
 
@@ -107,15 +188,15 @@ ARK 的处理方式是把关键状态落到项目文件中：
 /plugin marketplace remove ark
 ```
 
-卸载插件不会删除项目中已经生成的 `docs/ark/`、`CLAUDE.md`、`MEMORY.md`、`.claude/` 等文件。如需从项目中完全移除 ARK，请手动删除这些项目文件。
+卸载插件不会删除项目中已经生成的 `docs/ark/`、`CLAUDE.md`、`MEMORY.md`、`AGENTS.md`、`.claude/` 等文件。如需从项目中完全移除 ARK，请手动删除这些项目文件。
 
 ---
 
 ## 快速开始
 
-ARK 的日常使用不需要先背命令。项目通过 `/ark:ark-init` 接入后，`MEMORY.md` 会引用 ARK 规则文件；在这些规则被当前 Claude Code 会话加载的前提下，你可以直接描述任务，ARK 会根据 `rules/ark.md` 的路由倾向优先按对应 Skill 的规则处理。
+ARK 的日常使用不需要先背命令。项目通过初始化接入后，Claude Code 项目使用 `CLAUDE.md` + `MEMORY.md`，Codex 项目使用 `AGENTS.md`；在对应宿主加载项目上下文和 ARK 插件后，你可以直接描述任务，ARK 会根据 `rules/ark.md` 的路由倾向优先按对应 Skill 的规则处理。
 
-显式 `/ark:ark-*` 命令适合这些场景：初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先使用 `/ark:ark` 读取项目状态并让 ARK 推荐下一步，再按推荐继续。
+Claude Code 中可使用显式 `/ark:ark-*` 命令来初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。Codex 中可从技能面板选择 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan` 等入口，也可使用自然语言等价触发，例如“使用 ark-init 初始化项目”、“使用 ark-next 判断下一步”。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先让 ARK 读取项目状态并推荐下一步，再按推荐继续。
 
 ### 全新项目
 
@@ -127,6 +208,14 @@ ARK 的日常使用不需要先背命令。项目通过 `/ark:ark-init` 接入�
 
 ```text
 1. 模式 A — 全新项目（从零开始创建）
+```
+
+随后选择宿主配置：
+
+```text
+1. Claude Code — 生成 CLAUDE.md + MEMORY.md
+2. Codex — 生成 AGENTS.md
+3. Both — 同时生成三者
 ```
 
 初始化完成后，直接描述你要做的事：
@@ -174,7 +263,7 @@ ARK 会倾向先分析项目，再根据不确定项推荐确认 spec/design 或
 
 ## Mode A：全新项目
 
-Mode A 适合从空目录开始创建 Python 工程项目。它会生成项目骨架、质量工具配置、ARK Artifact、项目画像和 Claude Code 项目上下文。
+Mode A 适合从空目录开始创建 Python 工程项目。它会生成项目骨架、质量工具配置、ARK Artifact、项目画像和宿主项目上下文（Claude Code: `CLAUDE.md` + `MEMORY.md`；Codex: `AGENTS.md`）。
 
 ### 适用场景
 
@@ -230,8 +319,8 @@ Mode A 的执行重点：
 2. 使用 `uv init --bare` 原地生成干净的 `pyproject.toml`，不保留 uv 示例代码或 console script。
 3. 手动创建 `src/<package_name>/` layout 和测试结构。
 4. 补齐 hatch build 配置和默认开发质量工具：ruff、pyright。
-5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。
-6. 创建 `CLAUDE.md` 和 `MEMORY.md`，并在 `CLAUDE.md` 中写入 ARK 项目画像和默认 `fastchain-enhanced` 中文 Google 风格 docstring / 注释规范。
+5. 按宿主生成项目上下文：Codex 生成 `AGENTS.md`；Claude Code 生成 `CLAUDE.md` + `MEMORY.md`；Both 同时生成三者。
+6. Claude Code 宿主会额外生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。Codex 宿主由 ARK 插件自带的 Codex `PostToolUse` hook 调用同一个 `scripts/ruff-hook.py`，提供同等文件级格式化效果。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
 8. 在 Artifact 顶部写入 schema 版本头。
 9. 询问是否执行 `git init`。
@@ -257,21 +346,30 @@ my-api/
 ├── tests/
 │   ├── __init__.py
 │   └── conftest.py
-├── .claude/
-│   ├── ruff-hook.py
-│   └── settings.local.json        # 本地辅助配置，默认不提交
 ├── .gitignore
+├── AGENTS.md                      # Codex 宿主
 ├── CHANGELOG.md
-├── CLAUDE.md
-├── MEMORY.md
 ├── pyproject.toml
 ├── pyrightconfig.json
 └── README.md
 ```
 
+如果宿主选择 Claude Code 或 Both，还会生成 Claude Code 项目上下文和本地辅助配置：
+
+```text
+my-api/
+├── .claude/
+│   ├── ruff-hook.py
+│   └── settings.local.json        # Claude Code 本地辅助配置，默认不提交
+├── CLAUDE.md
+└── MEMORY.md
+```
+
+在 Codex 宿主下，`.claude/ruff-hook.py` 和 `.claude/settings.local.json` 不会生成；同等效果由 ARK 插件自带的 Codex `PostToolUse` hook 实现。该 hook 调用插件内已有的 `scripts/ruff-hook.py`，在 Codex 执行 `apply_patch` / `Edit` / `Write` 后，对本次改动的 Python 文件运行 `ruff format`。首次启用插件 hook 时，Codex 可能会要求在 `/hooks` 中审查并信任该 hook。
+
 ### Mode A 产物说明
 
-每个核心 Artifact 顶部都会写入 `ark-artifact`、`schema-version` 和 `last-updated` 版本头，便于 `ark-sync` 判断旧项目状态。Mode A 还会在 `CLAUDE.md` 中记录一次初始化时的能力快照；后续 Skill 执行时仍会按需重新检查 git、uv、pytest、ruff、pyright 等能力。
+每个核心 Artifact 顶部都会写入 `ark-artifact`、`schema-version` 和 `last-updated` 版本头，便于 `ark-sync` 判断旧项目状态。Mode A 还会在宿主项目上下文中记录一次初始化时的能力快照（Codex: `AGENTS.md`；Claude Code: `CLAUDE.md`）；后续 Skill 执行时仍会按需重新检查 git、uv、pytest、ruff、pyright 等能力。
 
 更细的 Artifact 协议、版本头语义和初始化契约由 Skill/reference 文件维护，README 只保留使用入口。
 
@@ -336,7 +434,7 @@ Mode B 适合把 ARK 接入已有代码库。它遵循 **Inspect & Respect**：�
 
 - 接手一个已有 Python 项目
 - 在老项目上启用 ARK Artifact 工作流
-- 希望 Claude Code 后续开发有稳定的状态文件
+- 希望 Claude Code 或 Codex 后续开发有稳定的状态文件
 - 不希望初始化过程改动业务代码或现有工程配置
 
 ### 示例：接入已有 FastAPI 项目
@@ -398,6 +496,24 @@ backend/
 └── MEMORY.md
 ```
 
+如果宿主选择 Codex，会创建或建议追加：
+
+```text
+backend/
+├── docs/
+│   └── ark/
+│       ├── spec.md
+│       ├── design.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── decisions.md
+│       ├── validation.md
+│       └── handoff.md
+└── AGENTS.md
+```
+
+如果宿主选择 Both，会同时维护 `CLAUDE.md`、`MEMORY.md` 和 `AGENTS.md`。
+
 它还可能创建 Claude Code 本地辅助文件：
 
 ```text
@@ -409,6 +525,8 @@ backend/
 `.claude/` 是本地辅助配置目录，默认被 ARK `.gitignore` 模板忽略，不作为必须提交的项目状态。Mode B 只有在用户确认后才会创建这些本地辅助文件。团队如需共享 Claude Code 配置，应显式讨论后再调整 `.gitignore`。
 
 如果 `.claude/settings.local.json` 已存在且缺少 ARK hook，ARK 只会在用户确认后合并缺失的 hook/permissions，不覆盖已有字段。
+
+Codex 宿主不创建 `.claude/` 本地辅助文件；Codex 的文件级 format hook 由已安装的 ARK 插件提供。
 
 Mode B 创建 Artifact 时必须使用 ARK 模板；模板不可用时，fallback Artifact 仍必须包含 `ark-artifact`、`schema-version`、`last-updated` 版本头，不生成纯空文件。
 
@@ -425,7 +543,7 @@ Mode B 默认不修改：
 - 已有 `src/`、`app/`、包目录或 `tests/`
 - 已有质量工具配置
 
-如果 `CLAUDE.md` 已存在，能力快照只会在用户确认后更新；未确认时，ARK 只在输出摘要中报告当前探测结果，不写文件。
+如果宿主上下文文件已存在（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`），能力快照只会在用户确认后更新；未确认时，ARK 只在输出摘要中报告当前探测结果，不写文件。
 
 Mode B 会识别并建议写入 `ARK 项目画像`：项目类型、运行入口、真实性锚点、外部依赖、契约边界和数据源元信息。它不会创建或托管项目数据目录，数据是否提交 Git 仍由项目自己决定。
 
@@ -436,8 +554,8 @@ Mode B 会轻量采样已有代码中的 docstring 和注释风格：
 - 已有项目风格明确时，后续 `/ark:ark-implement` 优先延续项目风格。
 - 未发现明确约定或风格混乱时，ARK 默认采用 `fastchain-enhanced` 中文 Google 风格：核心路径详细，普通路径标准，简单路径克制；公共类、公共函数、关键方法写中文 docstring，资源封装、核心链路、复杂逻辑、边界条件、降级策略、资源生命周期和并发控制补中文注释。
 - 中文 docstring 和中文注释的描述句默认不使用句末中文终止标点；业务解释类注释优先写在代码上方。
-- 如果 `CLAUDE.md` 不存在，Mode B 生成的项目上下文会记录上述判断。
-- 如果 `CLAUDE.md` 已存在，Mode B 不静默覆盖，只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认后才修改。
+- 如果宿主上下文文件不存在，Mode B 生成的项目上下文会记录上述判断（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`）。
+- 如果宿主上下文文件已存在，Mode B 不静默覆盖，只在输出摘要中建议可追加"Documentation & Comments"章节，用户确认后才修改。
 - Mode B 不批量修改任何已有源码注释。
 
 ### Mode B 的质量工具策略
@@ -449,7 +567,8 @@ Mode B 会检测 ruff、pyright 等工具，但默认只报告建议：
 | `pyrightconfig.json` | 不自动创建，只报告建议 |
 | `pyproject.toml [tool.ruff]` | 不自动追加，只报告建议 |
 | ruff / pyright 依赖 | 缺失时提示影响；只有确认项目由 uv / pyproject 管理时才提供 `uv add --dev` 安装选项 |
-| `.claude/settings.local.json` | 本地辅助配置；只有用户确认后才生成或合并缺失 hook，默认不提交 |
+| Claude Code `.claude/settings.local.json` | 本地辅助配置；只有用户确认后才生成或合并缺失 hook，默认不提交 |
+| Codex `PostToolUse` hook | 由已安装 ARK 插件提供，不写入项目 `.claude/` |
 
 Mode B 会同时检查 `requirements*.txt`、`setup.cfg`、`tox.ini`、`noxfile.py`、`.pre-commit-config.yaml` 等既有工具链信号，不会把 `uv add --dev` 强加给使用其他包管理方式的项目。
 
@@ -644,7 +763,7 @@ ark-next
 
 ARK 在 `rules/ark.md` 中定义了路由倾向。用户可以直接描述任务，Claude 会优先选择对应 Skill；如果自动触发未发生，会输出推荐入口。显式命令不是日常使用的唯一入口，而是强制指定流程的工具。
 
-这项能力有一个前提：当前项目已经通过 `/ark:ark-init` 接入 ARK，并且项目 `MEMORY.md` 引用的 ARK 规则已被当前 Claude Code 会话加载。ARK 不是全局运行时调度器；如果同一环境里安装了多个工作流插件，Claude 可能受到其他规则影响。
+这项能力有一个前提：当前项目已经通过 `/ark:ark-init` 接入 ARK，并且当前宿主已经加载 ARK 规则（Claude Code: 项目 `MEMORY.md` 引用规则；Codex: 已安装 ARK 插件并读取项目 `AGENTS.md`）。ARK 不是全局运行时调度器；如果同一环境里安装了多个工作流插件，宿主可能受到其他规则影响。
 
 在多插件环境中，如果你希望明确走 ARK，推荐这样描述：
 
@@ -771,7 +890,7 @@ ARK 使用四态判断 Artifact 是否还能作为执行依据：
 
 ## 规则系统
 
-ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
+ARK 内置 13 个规则文件。Claude Code 项目通过 `MEMORY.md` 引用；Codex 项目通过已安装插件中的 Skill 与项目 `AGENTS.md` 共同承载约定。
 
 | 规则文件 | 作用 |
 |----------|------|
@@ -789,7 +908,7 @@ ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
 | `python-backend-conventions.md` | Python 后端编码、fastchain-enhanced 中文注释和维护性规范 |
 | `user-preferences.md` | 默认 Python 版本、工具和用户偏好 |
 
-项目 `MEMORY.md` 由用户维护，不自动覆盖；其引用的插件规则文件会随插件更新生效。
+项目 `MEMORY.md` / `AGENTS.md` 由用户维护，不自动覆盖；插件中的规则文件会随插件更新生效。
 
 ---
 
@@ -827,7 +946,11 @@ ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
 
 通常应该提交。ARK 的核心价值就是让项目状态随代码演进，被版本控制记录下来。
 
-这条建议指 `docs/ark/*`、`CLAUDE.md`、`MEMORY.md` 等项目状态和规则入口；`.claude/` 是本地辅助配置，默认不提交。
+这条建议指 `docs/ark/*`、`CLAUDE.md`、`MEMORY.md`、`AGENTS.md` 等项目状态和规则入口；`.claude/` 是本地辅助配置，默认不提交。
+
+### Codex 的 `AGENTS.md` 会写入本机插件路径吗？
+
+不会。`AGENTS.md` 只记录项目级 ARK 约定、Artifact 位置和 Codex 中的自然语言触发方式，不写入某台机器的插件安装绝对路径。跨机器恢复时，应先在当前 Codex 环境安装 ARK 插件，再由 `AGENTS.md` 约束项目工作方式。
 
 ### ARK 和 superpowers / GSD 有什么区别？
 

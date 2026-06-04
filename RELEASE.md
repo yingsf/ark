@@ -7,6 +7,7 @@ Use this checklist before publishing a new ARK plugin version.
 - Bump `.claude-plugin/plugin.json` `version`
 - Bump `.claude-plugin/marketplace.json` `metadata.version`
 - Bump `.claude-plugin/marketplace.json` plugin entry `version`
+- Bump `.codex-plugin/plugin.json` `version`
 - Update README version badge
 - Add a `CHANGELOG.md` entry for the new version
 
@@ -32,6 +33,8 @@ The release gate runs:
 ```bash
 python -m json.tool .claude-plugin/plugin.json
 python -m json.tool .claude-plugin/marketplace.json
+python -m json.tool .codex-plugin/plugin.json
+python -m json.tool hooks/hooks.json
 python scripts/ark-check.py --release
 python scripts/ark-smoke.py
 python scripts/ark-smoke.py --require-uv
@@ -70,6 +73,9 @@ When Claude Code CLI is available, validate the plugin manifest:
 ```bash
 claude plugin validate .
 ```
+
+When Codex plugin tooling is available, validate `.codex-plugin/plugin.json`
+with the Codex plugin validator before publishing the Codex package.
 
 Then validate and install from a local marketplace inside Claude Code:
 

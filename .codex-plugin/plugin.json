@@ -1,0 +1,37 @@
+{
+  "name": "ark",
+  "version": "1.0.13",
+  "description": "Artifact-driven Reactive Kernel workflow for Python engineering projects.",
+  "author": {
+    "name": "Yingshufeng"
+  },
+  "homepage": "https://github.com/yingsf/ark",
+  "repository": "https://github.com/yingsf/ark",
+  "license": "MIT",
+  "keywords": [
+    "python",
+    "workflow",
+    "artifact",
+    "reactive",
+    "ark"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ARK",
+    "shortDescription": "Artifact-first engineering workflow.",
+    "longDescription": "ARK adds artifact-driven project workflows for requirements, design, planning, implementation, validation, handoff, review gates, and staged delivery.",
+    "developerName": "Yingshufeng",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "Review",
+      "Project Planning"
+    ],
+    "defaultPrompt": [
+      "Use ARK to inspect this project and recommend the next step.",
+      "Initialize ARK artifacts for this repository.",
+      "Follow the ARK workflow to implement and validate this task."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

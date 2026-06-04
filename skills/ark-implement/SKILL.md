@@ -167,7 +167,7 @@ Medium/Large 任务、显式功能 Batch、触发批次信号或使用 sub-agent
 
 核心摘要：
 
-- 修改前观察 `CLAUDE.md` 和相邻代码风格；无明确约定时使用 `fastchain-enhanced` 中文 Google 风格
+- 修改前观察宿主上下文文件（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`）和相邻代码风格；无明确约定时使用 `fastchain-enhanced` 中文 Google 风格
 - 实现前判断注释详细度分级：L0 / L1 / L2 / L3
 - 默认不主动新增顶部模块级 docstring，不使用变量后置三引号
 - 中文 docstring / 中文注释不使用句末中文终止标点，不写业务解释型尾随注释

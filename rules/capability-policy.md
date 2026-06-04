@@ -18,7 +18,7 @@ description: ARK 依赖能力及降级策略，确保工作流在不同环境下
 
 ## 探测策略
 
-- **ark-init**：Mode A 记录能力快照到项目 CLAUDE.md（5-8 行，标注"仅初始化时参考"）；Mode B 若 CLAUDE.md 已存在，仅在用户确认后更新，否则只在输出摘要中报告当前探测结果
+- **ark-init**：Mode A 记录能力快照到宿主上下文文件（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`，5-8 行，标注"仅初始化时参考"）；Mode B 若宿主上下文文件已存在，仅在用户确认后更新，否则只在输出摘要中报告当前探测结果
 - **各 Skill 入口**：按需重新检查关键能力，不依赖初始化快照
 - **Agent tool**：在 Skill 执行时检查当前工具集是否包含 Agent，不靠 shell 探测
 - **能力变化不阻塞工作流**，只影响功能完整性

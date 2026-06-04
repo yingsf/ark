@@ -15,10 +15,25 @@ class ArkAssetTests(unittest.TestCase):
     def test_versions_are_consistent(self) -> None:
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+        codex_plugin = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text())
+        codex_hooks = json.loads((ROOT / "hooks" / "hooks.json").read_text())
+        codex_marketplace = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text())
         version = plugin["version"]
         self.assertEqual(version, "1.0.13")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
+        self.assertEqual(codex_plugin["version"], version)
+        self.assertEqual(codex_plugin["name"], plugin["name"])
+        self.assertEqual(codex_plugin["skills"], "./skills/")
+        self.assertEqual(codex_plugin["hooks"], "./hooks/hooks.json")
+        post_tool_use = codex_hooks["hooks"]["PostToolUse"][0]
+        self.assertEqual(post_tool_use["matcher"], "apply_patch|Edit|Write")
+        self.assertIn("scripts/ruff-hook.py", post_tool_use["hooks"][0]["command"])
+        self.assertEqual(codex_marketplace["name"], "ark")
+        self.assertEqual(codex_marketplace["plugins"][0]["name"], plugin["name"])
+        self.assertEqual(codex_marketplace["plugins"][0]["source"], {"source": "local", "path": "./"})
+        self.assertEqual(codex_marketplace["plugins"][0]["policy"]["installation"], "AVAILABLE")
+        self.assertEqual(codex_marketplace["plugins"][0]["policy"]["authentication"], "ON_INSTALL")
         readme = (ROOT / "README.md").read_text()
         changelog = (ROOT / "CHANGELOG.md").read_text()
         self.assertIn(f"version-{version}-blue.svg", readme)
@@ -58,6 +73,7 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
             "Claude Code CLI not available; skipping plugin validate.",
+            "python -m json.tool hooks/hooks.json",
             "python scripts/ark-skill-smoke.py",
             "python scripts/ark-review-gate-smoke.py",
         ):
@@ -75,6 +91,7 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python scripts/ark-skill-smoke.py",
             "uv run python scripts/ark-review-gate-smoke.py",
             "claude plugin validate .",
+            "python -m json.tool hooks/hooks.json",
             "/plugin install ark@ark",
             "/plugin update ark@ark",
         ):
@@ -114,6 +131,7 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
+            "hooks/hooks.json",
             "--list",
             "--require-claude",
             "--skip-claude",
@@ -130,6 +148,7 @@ class ArkAssetTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         for token in (
             "python scripts/ark-check.py --release",
+            "python -m json.tool hooks/hooks.json",
             "python scripts/ark-skill-smoke.py",
             "python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-skill-smoke.py",
@@ -140,13 +159,43 @@ class ArkAssetTests(unittest.TestCase):
 
     def test_package_name_placeholder_is_used_for_python_package(self) -> None:
         claude_template = (ROOT / "templates/project/CLAUDE.md.template").read_text()
+        agents_template = (ROOT / "templates/project/AGENTS.md.template").read_text()
         ruff_snippet = (ROOT / "templates/project/pyproject-ruff.snippet.toml").read_text()
         fallback = (ROOT / "skills/ark-init/references/fallback-templates.md").read_text()
 
         self.assertIn("包名为 `<package_name>`", claude_template)
+        self.assertIn("包名为 `<package_name>`", agents_template)
         self.assertIn('known-first-party = ["<package_name>"]', ruff_snippet)
         self.assertIn('packages = ["src/<package_name>"]', fallback)
         self.assertNotIn('known-first-party = ["<project_name>"]', ruff_snippet)
+
+    def test_codex_host_assets_are_portable(self) -> None:
+        agents_template = (ROOT / "templates/project/AGENTS.md.template").read_text()
+        fallback = (ROOT / "skills/ark-init/references/fallback-templates.md").read_text()
+        init_skill = (ROOT / "skills/ark-init/SKILL.md").read_text()
+        readme = (ROOT / "README.md").read_text()
+
+        for text in (agents_template, fallback):
+            self.assertIn("ARK In Codex", text)
+            self.assertIn("不要在本文件中写入某台机器的插件安装绝对路径", text)
+            self.assertNotIn("/Users/", text)
+            self.assertNotIn("~/.codex", text)
+            self.assertNotIn("~/plugins", text)
+
+        self.assertIn("宿主兼容策略", init_skill)
+        self.assertIn("Claude Code / Codex / Both", init_skill)
+        self.assertIn("Codex | `AGENTS.md`", init_skill)
+        self.assertIn("`Ark: ...` Skill 入口或自然语言触发", init_skill)
+        self.assertIn("Codex `PostToolUse` hook", init_skill)
+        self.assertIn("不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射", init_skill)
+        self.assertIn("`Ark: Ark`", agents_template)
+        self.assertIn("`Ark: Ark Plan`", fallback)
+        self.assertIn("Codex 安装", readme)
+        self.assertIn("codex plugin marketplace add yingsf/ark", readme)
+        self.assertIn("codex plugin marketplace upgrade ark", readme)
+        self.assertIn("Codex 会将 ARK 入口显示为 Skill", readme)
+        self.assertIn("调用插件内已有的 `scripts/ruff-hook.py`", readme)
+        self.assertIn("Both — 同时生成三者", readme)
 
     def test_stage_contract_assets_exist(self) -> None:
         stage_skill = (ROOT / "skills/ark-stage/SKILL.md").read_text()

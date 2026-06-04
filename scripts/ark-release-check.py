@@ -43,6 +43,8 @@ def build_checks(require_claude: bool, skip_claude: bool) -> list[Check]:
     checks = [
         python_command("-m", "json.tool", ".claude-plugin/plugin.json"),
         python_command("-m", "json.tool", ".claude-plugin/marketplace.json"),
+        python_command("-m", "json.tool", ".codex-plugin/plugin.json"),
+        python_command("-m", "json.tool", "hooks/hooks.json"),
         python_command(
             "scripts/ark-check.py",
             "--release",

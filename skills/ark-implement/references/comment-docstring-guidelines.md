@@ -4,7 +4,7 @@
 
 ## 风格选择
 
-- 优先读取当前项目 `CLAUDE.md` 和相邻代码的既有约定
+- 优先读取当前项目的宿主上下文文件（Claude Code: `CLAUDE.md`；Codex: `AGENTS.md`）和相邻代码的既有约定
 - 若项目已有明确注释/docstring 风格，优先对齐项目风格
 - 若项目没有明确约定、风格混乱或缺少样例，使用 ARK 默认 `fastchain-enhanced` 中文 Google 风格
 - ARK 默认不主动新增顶部模块级 docstring；既有项目已存在的模块 docstring 可保持原状，除非本次任务明确要求清理

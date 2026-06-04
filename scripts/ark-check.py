@@ -94,6 +94,7 @@ def check_changelog_contract(
 def check_versions(errors: list[str], release_mode: bool = False) -> None:
     plugin = json.loads(read(ROOT / ".claude-plugin" / "plugin.json"))
     marketplace = json.loads(read(ROOT / ".claude-plugin" / "marketplace.json"))
+    codex_plugin = json.loads(read(ROOT / ".codex-plugin" / "plugin.json"))
     version = plugin.get("version")
     plugin_name = plugin.get("name")
 
@@ -111,6 +112,16 @@ def check_versions(errors: list[str], release_mode: bool = False) -> None:
     for item in matching_plugins:
         if item.get("version") != version:
             fail(errors, "marketplace plugin version does not match plugin.json")
+
+    if codex_plugin.get("version") != version:
+        fail(errors, "Codex plugin version does not match Claude plugin version")
+    if codex_plugin.get("name") != plugin_name:
+        fail(errors, "Codex plugin name does not match Claude plugin name")
+    hooks_path = codex_plugin.get("hooks")
+    if hooks_path != "./hooks/hooks.json":
+        fail(errors, "Codex plugin hooks path must be ./hooks/hooks.json")
+    elif not (ROOT / hooks_path).exists():
+        fail(errors, "Codex plugin hooks file is missing")
 
     readme = read(ROOT / "README.md")
     badge = f"version-{version}-blue.svg"
@@ -1268,7 +1279,8 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "find . -maxdepth 1 -name 'requirements*.txt' -print",
             "检测命令失败不得继续当作",
             "每个质量工具配置写入后必须复查文件存在性",
-            "必须使用 Claude Code 的交互式提问机制",
+            "必须使用当前宿主提供的交互式选择/提问机制",
+            "Claude Code 和 Codex 都应优先使用各自的交互式面板或选择控件",
             "不得只在普通回复中输出",
             "模式选择不得通过普通文本问题完成",
             "不得生成纯空文件",
@@ -1286,7 +1298,8 @@ def check_workflow_tokens(errors: list[str]) -> None:
             "Mode A 输出下一步规则",
             "find . -maxdepth 1 -name 'requirements*.txt' -print",
             "每个质量工具配置写入后必须复查文件存在性",
-            "必须使用 Claude Code 的交互式提问机制",
+            "必须使用当前宿主提供的交互式选择/提问机制",
+            "Claude Code 和 Codex 都应优先使用各自的交互式面板或选择控件",
             "不得只输出\"请选择初始化模式\"",
             "不得生成纯空文件",
             "覆盖（高风险，必须二次确认）",

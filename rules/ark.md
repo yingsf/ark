@@ -108,8 +108,8 @@ ark 有流程骨架，但不要求所有任务都走同样的重流程。
 ## 旧项目升级
 
 ARK 插件更新后：
-- 规则文件随插件更新自动生效（rules/ 通过 MEMORY.md 加载）
-- 项目内 CLAUDE.md / MEMORY.md 不自动覆盖，需用户手动更新
+- 规则文件随插件更新自动生效：Claude Code 项目通过 `MEMORY.md` 引用；Codex 项目通过已安装插件中的 Skill 与项目 `AGENTS.md` 共同承载
+- 项目内宿主上下文文件不自动覆盖（Claude Code: `CLAUDE.md` / `MEMORY.md`；Codex: `AGENTS.md`），需用户手动更新或重新执行 ark-init Mode B 检查补齐
 - Artifact 版本头缺失时由 ark-sync 标记 unknown，不阻塞工作流
 - 用户可重新执行 ark-init Mode B 检查是否需要补模板/规则入口
 - 不提供自动迁移，避免覆盖用户自定义内容
