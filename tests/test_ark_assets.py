@@ -15,10 +15,14 @@ class ArkAssetTests(unittest.TestCase):
     def test_versions_are_consistent(self) -> None:
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+        codex_plugin = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text())
         version = plugin["version"]
         self.assertEqual(version, "1.0.13")
         self.assertEqual(marketplace["metadata"]["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
+        self.assertEqual(codex_plugin["version"], version)
+        self.assertEqual(codex_plugin["name"], plugin["name"])
+        self.assertEqual(codex_plugin["skills"], "./skills/")
         readme = (ROOT / "README.md").read_text()
         changelog = (ROOT / "CHANGELOG.md").read_text()
         self.assertIn(f"version-{version}-blue.svg", readme)
@@ -140,13 +144,35 @@ class ArkAssetTests(unittest.TestCase):
 
     def test_package_name_placeholder_is_used_for_python_package(self) -> None:
         claude_template = (ROOT / "templates/project/CLAUDE.md.template").read_text()
+        agents_template = (ROOT / "templates/project/AGENTS.md.template").read_text()
         ruff_snippet = (ROOT / "templates/project/pyproject-ruff.snippet.toml").read_text()
         fallback = (ROOT / "skills/ark-init/references/fallback-templates.md").read_text()
 
         self.assertIn("包名为 `<package_name>`", claude_template)
+        self.assertIn("包名为 `<package_name>`", agents_template)
         self.assertIn('known-first-party = ["<package_name>"]', ruff_snippet)
         self.assertIn('packages = ["src/<package_name>"]', fallback)
         self.assertNotIn('known-first-party = ["<project_name>"]', ruff_snippet)
+
+    def test_codex_host_assets_are_portable(self) -> None:
+        agents_template = (ROOT / "templates/project/AGENTS.md.template").read_text()
+        fallback = (ROOT / "skills/ark-init/references/fallback-templates.md").read_text()
+        init_skill = (ROOT / "skills/ark-init/SKILL.md").read_text()
+        readme = (ROOT / "README.md").read_text()
+
+        for text in (agents_template, fallback):
+            self.assertIn("ARK In Codex", text)
+            self.assertIn("不要在本文件中写入某台机器的插件安装绝对路径", text)
+            self.assertNotIn("/Users/", text)
+            self.assertNotIn("~/.codex", text)
+            self.assertNotIn("~/plugins", text)
+
+        self.assertIn("宿主兼容策略", init_skill)
+        self.assertIn("Claude Code / Codex / Both", init_skill)
+        self.assertIn("Codex | `AGENTS.md`", init_skill)
+        self.assertIn("不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射", init_skill)
+        self.assertIn("Codex 安装", readme)
+        self.assertIn("Both — 同时生成三者", readme)
 
     def test_stage_contract_assets_exist(self) -> None:
         stage_skill = (ROOT / "skills/ark-stage/SKILL.md").read_text()

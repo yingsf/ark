@@ -344,6 +344,71 @@ uv run pyright
 
 ---
 
+## AGENTS.md
+
+```markdown
+# <project_name>
+
+## Project Overview
+
+<project_name> 是一个 Python 项目，使用 src layout，包名为 `<package_name>`。
+本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
+
+## ARK 项目画像
+<!-- ark-init: 初始快照；后续由 ark-analyze / ark-sync 按真实项目演进建议更新 -->
+- 项目类型：unknown
+- 运行入口：待确认
+- 真实性锚点：待确认
+- 数据源：无 / 项目外部管理 / 本地路径元信息待确认（ARK 不托管数据内容）
+- 外部依赖：无 / 待确认
+- 契约边界：HTTP / MCP / CLI / SDK / 文件格式 / 事件 / 待确认
+- 替身边界：mock/fake/in-memory 仅用于测试或短期替代，真实验证需单独记录
+
+## ARK In Codex
+
+- 当前 Codex 环境应安装 ARK 插件；Skill 正文、规则文件和 Artifact 模板由插件提供
+- 使用自然语言触发 ARK Skill，例如“使用 ARK 查看当前项目状态”、“按 ark-init 接入已有项目”、“使用 ark-plan 拆解这个需求”
+- 不依赖 Claude Code 的 `/ark:ark-*` 斜杠命令；当文档提到 `/ark:ark-plan` 时，在 Codex 中等价表达为“使用 ark-plan”
+- 不要在本文件中写入某台机器的插件安装绝对路径；跨机器恢复时以当前环境安装的 ARK 插件为准
+
+## Commands
+
+文件级（日常编辑）：
+```bash
+uv run ruff format <file>
+```
+
+稳定点质量整理：
+```bash
+uv sync
+uv run pytest
+uv run ruff check --fix .
+uv run ruff format .
+uv run pyright
+```
+
+## Artifact Workflow
+
+| 文件 | 何时更新 |
+|------|----------|
+| `docs/ark/spec.md` | 添加新功能前 |
+| `docs/ark/design.md` | 架构变更时 |
+| `docs/ark/plan.md` | 任务规划或阶段推进时 |
+| `docs/ark/tasks.md` | 开始/完成任务时 |
+| `docs/ark/decisions.md` | 做出技术选型时 |
+| `docs/ark/validation.md` | 完成验证后 |
+| `docs/ark/handoff.md` | 阶段暂停或会话结束前 |
+
+## Working Pattern
+
+1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
+2. 按对应 ARK Skill 的可写范围更新 Artifact；只读、说明或分流类 Skill 不落盘
+3. 对涉及真实依赖、真实数据或公开契约的任务，优先建立最小真实闭环
+4. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
+```
+
+---
+
 ## tests/conftest.py
 
 ```python

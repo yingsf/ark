@@ -7,9 +7,10 @@
 [![Version](https://img.shields.io/badge/version-1.0.13-blue.svg)](https://github.com/yingsf/ark)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-green.svg)](https://code.claude.com/docs/en/setup)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple.svg)](https://docs.anthropic.com/en/docs/claude-code/plugins)
+[![Codex Plugin](https://img.shields.io/badge/Codex-Plugin-0ea5e9.svg)](https://developers.openai.com/codex)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-面向 Python 工程项目的 Claude Code 工作流插件。ARK 用文件化 Artifact 管理需求、设计、计划、任务、决策、验证和交接状态，并通过项目画像与真实性锚点，让复杂开发任务可追踪、可验证、可中断恢复。
+面向 Python 工程项目的 Claude Code / Codex 工作流插件。ARK 用文件化 Artifact 管理需求、设计、计划、任务、决策、验证和交接状态，并通过项目画像与真实性锚点，让复杂开发任务可追踪、可验证、可中断恢复。
 
 [安装](#安装) · [快速开始](#快速开始) · [Mode A](#mode-a全新项目) · [Mode B](#mode-b已有项目) · [工作流](#推荐工作流) · [Skill](#skill-一览) · [FAQ](#faq)
 
@@ -19,7 +20,7 @@
 
 ## ARK 是什么
 
-ARK 是一套 **Artifact-first** 的 Claude Code 工程工作流。它不是一组松散 prompt，而是一套围绕项目文件持续维护状态的开发内核。
+ARK 是一套 **Artifact-first** 的 Claude Code / Codex 工程工作流。它不是一组松散 prompt，而是一套围绕项目文件持续维护状态的开发内核。
 
 传统 AI 编程容易遇到这些问题：
 
@@ -64,11 +65,11 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 | 工具 | 要求 |
 |------|------|
-| Claude Code | 已安装并可使用 plugin 命令 |
+| Claude Code 或 Codex | 已安装对应插件宿主 |
 | Git | 推荐安装，用于状态判断和 checkpoint |
 | Python | 推荐 3.12；ARK 支持 3.10-3.14 的项目初始化参数 |
 
-### 安装插件
+### Claude Code 安装
 
 在 Claude Code 中执行：
 
@@ -86,6 +87,19 @@ ARK 的处理方式是把关键状态落到项目文件中：
 | Install for this project | 项目内共享插件配置 | 团队统一使用时选择 |
 | Install locally | 只在当前仓库、当前用户生效 | 试用时选择 |
 
+### Codex 安装
+
+Codex 使用同一仓库中的 `.codex-plugin/plugin.json`，插件核心内容仍是共享的 `skills/`、`rules/`、`templates/` 和 `scripts/`。发布或本地安装时，将插件源指向仓库根目录即可。
+
+Codex 中没有 Claude Code 的 `/ark:ark-*` 斜杠命令约定。使用自然语言触发对应 Skill：
+
+```text
+使用 ARK 查看当前项目状态
+按 ark-init 接入已有项目
+使用 ark-plan 拆解这个需求
+使用 ark-validate 记录验证结果
+```
+
 ### 升级
 
 ```text
@@ -96,7 +110,7 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 `/plugin marketplace update ark` 用于刷新 marketplace listing；`/plugin update ark@ark` 才会更新已安装插件。ARK 使用显式版本号发布，每次发布都会同步更新 `plugin.json`、`marketplace.json` 和 README badge；如果版本号未变，Claude Code 可能认为已安装版本就是最新版本并跳过更新。
 
-升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 `/ark:ark-init`，选择 Mode B 检查是否需要补齐。
+升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md`、`AGENTS.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 ark-init，选择 Mode B 检查是否需要补齐。
 
 ### 卸载
 
@@ -107,15 +121,15 @@ ARK 的处理方式是把关键状态落到项目文件中：
 /plugin marketplace remove ark
 ```
 
-卸载插件不会删除项目中已经生成的 `docs/ark/`、`CLAUDE.md`、`MEMORY.md`、`.claude/` 等文件。如需从项目中完全移除 ARK，请手动删除这些项目文件。
+卸载插件不会删除项目中已经生成的 `docs/ark/`、`CLAUDE.md`、`MEMORY.md`、`AGENTS.md`、`.claude/` 等文件。如需从项目中完全移除 ARK，请手动删除这些项目文件。
 
 ---
 
 ## 快速开始
 
-ARK 的日常使用不需要先背命令。项目通过 `/ark:ark-init` 接入后，`MEMORY.md` 会引用 ARK 规则文件；在这些规则被当前 Claude Code 会话加载的前提下，你可以直接描述任务，ARK 会根据 `rules/ark.md` 的路由倾向优先按对应 Skill 的规则处理。
+ARK 的日常使用不需要先背命令。项目通过初始化接入后，Claude Code 项目使用 `CLAUDE.md` + `MEMORY.md`，Codex 项目使用 `AGENTS.md`；在对应宿主加载项目上下文和 ARK 插件后，你可以直接描述任务，ARK 会根据 `rules/ark.md` 的路由倾向优先按对应 Skill 的规则处理。
 
-显式 `/ark:ark-*` 命令适合这些场景：初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先使用 `/ark:ark` 读取项目状态并让 ARK 推荐下一步，再按推荐继续。
+Claude Code 中可使用显式 `/ark:ark-*` 命令来初始化项目、强制指定流程、排查路由未触发，或向团队演示 ARK 的工作方式。Codex 中使用自然语言等价触发，例如“使用 ark-init 初始化项目”、“使用 ark-next 判断下一步”。如果你同时安装了 superpowers 等其他工作流插件，建议在任务开头写“按 ARK 工作流...”，或先让 ARK 读取项目状态并推荐下一步，再按推荐继续。
 
 ### 全新项目
 
@@ -127,6 +141,14 @@ ARK 的日常使用不需要先背命令。项目通过 `/ark:ark-init` 接入�
 
 ```text
 1. 模式 A — 全新项目（从零开始创建）
+```
+
+随后选择宿主配置：
+
+```text
+1. Claude Code — 生成 CLAUDE.md + MEMORY.md
+2. Codex — 生成 AGENTS.md
+3. Both — 同时生成三者
 ```
 
 初始化完成后，直接描述你要做的事：
@@ -174,7 +196,7 @@ ARK 会倾向先分析项目，再根据不确定项推荐确认 spec/design 或
 
 ## Mode A：全新项目
 
-Mode A 适合从空目录开始创建 Python 工程项目。它会生成项目骨架、质量工具配置、ARK Artifact、项目画像和 Claude Code 项目上下文。
+Mode A 适合从空目录开始创建 Python 工程项目。它会生成项目骨架、质量工具配置、ARK Artifact、项目画像和宿主项目上下文（Claude Code: `CLAUDE.md` + `MEMORY.md`；Codex: `AGENTS.md`）。
 
 ### 适用场景
 
@@ -771,7 +793,7 @@ ARK 使用四态判断 Artifact 是否还能作为执行依据：
 
 ## 规则系统
 
-ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
+ARK 内置 13 个规则文件。Claude Code 项目通过 `MEMORY.md` 引用；Codex 项目通过已安装插件中的 Skill 与项目 `AGENTS.md` 共同承载约定。
 
 | 规则文件 | 作用 |
 |----------|------|
@@ -789,7 +811,7 @@ ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
 | `python-backend-conventions.md` | Python 后端编码、fastchain-enhanced 中文注释和维护性规范 |
 | `user-preferences.md` | 默认 Python 版本、工具和用户偏好 |
 
-项目 `MEMORY.md` 由用户维护，不自动覆盖；其引用的插件规则文件会随插件更新生效。
+项目 `MEMORY.md` / `AGENTS.md` 由用户维护，不自动覆盖；插件中的规则文件会随插件更新生效。
 
 ---
 
@@ -827,7 +849,11 @@ ARK 内置 13 个规则文件，通过项目 `MEMORY.md` 引用。
 
 通常应该提交。ARK 的核心价值就是让项目状态随代码演进，被版本控制记录下来。
 
-这条建议指 `docs/ark/*`、`CLAUDE.md`、`MEMORY.md` 等项目状态和规则入口；`.claude/` 是本地辅助配置，默认不提交。
+这条建议指 `docs/ark/*`、`CLAUDE.md`、`MEMORY.md`、`AGENTS.md` 等项目状态和规则入口；`.claude/` 是本地辅助配置，默认不提交。
+
+### Codex 的 `AGENTS.md` 会写入本机插件路径吗？
+
+不会。`AGENTS.md` 只记录项目级 ARK 约定、Artifact 位置和 Codex 中的自然语言触发方式，不写入某台机器的插件安装绝对路径。跨机器恢复时，应先在当前 Codex 环境安装 ARK 插件，再由 `AGENTS.md` 约束项目工作方式。
 
 ### ARK 和 superpowers / GSD 有什么区别？
 

@@ -1,0 +1,93 @@
+# <project_name>
+
+## Project Overview
+
+<project_name> 是一个 Python 项目，使用 src layout，包名为 `<package_name>`。
+
+本项目使用 ARK 框架管理开发流程，核心 Artifact 位于 `docs/ark/` 目录。
+
+## ARK 项目画像
+<!-- ark-init: 初始快照；后续由 ark-analyze / ark-sync 按真实项目演进建议更新 -->
+- 项目类型：unknown
+- 运行入口：待确认
+- 真实性锚点：待确认
+- 数据源：无 / 项目外部管理 / 本地路径元信息待确认（ARK 不托管数据内容）
+- 外部依赖：无 / 待确认
+- 契约边界：HTTP / MCP / CLI / SDK / 文件格式 / 事件 / 待确认
+- 替身边界：mock/fake/in-memory 仅用于测试或短期替代，真实验证需单独记录
+
+## ARK In Codex
+
+- 当前 Codex 环境应安装 ARK 插件；Skill 正文、规则文件和 Artifact 模板由插件提供
+- 使用自然语言触发 ARK Skill，例如“使用 ARK 查看当前项目状态”、“按 ark-init 接入已有项目”、“使用 ark-plan 拆解这个需求”
+- 不依赖 Claude Code 的 `/ark:ark-*` 斜杠命令；当文档提到 `/ark:ark-plan` 时，在 Codex 中等价表达为“使用 ark-plan”
+- 不要在本文件中写入某台机器的插件安装绝对路径；跨机器恢复时以当前环境安装的 ARK 插件为准
+
+## Commands
+
+文件级（日常编辑）：
+```bash
+uv run ruff format <file>
+```
+
+稳定点质量整理：
+```bash
+uv sync
+uv run pytest
+uv run pytest tests/test_xxx.py -v
+uv run ruff check --fix .
+uv run ruff format .
+uv run pyright
+```
+
+## Artifact Workflow
+
+| 文件 | 何时更新 |
+|------|----------|
+| `docs/ark/spec.md` | 添加新功能前 |
+| `docs/ark/design.md` | 架构变更时 |
+| `docs/ark/plan.md` | 任务规划或阶段推进时 |
+| `docs/ark/tasks.md` | 开始/完成任务时 |
+| `docs/ark/decisions.md` | 做出技术选型时 |
+| `docs/ark/validation.md` | 完成验证后 |
+| `docs/ark/handoff.md` | 阶段暂停或会话结束前 |
+
+## Extension Docs
+
+详细方案、专题设计、接口契约、集成说明、数据源元信息等不写入 `docs/ark/`。
+按需使用 `ark-solution` 写入项目自有扩展文档：
+
+- `docs/solution/`：专题详细方案
+- `docs/design/`：模块或子系统详细设计
+- `docs/contracts/`：HTTP/MCP/API/CLI/SDK/文件格式/事件契约
+- `docs/integrations/`：外部系统接入
+- `docs/data-sources/`：数据源元信息（不存放数据内容）
+
+## Working Pattern
+
+1. 开始任务前阅读 `docs/ark/tasks.md`，确认当前进展
+2. 按对应 ARK Skill 的可写范围更新 Artifact；只读、说明或分流类 Skill 不落盘
+3. 对涉及真实依赖、真实数据或公开契约的任务，优先建立最小真实闭环
+4. 回复时说明：改了哪些文件、跑了哪些验证、哪些验证未执行
+
+## Code Style
+
+- 使用 type hints，所有公开函数必须有参数和返回值类型注解
+- 注释详细度：fastchain-enhanced（核心路径详细，普通路径标准，简单路径克制）
+- 公共类、公共函数、关键方法使用中文 Google 风格 docstring
+- L2/L3 对象（核心 service / manager / provider / adapter、资源生命周期、外部依赖封装、启动链路、数据导入链路）使用增强 docstring，说明职责、设计原因、封装边界、生命周期和关键 Attributes
+- 简单私有 helper、薄包装、简单 getter/setter 不强制补 docstring
+- 不主动新增顶部模块级 docstring
+- 不使用赋值语句后的三引号字符串说明常量、变量、集合或配置项；必要说明写在定义上方的中文块注释
+- 复杂逻辑、边界条件、降级策略、资源生命周期、并发控制应补充中文注释
+- 注释解释原因、约束和风险，避免重复代码表面含义
+- 中文 docstring 和中文注释的描述句不使用句末中文终止标点（避免 `。`、`！`、`？`、`；`）
+- 业务解释类注释优先写在代码上方，不写解释性尾随注释
+- 导入顺序：stdlib → third-party → local，之间用空行分隔
+- 优先使用 `pathlib.Path` 而非 `os.path`
+- 异常处理不要裸 `except:`，至少捕获 `Exception`
+
+## Do NOT
+
+- 不要把 mock/fake/in-memory/合成数据结果描述为真实验证通过
+- 不要把敏感数据、密钥、连接串或大体量数据内容写入 ARK 文档
