@@ -91,39 +91,59 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 Codex 使用仓库中的 `.codex-plugin/plugin.json` 加载插件，核心内容仍复用 `skills/`、`rules/`、`templates/` 和 `scripts/`。
 
-推荐在 Codex App 中让 Codex 代为完成安装。新开一个 Codex thread，直接发送：
+推荐在 Codex App 中让 Codex 代为完成安装。新开一个 Codex thread，直接发送下面这段话：
 
 ```text
 请帮我安装 ARK Codex 插件：
-1. 添加 marketplace：yingsf/ark
-2. 在 Codex App 的插件界面中安装并启用 ARK
-3. 安装完成后，新开或刷新 thread，让 ARK Skills 生效
-
-如果命令行只能添加 marketplace、不能完成 plugin 安装，请继续使用 Codex App 自己的插件安装能力操作。
+1. 如果本机还没有源码，请克隆 https://github.com/yingsf/ark.git 到 ~/plugins/ark；如果已有 ~/plugins/ark，请先更新到最新版本。
+2. 检查 ~/plugins/ark/.codex-plugin/plugin.json 是否存在，并运行插件校验；如果校验失败，请指出失败字段，不要继续安装。
+3. 确保 ~/.agents/plugins/marketplace.json 存在，name 为 personal，并在 plugins 数组中加入或更新 ARK 条目：
+   - name: ark
+   - source: {"source": "local", "path": "./plugins/ark"}
+   - policy.installation: AVAILABLE
+   - policy.authentication: ON_INSTALL
+   - category: Productivity
+4. 执行 codex plugin add ark@personal 安装插件。
+5. 打开 Codex 插件界面，进入 ARK 插件详情，审查并信任待审核的 hooks。
+6. 执行 codex plugin list，确认 ark@personal 已 installed, enabled。
+7. 安装完成后，请告诉我需要新开或刷新 Codex thread，ARK Skills 才会生效。
 ```
 
-也可以只先添加 marketplace 来源，再回到 Codex App 插件界面安装并启用 ARK：
-
-```bash
-codex plugin marketplace add yingsf/ark
-```
-
-本地开发或调试时，可以添加本地 clone：
-
-```bash
-git clone https://github.com/yingsf/ark.git
-cd ark
-codex plugin marketplace add .
-```
-
-也可以在父目录中直接添加 clone 下来的目录：
+如果你想手动安装，等价命令如下：
 
 ```bash
 git clone https://github.com/yingsf/ark.git
-codex plugin marketplace add ./ark
+mkdir -p ~/plugins
+mv ark ~/plugins/ark
 ```
 
-> 注意：`codex plugin marketplace add ...` 只负责把 ARK 加入 marketplace 来源。在某些 Codex 版本中，由于插件结构或 App 安装流程限制，命令行可以添加 marketplace，但不能直接完成 plugin 安装。遇到这种情况时，不要手动复制插件目录，应让 Codex App 继续完成安装和启用。
+然后把下面的条目加入 `~/.agents/plugins/marketplace.json` 的 `plugins` 数组：
+
+```json
+{
+  "name": "ark",
+  "source": {
+    "source": "local",
+    "path": "./plugins/ark"
+  },
+  "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "ON_INSTALL"
+  },
+  "category": "Productivity"
+}
+```
+
+最后安装：
+
+```bash
+codex plugin add ark@personal
+codex plugin list
+```
+
+安装后进入 Codex 插件界面，打开 ARK 插件详情，审查并信任待审核的 hooks。ARK 的 hooks 文件位于 `hooks/hooks.json`；Codex 会从插件根目录发现它，不需要也不应该在 `.codex-plugin/plugin.json` 中声明 `hooks` 字段。
+
+> 注意：不要在 ARK 仓库根目录直接执行 `codex plugin marketplace add .` 后再执行 `codex plugin add ark@ark`。当前 Codex marketplace 需要的是 marketplace 根目录，不是单个插件仓库根目录；直接添加 ARK 仓库会导致 `plugin "ark" was not found in marketplace "ark"`。
 
 Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan`。你可以在技能面板中选择对应入口，也可以直接用自然语言触发：
 
@@ -138,10 +158,13 @@ Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`
 
 ### 升级
 
-Codex 中更新 marketplace：
+Codex 中更新 ARK：
 
 ```bash
-codex plugin marketplace upgrade ark
+cd ~/plugins/ark
+git pull
+codex plugin remove ark
+codex plugin add ark@personal
 ```
 
 Claude Code 中升级：
