@@ -91,6 +91,45 @@ ARK 的处理方式是把关键状态落到项目文件中：
 
 Codex 使用同一仓库中的 `.codex-plugin/plugin.json`，插件核心内容仍是共享的 `skills/`、`rules/`、`templates/` 和 `scripts/`。发布或本地安装时，将插件源指向仓库根目录即可。
 
+方式一：直接从 GitHub 添加 marketplace：
+
+```bash
+codex plugin marketplace add yingsf/ark
+```
+
+添加后，在 Codex 插件界面找到 ARK 并启用/安装。新开一个 thread 后，Codex 会加载 ARK Skills。
+
+方式二：先 clone 到本地再添加：
+
+```bash
+git clone https://github.com/yingsf/ark.git
+cd ark
+codex plugin marketplace add .
+```
+
+也可以在父目录中直接添加 clone 下来的目录：
+
+```bash
+git clone https://github.com/yingsf/ark.git
+codex plugin marketplace add ./ark
+```
+
+后续更新 GitHub marketplace：
+
+```bash
+codex plugin marketplace upgrade ark
+```
+
+如果是本地 clone 方式，先拉取仓库更新，再升级 marketplace：
+
+```bash
+cd ark
+git pull
+codex plugin marketplace upgrade ark
+```
+
+这些命令会让 Codex 找到并安装 ARK 插件；用户不需要手动复制 `skills/`、`rules/` 或维护插件路径。
+
 Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`Ark: Ark Plan`。你可以在技能面板中选择对应入口，也可以直接用自然语言触发：
 
 ```text
@@ -104,13 +143,21 @@ Codex 会将 ARK 入口显示为 Skill，例如 `Ark: Ark`、`Ark: Ark Init`、`
 
 ### 升级
 
+Codex 中更新 marketplace：
+
+```bash
+codex plugin marketplace upgrade ark
+```
+
+Claude Code 中升级：
+
 ```text
 /plugin marketplace update ark
 /plugin update ark@ark
 /reload-plugins
 ```
 
-`/plugin marketplace update ark` 用于刷新 marketplace listing；`/plugin update ark@ark` 才会更新已安装插件。ARK 使用显式版本号发布，每次发布都会同步更新 `plugin.json`、`marketplace.json` 和 README badge；如果版本号未变，Claude Code 可能认为已安装版本就是最新版本并跳过更新。
+`/plugin marketplace update ark` 用于刷新 Claude Code marketplace listing；`/plugin update ark@ark` 才会更新 Claude Code 已安装插件。ARK 使用显式版本号发布，每次发布都会同步更新 `plugin.json`、`marketplace.json` 和 README badge；如果版本号未变，Claude Code 可能认为已安装版本就是最新版本并跳过更新。
 
 升级插件不会自动覆盖项目内的 `CLAUDE.md`、`MEMORY.md`、`AGENTS.md` 或 `docs/ark/*`。插件规则文件会随插件更新生效；如果新版本引入了新的项目模板或工作流入口，可在项目中重新执行 ark-init，选择 Mode B 检查是否需要补齐。
 
@@ -254,8 +301,8 @@ Mode A 的执行重点：
 2. 使用 `uv init --bare` 原地生成干净的 `pyproject.toml`，不保留 uv 示例代码或 console script。
 3. 手动创建 `src/<package_name>/` layout 和测试结构。
 4. 补齐 hatch build 配置和默认开发质量工具：ruff、pyright。
-5. 生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。
-6. 创建 `CLAUDE.md` 和 `MEMORY.md`，并在 `CLAUDE.md` 中写入 ARK 项目画像和默认 `fastchain-enhanced` 中文 Google 风格 docstring / 注释规范。
+5. 按宿主生成项目上下文：Codex 生成 `AGENTS.md`；Claude Code 生成 `CLAUDE.md` + `MEMORY.md`；Both 同时生成三者。
+6. Claude Code 宿主会额外生成 `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 本地辅助文件（默认被 `.gitignore` 忽略；hook 只做文件级格式化）。Codex 宿主由 ARK 插件自带的 Codex `PostToolUse` hook 调用同一个 `scripts/ruff-hook.py`，提供同等文件级格式化效果。
 7. 创建 `docs/ark/` 下 7 个核心 Artifact。
 8. 在 Artifact 顶部写入 schema 版本头。
 9. 询问是否执行 `git init`。
@@ -281,21 +328,30 @@ my-api/
 ├── tests/
 │   ├── __init__.py
 │   └── conftest.py
-├── .claude/
-│   ├── ruff-hook.py
-│   └── settings.local.json        # 本地辅助配置，默认不提交
 ├── .gitignore
+├── AGENTS.md                      # Codex 宿主
 ├── CHANGELOG.md
-├── CLAUDE.md
-├── MEMORY.md
 ├── pyproject.toml
 ├── pyrightconfig.json
 └── README.md
 ```
 
+如果宿主选择 Claude Code 或 Both，还会生成 Claude Code 项目上下文和本地辅助配置：
+
+```text
+my-api/
+├── .claude/
+│   ├── ruff-hook.py
+│   └── settings.local.json        # Claude Code 本地辅助配置，默认不提交
+├── CLAUDE.md
+└── MEMORY.md
+```
+
+在 Codex 宿主下，`.claude/ruff-hook.py` 和 `.claude/settings.local.json` 不会生成；同等效果由 ARK 插件自带的 Codex `PostToolUse` hook 实现。该 hook 调用插件内已有的 `scripts/ruff-hook.py`，在 Codex 执行 `apply_patch` / `Edit` / `Write` 后，对本次改动的 Python 文件运行 `ruff format`。首次启用插件 hook 时，Codex 可能会要求在 `/hooks` 中审查并信任该 hook。
+
 ### Mode A 产物说明
 
-每个核心 Artifact 顶部都会写入 `ark-artifact`、`schema-version` 和 `last-updated` 版本头，便于 `ark-sync` 判断旧项目状态。Mode A 还会在 `CLAUDE.md` 中记录一次初始化时的能力快照；后续 Skill 执行时仍会按需重新检查 git、uv、pytest、ruff、pyright 等能力。
+每个核心 Artifact 顶部都会写入 `ark-artifact`、`schema-version` 和 `last-updated` 版本头，便于 `ark-sync` 判断旧项目状态。Mode A 还会在宿主项目上下文中记录一次初始化时的能力快照（Codex: `AGENTS.md`；Claude Code: `CLAUDE.md`）；后续 Skill 执行时仍会按需重新检查 git、uv、pytest、ruff、pyright 等能力。
 
 更细的 Artifact 协议、版本头语义和初始化契约由 Skill/reference 文件维护，README 只保留使用入口。
 

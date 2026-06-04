@@ -94,6 +94,7 @@ def check_changelog_contract(
 def check_versions(errors: list[str], release_mode: bool = False) -> None:
     plugin = json.loads(read(ROOT / ".claude-plugin" / "plugin.json"))
     marketplace = json.loads(read(ROOT / ".claude-plugin" / "marketplace.json"))
+    codex_plugin = json.loads(read(ROOT / ".codex-plugin" / "plugin.json"))
     version = plugin.get("version")
     plugin_name = plugin.get("name")
 
@@ -111,6 +112,16 @@ def check_versions(errors: list[str], release_mode: bool = False) -> None:
     for item in matching_plugins:
         if item.get("version") != version:
             fail(errors, "marketplace plugin version does not match plugin.json")
+
+    if codex_plugin.get("version") != version:
+        fail(errors, "Codex plugin version does not match Claude plugin version")
+    if codex_plugin.get("name") != plugin_name:
+        fail(errors, "Codex plugin name does not match Claude plugin name")
+    hooks_path = codex_plugin.get("hooks")
+    if hooks_path != "./hooks/hooks.json":
+        fail(errors, "Codex plugin hooks path must be ./hooks/hooks.json")
+    elif not (ROOT / hooks_path).exists():
+        fail(errors, "Codex plugin hooks file is missing")
 
     readme = read(ROOT / "README.md")
     badge = f"version-{version}-blue.svg"

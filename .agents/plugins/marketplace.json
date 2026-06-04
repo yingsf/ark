@@ -1,0 +1,20 @@
+{
+  "name": "ark",
+  "interface": {
+    "displayName": "ARK"
+  },
+  "plugins": [
+    {
+      "name": "ark",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

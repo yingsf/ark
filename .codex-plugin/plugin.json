@@ -16,6 +16,7 @@
     "ark"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "ARK",
     "shortDescription": "Artifact-first engineering workflow.",

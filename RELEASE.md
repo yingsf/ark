@@ -34,6 +34,7 @@ The release gate runs:
 python -m json.tool .claude-plugin/plugin.json
 python -m json.tool .claude-plugin/marketplace.json
 python -m json.tool .codex-plugin/plugin.json
+python -m json.tool hooks/hooks.json
 python scripts/ark-check.py --release
 python scripts/ark-smoke.py
 python scripts/ark-smoke.py --require-uv

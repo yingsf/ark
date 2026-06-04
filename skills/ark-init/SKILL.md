@@ -47,7 +47,7 @@ Mode A 不得静默使用 `unknown`。只有用户明确选择"不确定 / unkno
 
 > `.venv/` 由 uv 按需创建，不是保证产物。
 
-> `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 是 Claude Code 本地辅助文件，默认被 `.gitignore` 忽略，不作为必须提交的项目产物。
+> `.claude/ruff-hook.py` 和 `.claude/settings.local.json` 是 Claude Code 本地辅助文件，默认被 `.gitignore` 忽略，不作为必须提交的项目产物。Codex 宿主通过 ARK 插件自带的 Codex `PostToolUse` hook 调用同一个 `scripts/ruff-hook.py`，达到同等文件级格式化效果，不生成 `.claude/`。
 
 ## 相关 Artifact
 自动创建完整的 7 个核心 Artifact：
@@ -266,6 +266,8 @@ build-backend = "hatchling.build"
 2. **`pyrightconfig.json`** — 替换 `<python_version>`、`<source_and_test_dirs>` 为探测值
 3. **`.claude/settings.local.json`** — 本地配置，含 ruff format hook + permissions（最小白名单）；hook 命令引用 `.claude/ruff-hook.py`（相对路径）；已存在时合并追加（同 Mode B 逻辑：不覆盖已有字段，将缺失的 hooks 和 permissions 补充进去）
 4. **`pyproject.toml` 中追加 `[tool.ruff]`** — 仅当不存在时追加，替换 `<python_version_short>`、`<package_name>`、`<source_and_test_dirs>`
+
+Codex 宿主不生成 `.claude/` 本地辅助文件；由 ARK 插件自带的 Codex `PostToolUse` hook 调用 `${PLUGIN_ROOT}/scripts/ruff-hook.py`。这与 Claude Code 本地辅助 hook 使用同一份脚本，都会在编辑 Python 文件后执行文件级 `ruff format`。
 
 每个质量工具配置写入后必须复查文件存在性和关键内容：
 - `.claude/ruff-hook.py`

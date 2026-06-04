@@ -16,6 +16,8 @@ class ArkAssetTests(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         codex_plugin = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text())
+        codex_hooks = json.loads((ROOT / "hooks" / "hooks.json").read_text())
+        codex_marketplace = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text())
         version = plugin["version"]
         self.assertEqual(version, "1.0.13")
         self.assertEqual(marketplace["metadata"]["version"], version)
@@ -23,6 +25,15 @@ class ArkAssetTests(unittest.TestCase):
         self.assertEqual(codex_plugin["version"], version)
         self.assertEqual(codex_plugin["name"], plugin["name"])
         self.assertEqual(codex_plugin["skills"], "./skills/")
+        self.assertEqual(codex_plugin["hooks"], "./hooks/hooks.json")
+        post_tool_use = codex_hooks["hooks"]["PostToolUse"][0]
+        self.assertEqual(post_tool_use["matcher"], "apply_patch|Edit|Write")
+        self.assertIn("scripts/ruff-hook.py", post_tool_use["hooks"][0]["command"])
+        self.assertEqual(codex_marketplace["name"], "ark")
+        self.assertEqual(codex_marketplace["plugins"][0]["name"], plugin["name"])
+        self.assertEqual(codex_marketplace["plugins"][0]["source"], {"source": "local", "path": "./"})
+        self.assertEqual(codex_marketplace["plugins"][0]["policy"]["installation"], "AVAILABLE")
+        self.assertEqual(codex_marketplace["plugins"][0]["policy"]["authentication"], "ON_INSTALL")
         readme = (ROOT / "README.md").read_text()
         changelog = (ROOT / "CHANGELOG.md").read_text()
         self.assertIn(f"version-{version}-blue.svg", readme)
@@ -62,6 +73,7 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
             "Claude Code CLI not available; skipping plugin validate.",
+            "python -m json.tool hooks/hooks.json",
             "python scripts/ark-skill-smoke.py",
             "python scripts/ark-review-gate-smoke.py",
         ):
@@ -79,6 +91,7 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python scripts/ark-skill-smoke.py",
             "uv run python scripts/ark-review-gate-smoke.py",
             "claude plugin validate .",
+            "python -m json.tool hooks/hooks.json",
             "/plugin install ark@ark",
             "/plugin update ark@ark",
         ):
@@ -118,6 +131,7 @@ class ArkAssetTests(unittest.TestCase):
             "uv run python scripts/ark-review-gate-smoke.py",
             "uv run python -m unittest discover -s tests",
             "claude plugin validate .",
+            "hooks/hooks.json",
             "--list",
             "--require-claude",
             "--skip-claude",
@@ -134,6 +148,7 @@ class ArkAssetTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         for token in (
             "python scripts/ark-check.py --release",
+            "python -m json.tool hooks/hooks.json",
             "python scripts/ark-skill-smoke.py",
             "python scripts/ark-review-gate-smoke.py",
             "uv run python scripts/ark-skill-smoke.py",
@@ -171,11 +186,15 @@ class ArkAssetTests(unittest.TestCase):
         self.assertIn("Claude Code / Codex / Both", init_skill)
         self.assertIn("Codex | `AGENTS.md`", init_skill)
         self.assertIn("`Ark: ...` Skill 入口或自然语言触发", init_skill)
+        self.assertIn("Codex `PostToolUse` hook", init_skill)
         self.assertIn("不得要求 Codex 用户手工创建或维护 Claude Code 的 `/ark:*` 命令映射", init_skill)
         self.assertIn("`Ark: Ark`", agents_template)
         self.assertIn("`Ark: Ark Plan`", fallback)
         self.assertIn("Codex 安装", readme)
+        self.assertIn("codex plugin marketplace add yingsf/ark", readme)
+        self.assertIn("codex plugin marketplace upgrade ark", readme)
         self.assertIn("Codex 会将 ARK 入口显示为 Skill", readme)
+        self.assertIn("调用插件内已有的 `scripts/ruff-hook.py`", readme)
         self.assertIn("Both — 同时生成三者", readme)
 
     def test_stage_contract_assets_exist(self) -> None:

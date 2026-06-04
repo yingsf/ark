@@ -19,6 +19,7 @@ jobs:
           python -m json.tool .claude-plugin/plugin.json
           python -m json.tool .claude-plugin/marketplace.json
           python -m json.tool .codex-plugin/plugin.json
+          python -m json.tool hooks/hooks.json
       - name: Run ARK repository checks
         run: python scripts/ark-check.py
       - name: List release checks
