@@ -1,3 +1,5 @@
+
+
 <div align="center">
 
 # ARK
@@ -168,7 +170,7 @@ ARK 会倾向先分析项目，再根据不确定项推荐确认 spec/design 或
 /ark:ark
 ```
 
-`/ark:ark` 会读取 `docs/ark/` 下的 Artifact，输出项目状态、非 fresh 的 Artifact、活跃任务、阻塞项和推荐下一步。
+`/ark:ark` 会读取 `docs/ark/` 下的 Artifact，输出项目状态、非 fresh 的 Artifact、活跃任务、待验证任务、阻塞项和推荐下一步。
 
 ---
 
